@@ -80,8 +80,9 @@ def find_packages(basepath):
     paths = find_package_paths(basepath)
     for path in paths:
         package = parse_package(os.path.join(basepath, path))
-        if package.name in packages:
-            raise RuntimeError('Two packages found with the same name "%s":\n- %s\n- %s' % (package.name, path.filename, packages[package.name].filename))
+        paths_with_same_name = [p for p, pkg in packages.iteritems() if pkg.name == package.name]
+        if paths_with_same_name:
+            raise RuntimeError('Two packages found with the same name "%s":\n- %s\n- %s' % (package.name, path, paths_with_same_name[0]))
         packages[path] = package
     return packages
 
@@ -100,5 +101,5 @@ def verify_equal_package_versions(packages):
         if version is None:
             version = package.version
         elif package.version != version:
-            raise RuntimeError('Two packages have different version numbers (%s != %s):\n- %s' % (package.version, version, package.filename))
+            raise RuntimeError('Two packages have different version numbers (%s != %s):\n- %s\n- %s' % (package.version, version, package.filename, packages[0].filename))
     return version
