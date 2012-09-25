@@ -63,17 +63,25 @@ class Package(object):
         'filename'
     ]
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, **kwargs):
         """
         :param filename: location of package.xml.  Necessary if
           converting ``${prefix}`` in ``<export>`` values, ``str``.
         """
+        # first make sure all multiple slots have empty list as value
         for attr in self.__slots__:
             if attr.endswith('s'):
                 setattr(self, attr, [])
             else:
                 setattr(self, attr, None)
         self.filename = filename
+        for key, value in kwargs.items():
+            if key not in self.__slots__:
+                raise TypeError('Unknown Property: %s' % key)
+            if key.endswith('s'):
+                setattr(self, key, list(value))
+            else:
+                setattr(self, key, value)
 
     def __getitem__(self, key):
         if key in self.__slots__:
