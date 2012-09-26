@@ -1,6 +1,6 @@
 import unittest
 
-from catkin_pkg.package import Package, validate_package, InvalidPackage, \
+from catkin_pkg.package import Package, InvalidPackage, \
     Dependency
 
 from mock import Mock
@@ -110,6 +110,7 @@ class PackageTest(unittest.TestCase):
         self.assertEqual(mexp, pack.exports)
 
     def test_validate_package(self):
+        maint = self.get_maintainer()
         pack = Package('foo',
                        name='bar_2go',
                        package_format='1',
@@ -117,17 +118,17 @@ class PackageTest(unittest.TestCase):
                        version_abi='pabi',
                        description='pdesc',
                        licenses=['BSD'],
-                       maintainers=[self.get_maintainer()])
-        validate_package(pack)
+                       maintainers=[maint])
+        Package.validate(pack)
         # check invalid names
         pack.name = '2bar'
-        self.assertRaises(InvalidPackage, validate_package, pack)
+        Package.validate(pack)
         pack.name = 'bar bza'
-        self.assertRaises(InvalidPackage, validate_package, pack)
+        self.assertRaises(InvalidPackage, Package.validate, pack)
         pack.name = 'bar-bza'
-        self.assertRaises(InvalidPackage, validate_package, pack)
+        self.assertRaises(InvalidPackage, Package.validate, pack)
         pack.name = 'BAR'
-        self.assertRaises(InvalidPackage, validate_package, pack)
+        Package.validate(pack)
         # check authors emails
         pack.name = 'bar'
         auth1 = Mock()
@@ -135,12 +136,15 @@ class PackageTest(unittest.TestCase):
         auth2 = Mock()
         auth2.email = None
         pack.authors = [auth1, auth2]
-        validate_package(pack)
+        Package.validate(pack)
         auth1.email = 'foo@bar.com'
-        validate_package(pack)
+        Package.validate(pack)
         auth1.email = 'foo[at]bar.com'
-        validate_package(pack)
+        self.assertRaises(InvalidPackage, Package.validate, pack)
         auth1.email = 'foo bar.com'
-        self.assertRaises(InvalidPackage, validate_package, pack)
+        self.assertRaises(InvalidPackage, Package.validate, pack)
         auth1.email = 'foo<bar.com'
-        self.assertRaises(InvalidPackage, validate_package, pack)
+        self.assertRaises(InvalidPackage, Package.validate, pack)
+        auth1.email = 'foo@bar.com'
+        maint.email = None
+        self.assertRaises(InvalidPackage, Package.validate, pack)
