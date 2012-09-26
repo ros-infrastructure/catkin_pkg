@@ -89,12 +89,18 @@ def create_package_files(target_path, package_template):
     _create_files(newfiles, target_path)
 
 
+
+class CatkinTemplate(Template):
+    """subclass to use @ instead of $ as markers"""
+    delimiter = '@'
+    escape = '@'
+
 def create_cmakelists(package_template):
     """
     :param package_template: contains the required information
     :returns: file contents as string
     """
-    ctemp = Template(CMAKELISTS_TXT_TEMPLATE)
+    ctemp = CatkinTemplate(CMAKELISTS_TXT_TEMPLATE)
     if package_template.components == []:
         components = ''
     else:
@@ -135,7 +141,7 @@ def create_package_xml(package_template):
     :param package_template: contains the required information
     :returns: file contents as string
     """
-    ctemp = Template(PACKAGE_XML_TEMPLATE)
+    ctemp = CatkinTemplate(PACKAGE_XML_TEMPLATE)
     temp_dict = {}
     for key in package_template.__slots__:
         temp_dict[key] = getattr(package_template, key)
@@ -207,16 +213,16 @@ def create_package_xml(package_template):
     return ctemp.substitute(temp_dict)
 
 
-## Python template string: $$ escapes $, $foo is replaced from dict
+## Python template string: @@ escapes @, @foo is replaced from dict
 ## with key foo
 CMAKELISTS_TXT_TEMPLATE = """cmake_minimum_required(VERSION 2.8)
-project($name)
+project(@name)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED$components)
+find_package(catkin REQUIRED@components)
 
-catkin_project($${PROJECT_NAME}
-#  LIBRARIES $${PROJECT_NAME}
+catkin_project(${PROJECT_NAME}
+#  LIBRARIES ${PROJECT_NAME}
 #  INCLUDE_DIRS include
 #  DEPENDS
   )
@@ -254,37 +260,37 @@ catkin_project($${PROJECT_NAME}
 # find_package(Boost REQUIRED COMPONENTS system)
 
 ## Use this to declare libraries that this package creates
-# add_library($${PROJECT_NAME}
-#   src/$${PROJECT_NAME}/main.cpp
+# add_library(${PROJECT_NAME}
+#   src/${PROJECT_NAME}/main.cpp
 #   )
 
 ## Use this to declare executables that this package creates
-# add_executable($${PROJECT_NAME}_node src/main.cpp)
+# add_executable(${PROJECT_NAME}_node src/main.cpp)
 
 ## Use this to e.g. make your executables depend on your libraries
-# add_dependencies($${PROJECT_NAME}_node $${PROJECT_NAME})
+# add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME})
 
 ## Specify additional locations of header files
 # include_directories(include)
 
 ## specify what c++ libraries your c++ executable should be linked against
-# target_link_libraries($${PROJECT_NAME}_node
-#   $${Boost_LIBRARIES}
+# target_link_libraries(${PROJECT_NAME}_node
+#   ${Boost_LIBRARIES}
 #   )
 
 ## Use this to declare executable scripts (Python etc.)
 # install(PROGRAMS
 #   scripts/my_python_script
-#   DESTINATION $${CATKIN_PROJECT_BIN_DESTINATION})
+#   DESTINATION ${CATKIN_PROJECT_BIN_DESTINATION})
 
 ## Use this to declare c++ executables and/or libraries
-# install(TARGETS $${PROJECT_NAME}_node
-#   ARCHIVE DESTINATION $${CATKIN_PROJECT_LIB_DESTINATION}
-#   LIBRARY DESTINATION $${CATKIN_PROJECT_LIB_DESTINATION})
+# install(TARGETS ${PROJECT_NAME}_node
+#   ARCHIVE DESTINATION ${CATKIN_PROJECT_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PROJECT_LIB_DESTINATION})
 
 ## If specific folders are to be installed (no executable or library), use this
 # install(DIRECTORY include/
-#   DESTINATION $${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+#   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
 #   FILES_MATCHING PATTERN "*.h"
 #   PATTERN ".svn" EXCLUDE)
 
@@ -292,13 +298,13 @@ catkin_project($${PROJECT_NAME}
 # install(FILES
 #   myfile1
 #   myfile2
-#   DESTINATION $${CATKIN_PROJECT_INCLUDE_DESTINATION}
+#   DESTINATION ${CATKIN_PROJECT_INCLUDE_DESTINATION}
 # )
 
 ## Use this for c++ gtest unit tests
-# catkin_add_gtest($${PROJECT_NAME}-test test/mytest)
-# if(TARGET $${PROJECT_NAME}-test)
-#   target_link_libraries($${PROJECT_NAME}-test_version)
+# catkin_add_gtest(${PROJECT_NAME}-test test/mytest)
+# if(TARGET ${PROJECT_NAME}-test)
+#   target_link_libraries(${PROJECT_NAME}-test_version)
 # endif()
 
 ## Use this to declare python unit test folders
@@ -307,28 +313,28 @@ catkin_project($${PROJECT_NAME}
 
 PACKAGE_XML_TEMPLATE = """<?xml version="1.0"?>
 <package>
-  <name>$name</name>
-  <version$version_abi>$version</version>
-  <description>$description</description>
+  <name>@name</name>
+  <version@version_abi>@version</version>
+  <description>@description</description>
 
   <!-- multiple maintainer tags allowed, one name per tag-->
-  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-$maintainers
+  <!-- <maintainer email="jane.doe@@example.com">Jane Doe</maintainer> -->
+@maintainers
   <!-- Commonly used license strings:
   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3-->
-$licenses
+@licenses
   <!-- url type could be one of website (default), bugtracker and repository -->
-  <!-- <url type="website">http://wiki.ros.org/$name</url> -->
-$urls
+  <!-- <url type="website">http://wiki.ros.org/@name</url> -->
+@urls
   <!-- multiple authors tags allowed, one name per tag-->
-  <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
-$authors
-$dependencies
+  <!-- <author email="jane.doe@@example.com">Jane Doe</author> -->
+@authors
+@dependencies
   <export>
     <!-- This section contains any information that other tools require-->
     <!-- <architecture_independent/> -->
     <!-- <meta_package/> -->
-$exports
+@exports
   </export>
 </package>
 """
