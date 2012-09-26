@@ -1,6 +1,7 @@
 import unittest
 
-from catkin_pkg.package import Package, validate_package, InvalidPackage
+from catkin_pkg.package import Package, validate_package, InvalidPackage, \
+    Dependency
 
 from mock import Mock
 
@@ -40,6 +41,20 @@ class PackageTest(unittest.TestCase):
 
         self.assertRaises(TypeError, Package, unknownattribute=42)
 
+    def test_init_dependency(self):
+        dep = Dependency('foo',
+                         version_lt=1,
+                         version_lte=2,
+                         version_eq=3,
+                         version_gte=4,
+                         version_gt=5)
+        self.assertEquals('foo', dep.name)
+        self.assertEquals(1, dep.version_lt)
+        self.assertEquals(2, dep.version_lte)
+        self.assertEquals(3, dep.version_eq)
+        self.assertEquals(4, dep.version_gte)
+        self.assertEquals(5, dep.version_gt)
+        self.assertRaises(TypeError, Dependency, 'foo', unknownattribute=42)
 
     def test_init_kwargs_string(self):
         pack = Package('foo',

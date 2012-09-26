@@ -100,13 +100,17 @@ class Package(object):
         return str(data)
 
 
-class Dependendency(object):
+class Dependency(object):
     __slots__ = ['name', 'version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
 
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         for attr in self.__slots__:
             setattr(self, attr, None)
         self.name = name
+        for key, value in kwargs.items():
+            if key not in self.__slots__:
+                raise TypeError('Unknown Property: %s' % key)
+            setattr(self, key, value)
 
     def __str__(self):
         return self.name
@@ -411,7 +415,7 @@ def _get_node_attr(node, attr, default=False):
 def _get_dependencies(parent, tagname, invalid_name=None):
     depends = []
     for node in _get_nodes(parent, tagname):
-        depend = Dependendency(_get_node_value(node))
+        depend = Dependency(_get_node_value(node))
         if invalid_name is not None and depend.name == invalid_name:
             raise InvalidPackage('The manifest must not "%s" on a package with the same name as this package' % tagname)
         for attr in ['version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']:
