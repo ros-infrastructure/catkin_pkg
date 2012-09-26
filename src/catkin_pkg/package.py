@@ -331,7 +331,7 @@ def parse_package_string(data, filename=None):
     for node in urls:
         pkg.urls.append(Url(
             _get_node_value(node),
-            _get_node_attr(node, 'type', default=None)
+            _get_node_attr(node, 'type', default='website')
         ))
 
     # authors with optional email
@@ -405,9 +405,12 @@ def _get_optional_node_value(parent, tagname, default=None):
 
 
 def _get_node_attr(node, attr, default=False):
+    """
+    :param default: False means value required required
+    """
     if node.hasAttribute(attr):
         return str(node.getAttribute(attr))
-    if default == False:
+    if default is False:
         raise InvalidPackage('The "%s" tag must have the attribute "%s"' % (node.tagName, attr))
     return default
 
