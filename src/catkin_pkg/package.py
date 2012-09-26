@@ -191,8 +191,10 @@ def parse_package_for_distutils(path=None):
     """
     Extract the information relevant for distutils from the package
     manifest.  It sets the following keys: name, version, maintainer,
-    long_description, license, keywords.  The following keys depend on information which are
-    optional: autho, author_email, maintainer_email, url
+    long_description, license, keywords.
+
+    The following keys depend on information which are
+    optional: author, author_email, maintainer_email, url
 
     :param path: The path of the package.xml file, it may or may not
     include the filename
