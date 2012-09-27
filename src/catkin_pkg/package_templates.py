@@ -151,6 +151,9 @@ def create_package_xml(package_template):
     else:
         temp_dict['version_abi'] = ''
 
+    if not package_template.description:
+        temp_dict['description'] = 'The %s package ...' % package_template.name
+
     licenses = []
     for plicense in package_template.licenses:
         licenses.append('  <license>%s</license>\n' % plicense)
@@ -160,7 +163,7 @@ def create_package_xml(package_template):
         email_string = (""
                         if person.email is None
                         else 'email="%s"' % person.email)
-        return '  <%s %s >%s</%s>\n' % (tagname, email_string, person.name, tagname)
+        return '  <%s %s>%s</%s>\n' % (tagname, email_string, person.name, tagname)
 
     maintainers = []
     for maintainer in package_template.maintainers:
@@ -329,12 +332,17 @@ PACKAGE_XML_TEMPLATE = """<?xml version="1.0"?>
   <!-- multiple authors tags allowed, one name per tag-->
   <!-- <author email="jane.doe@@example.com">Jane Doe</author> -->
 @authors
+  <!--Any system dependency or dependency to catkin packages. Examples:-->
+  <!--<build_depend>genmsg</build_depend> for libraries for compiling-->
+  <!--<buildtool_depend>cmake</buildtool_depend> for build tools-->
+  <!--<run_depend>python-yaml</run_depend> for packages used at runtime-->
+  <!--<test_depend>gtest</test_depend> for packages needed for testing-->
 @dependencies
   <export>
     <!-- This section contains any information that other tools require-->
     <!-- <architecture_independent/> -->
     <!-- <meta_package/> -->
-@exports
+@exports\
   </export>
 </package>
 """
