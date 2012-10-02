@@ -295,10 +295,10 @@ def parse_package_string(data, filename=None):
         pkg.licenses.append(_get_node_value(node))
 
     # dependencies and relationships
-    pkg.build_depends = _get_dependencies(root, 'build_depend')
-    pkg.buildtool_depends = _get_dependencies(root, 'buildtool_depend')
-    pkg.run_depends = _get_dependencies(root, 'run_depend')
-    pkg.test_depends = _get_dependencies(root, 'test_depend')
+    pkg.build_depends = _get_dependencies(root, 'build_depend', pkg.name)
+    pkg.buildtool_depends = _get_dependencies(root, 'buildtool_depend', pkg.name)
+    pkg.run_depends = _get_dependencies(root, 'run_depend', pkg.name)
+    pkg.test_depends = _get_dependencies(root, 'test_depend', pkg.name)
     pkg.conflicts = _get_dependencies(root, 'conflict')
     pkg.replaces = _get_dependencies(root, 'replace')
 
@@ -359,10 +359,12 @@ def _get_node_attr(node, attr, default=False):
     return default
 
 
-def _get_dependencies(parent, tagname):
+def _get_dependencies(parent, tagname, invalid_name=None):
     depends = []
     for node in _get_nodes(parent, tagname):
         depend = Dependendency(_get_node_value(node))
+        if invalid_name is not None and depend.name == invalid_name:
+            raise InvalidPackage('The manifest must not "%s" on a package with the same name as this package' % tagname)
         for attr in ['version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']:
             setattr(depend, attr, _get_node_attr(node, attr, None))
         depends.append(depend)
