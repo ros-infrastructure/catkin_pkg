@@ -144,7 +144,20 @@ class PackageTest(unittest.TestCase):
         pack.maintainers=[maint]
         maint.email = None
         self.assertRaises(InvalidPackage, Package.validate, pack)
-        
+        maint.email = 'foo@bar.com'
+
+        for dep_type in [pack.build_depends,
+                         pack.buildtool_depends,
+                         pack.run_depends,
+                         pack.test_depends,
+                         pack.conflicts,
+                         pack.replaces]:
+            pack.validate()
+            depend = Dependency(pack.name)
+            dep_type.append(depend)
+            self.assertRaises(InvalidPackage, Package.validate, pack)
+            dep_type.remove(depend)
+
     def test_validate_person(self):
         auth1=Person('foo')
         auth1.email = 'foo@bar.com'

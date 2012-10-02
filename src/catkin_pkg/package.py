@@ -135,6 +135,15 @@ class Package(object):
             for author in self.authors:
                 author.validate()
 
+        for dep_type in [self.build_depends,
+                         self.buildtool_depends,
+                         self.run_depends,
+                         self.test_depends,
+                         self.conflicts,
+                         self.replaces]:
+            for depend in dep_type:
+                if depend.name == self.name:
+                    raise InvalidPackage('The manifest must not depend on a package with the same name as this package')
 
 class Dependency(object):
     __slots__ = ['name', 'version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
@@ -349,10 +358,10 @@ def parse_package_string(data, filename=None):
         pkg.licenses.append(_get_node_value(node))
 
     # dependencies and relationships
-    pkg.build_depends = _get_dependencies(root, 'build_depend', pkg.name)
-    pkg.buildtool_depends = _get_dependencies(root, 'buildtool_depend', pkg.name)
-    pkg.run_depends = _get_dependencies(root, 'run_depend', pkg.name)
-    pkg.test_depends = _get_dependencies(root, 'test_depend', pkg.name)
+    pkg.build_depends = _get_dependencies(root, 'build_depend')
+    pkg.buildtool_depends = _get_dependencies(root, 'buildtool_depend')
+    pkg.run_depends = _get_dependencies(root, 'run_depend')
+    pkg.test_depends = _get_dependencies(root, 'test_depend')
     pkg.conflicts = _get_dependencies(root, 'conflict')
     pkg.replaces = _get_dependencies(root, 'replace')
 
@@ -416,12 +425,10 @@ def _get_node_attr(node, attr, default=False):
     return default
 
 
-def _get_dependencies(parent, tagname, invalid_name=None):
+def _get_dependencies(parent, tagname):
     depends = []
     for node in _get_nodes(parent, tagname):
         depend = Dependency(_get_node_value(node))
-        if invalid_name is not None and depend.name == invalid_name:
-            raise InvalidPackage('The manifest must not "%s" on a package with the same name as this package' % tagname)
         for attr in ['version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']:
             setattr(depend, attr, _get_node_attr(node, attr, None))
         depends.append(depend)
