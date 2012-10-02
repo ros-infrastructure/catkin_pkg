@@ -36,6 +36,7 @@ representation.
 """
 
 import os
+import re
 import xml.dom.minidom as dom
 
 
@@ -63,17 +64,25 @@ class Package(object):
         'filename'
     ]
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, **kwargs):
         """
         :param filename: location of package.xml.  Necessary if
           converting ``${prefix}`` in ``<export>`` values, ``str``.
         """
+        # first make sure all multiple slots have empty list as value
         for attr in self.__slots__:
             if attr.endswith('s'):
                 setattr(self, attr, [])
             else:
                 setattr(self, attr, None)
         self.filename = filename
+        for key, value in kwargs.items():
+            if key not in self.__slots__:
+                raise TypeError('Unknown Property: %s' % key)
+            if key.endswith('s'):
+                setattr(self, key, list(value))
+            else:
+                setattr(self, key, value)
 
     def __getitem__(self, key):
         if key in self.__slots__:
@@ -90,14 +99,63 @@ class Package(object):
             data[attr] = getattr(self, attr)
         return str(data)
 
+    def validate(self):
+        """
+        makes sure all standards for packages are met
+        :param package: Package to check
+        :raises InvalidPackage: in case validation fails
+        """
+        if not self.name:
+            raise InvalidPackage('Package name must not be empty')
+        if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_]*$', self.name):
+            raise InvalidPackage('Package name %s does not follow naming conventions' %
+                             self.name)
+        # if not re.match('^[a-z][a-z0-9_]*$', self.name):
+        #     sys.stderr.write('WARNING: Package names should be lowercase and start with a letter: %s' % self.name)
 
-class Dependendency(object):
+        if self.package_format:
+            if not re.match('^[0-9]+$', str(self.package_format)):
+                raise InvalidPackage('The "format" attribute of the package must contain a positive integer if present')
+
+        if not self.version:
+            raise InvalidPackage('Package version must not be empty')
+        if not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', self.version):
+            raise InvalidPackage('Package version %s does not follow version conventions' % self.version)
+
+        if not self.maintainers:
+            raise InvalidPackage('Package must declare at least one maintainer')
+        for maintainer in self.maintainers:
+            maintainer.validate()
+            if not maintainer.email:
+                raise InvalidPackage('Maintainer must have an email address')
+
+        if not self.licenses:
+            raise InvalidPackage('The manifest must contain at least one "license" tag')
+        if self.authors is not None:
+            for author in self.authors:
+                author.validate()
+
+        for dep_type in [self.build_depends,
+                         self.buildtool_depends,
+                         self.run_depends,
+                         self.test_depends,
+                         self.conflicts,
+                         self.replaces]:
+            for depend in dep_type:
+                if depend.name == self.name:
+                    raise InvalidPackage('The manifest must not depend on a package with the same name as this package')
+
+class Dependency(object):
     __slots__ = ['name', 'version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
 
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         for attr in self.__slots__:
             setattr(self, attr, None)
         self.name = name
+        for key, value in kwargs.items():
+            if key not in self.__slots__:
+                raise TypeError('Unknown Property: %s' % key)
+            setattr(self, key, value)
 
     def __str__(self):
         return self.name
@@ -122,6 +180,15 @@ class Person(object):
     def __str__(self):
         return '%s <%s>' % (self.name, self.email) if self.email is not None else self.name
 
+    def validate(self):
+        print(self.email)
+        if self.email is None:
+            return
+        if not re.match('^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+\.[a-zA-Z]{2,6}$',
+                        self.email):
+            raise InvalidPackage('Invalid email %s %s' %
+                                 (self.email, self.name))
+
 
 class Url(object):
     __slots__ = ['url', 'type']
@@ -138,8 +205,10 @@ def parse_package_for_distutils(path=None):
     """
     Extract the information relevant for distutils from the package
     manifest.  It sets the following keys: name, version, maintainer,
-    long_description, license, keywords.  The following keys depend on information which are
-    optional: autho, author_email, maintainer_email, url
+    long_description, license, keywords.
+
+    The following keys depend on information which are
+    optional: author, author_email, maintainer_email, url
 
     :param path: The path of the package.xml file, it may or may not
     include the filename
@@ -246,8 +315,6 @@ def parse_package_string(data, filename=None):
 
     # format attribute
     value = _get_node_attr(root, 'format', default=1)
-    if value != int(value) or int(value) < 0:
-        raise InvalidPackage('The "format" attribute of the "package" tag must contain a positive integer if present')
     pkg.package_format = int(value)
 
     # name
@@ -263,8 +330,6 @@ def parse_package_string(data, filename=None):
 
     # at least one maintainer, all must have email
     maintainers = _get_nodes(root, 'maintainer')
-    if not maintainers:
-        raise InvalidPackage('The manifest must contain at least one "maintainer" tag')
     for node in maintainers:
         pkg.maintainers.append(Person(
             _get_node_value(node, apply_str=False),
@@ -276,7 +341,7 @@ def parse_package_string(data, filename=None):
     for node in urls:
         pkg.urls.append(Url(
             _get_node_value(node),
-            _get_node_attr(node, 'type', default=None)
+            _get_node_attr(node, 'type', default='website')
         ))
 
     # authors with optional email
@@ -289,16 +354,14 @@ def parse_package_string(data, filename=None):
 
     # at least one license
     licenses = _get_nodes(root, 'license')
-    if not licenses:
-        raise InvalidPackage('The manifest must contain at least one "license" tag')
     for node in licenses:
         pkg.licenses.append(_get_node_value(node))
 
     # dependencies and relationships
-    pkg.build_depends = _get_dependencies(root, 'build_depend', pkg.name)
-    pkg.buildtool_depends = _get_dependencies(root, 'buildtool_depend', pkg.name)
-    pkg.run_depends = _get_dependencies(root, 'run_depend', pkg.name)
-    pkg.test_depends = _get_dependencies(root, 'test_depend', pkg.name)
+    pkg.build_depends = _get_dependencies(root, 'build_depend')
+    pkg.buildtool_depends = _get_dependencies(root, 'buildtool_depend')
+    pkg.run_depends = _get_dependencies(root, 'run_depend')
+    pkg.test_depends = _get_dependencies(root, 'test_depend')
     pkg.conflicts = _get_dependencies(root, 'conflict')
     pkg.replaces = _get_dependencies(root, 'replace')
 
@@ -312,7 +375,7 @@ def parse_package_string(data, filename=None):
                 export.attributes[str(key)] = str(value)
             exports.append(export)
         pkg.exports = exports
-
+    pkg.validate()
     return pkg
 
 
@@ -352,19 +415,20 @@ def _get_optional_node_value(parent, tagname, default=None):
 
 
 def _get_node_attr(node, attr, default=False):
+    """
+    :param default: False means value required required
+    """
     if node.hasAttribute(attr):
         return str(node.getAttribute(attr))
-    if default == False:
+    if default is False:
         raise InvalidPackage('The "%s" tag must have the attribute "%s"' % (node.tagName, attr))
     return default
 
 
-def _get_dependencies(parent, tagname, invalid_name=None):
+def _get_dependencies(parent, tagname):
     depends = []
     for node in _get_nodes(parent, tagname):
-        depend = Dependendency(_get_node_value(node))
-        if invalid_name is not None and depend.name == invalid_name:
-            raise InvalidPackage('The manifest must not "%s" on a package with the same name as this package' % tagname)
+        depend = Dependency(_get_node_value(node))
         for attr in ['version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']:
             setattr(depend, attr, _get_node_attr(node, attr, None))
         depends.append(depend)
