@@ -69,20 +69,19 @@ class Package(object):
         :param filename: location of package.xml.  Necessary if
           converting ``${prefix}`` in ``<export>`` values, ``str``.
         """
-        # first make sure all multiple slots have empty list as value
+        # initialize all slots ending with "s" with lists, all other with plain values
         for attr in self.__slots__:
             if attr.endswith('s'):
-                setattr(self, attr, [])
+                value = list(kwargs[attr]) if attr in kwargs else []
+                setattr(self, attr, value)
             else:
-                setattr(self, attr, None)
+                value = kwargs[attr] if attr in kwargs else None
+                setattr(self, attr, value)
         self.filename = filename
-        for key, value in kwargs.items():
-            if key not in self.__slots__:
-                raise TypeError('Unknown Property: %s' % key)
-            if key.endswith('s'):
-                setattr(self, key, list(value))
-            else:
-                setattr(self, key, value)
+        # verify that no unknown keywords are passed
+        unknown = set(kwargs.keys()).difference(self.__slots__)
+        if unknown:
+            raise TypeError('Unknown properties: %s' % ', '.join(unknown))
 
     def __getitem__(self, key):
         if key in self.__slots__:
@@ -108,8 +107,7 @@ class Package(object):
         if not self.name:
             raise InvalidPackage('Package name must not be empty')
         if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_]*$', self.name):
-            raise InvalidPackage('Package name %s does not follow naming conventions' %
-                             self.name)
+            raise InvalidPackage('Package name "%s" does not follow naming conventions' % self.name)
         # if not re.match('^[a-z][a-z0-9_]*$', self.name):
         #     sys.stderr.write('WARNING: Package names should be lowercase and start with a letter: %s' % self.name)
 
@@ -120,14 +118,14 @@ class Package(object):
         if not self.version:
             raise InvalidPackage('Package version must not be empty')
         if not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', self.version):
-            raise InvalidPackage('Package version %s does not follow version conventions' % self.version)
+            raise InvalidPackage('Package version "%s" does not follow version conventions' % self.version)
 
         if not self.maintainers:
             raise InvalidPackage('Package must declare at least one maintainer')
         for maintainer in self.maintainers:
             maintainer.validate()
             if not maintainer.email:
-                raise InvalidPackage('Maintainer must have an email address')
+                raise InvalidPackage('Maintainers must have an email address')
 
         if not self.licenses:
             raise InvalidPackage('The manifest must contain at least one "license" tag')
@@ -140,17 +138,19 @@ class Package(object):
                 if depend.name == self.name:
                     raise InvalidPackage('The manifest must not "%s_depend" on a package with the same name as this package' % dep_type)
 
+
 class Dependency(object):
     __slots__ = ['name', 'version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
 
     def __init__(self, name, **kwargs):
         for attr in self.__slots__:
-            setattr(self, attr, None)
+            value = kwargs[attr] if attr in kwargs else None
+            setattr(self, attr, value)
         self.name = name
-        for key, value in kwargs.items():
-            if key not in self.__slots__:
-                raise TypeError('Unknown Property: %s' % key)
-            setattr(self, key, value)
+        # verify that no unknown keywords are passed
+        unknown = set(kwargs.keys()).difference(self.__slots__)
+        if unknown:
+            raise TypeError('Unknown properties: %s' % ', '.join(unknown))
 
     def __str__(self):
         return self.name
@@ -179,10 +179,8 @@ class Person(object):
         print(self.email)
         if self.email is None:
             return
-        if not re.match('^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+\.[a-zA-Z]{2,6}$',
-                        self.email):
-            raise InvalidPackage('Invalid email %s %s' %
-                                 (self.email, self.name))
+        if not re.match('^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+\.[a-zA-Z]{2,6}$', self.email):
+            raise InvalidPackage('Invalid email "%s" for person "%s"' % (self.email, self.name))
 
 
 class Url(object):

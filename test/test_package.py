@@ -1,7 +1,6 @@
 import unittest
 
-from catkin_pkg.package import Package, InvalidPackage, \
-    Dependency, Person
+from catkin_pkg.package import Dependency, InvalidPackage, Package, Person
 
 from mock import Mock
 
@@ -141,7 +140,7 @@ class PackageTest(unittest.TestCase):
         # check maintainer required with email
         pack.maintainers = []
         self.assertRaises(InvalidPackage, Package.validate, pack)
-        pack.maintainers=[maint]
+        pack.maintainers = [maint]
         maint.email = None
         self.assertRaises(InvalidPackage, Package.validate, pack)
         maint.email = 'foo@bar.com'
@@ -154,7 +153,7 @@ class PackageTest(unittest.TestCase):
             dep_type.remove(depend)
 
     def test_validate_person(self):
-        auth1=Person('foo')
+        auth1 = Person('foo')
         auth1.email = 'foo@bar.com'
         auth1.validate()
         auth1.email = 'foo[at]bar.com'
