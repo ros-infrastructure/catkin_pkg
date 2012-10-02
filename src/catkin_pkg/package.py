@@ -99,43 +99,41 @@ class Package(object):
             data[attr] = getattr(self, attr)
         return str(data)
 
-    @staticmethod
-    def validate(package):
+    def validate(self):
         """
         makes sure all standards for packages are met
         :param package: Package to check
         :raises InvalidPackage: in case validation fails
         """
-        if not package.name:
+        if not self.name:
             raise InvalidPackage('Package name must not be empty')
-        if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_]*$', package.name):
+        if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_]*$', self.name):
             raise InvalidPackage('Package name %s does not follow naming conventions' %
-                             package.name)
-        # if not re.match('^[a-z][a-z0-9_]*$', package.name):
-        #     sys.stderr.write('WARNING: Package names should be lowercase and start with a letter: %s' % package.name)
+                             self.name)
+        # if not re.match('^[a-z][a-z0-9_]*$', self.name):
+        #     sys.stderr.write('WARNING: Package names should be lowercase and start with a letter: %s' % self.name)
 
-        if package.package_format:
-            if not re.match('^[0-9]+$', str(package.package_format)):
+        if self.package_format:
+            if not re.match('^[0-9]+$', str(self.package_format)):
                 raise InvalidPackage('The "format" attribute of the package must contain a positive integer if present')
 
-        if not package.version:
+        if not self.version:
             raise InvalidPackage('Package version must not be empty')
-        if not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', package.version):
-            raise InvalidPackage('Package version %s does not follow version conventions' % package.version)
+        if not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', self.version):
+            raise InvalidPackage('Package version %s does not follow version conventions' % self.version)
 
-        if not package.maintainers:
+        if not self.maintainers:
             raise InvalidPackage('Package must declare at least one maintainer')
-        for maintainer in package.maintainers:
-            Person.validate(maintainer)
+        for maintainer in self.maintainers:
+            maintainer.validate()
             if not maintainer.email:
                 raise InvalidPackage('Maintainer must have an email address')
 
-        if not package.licenses:
+        if not self.licenses:
             raise InvalidPackage('The manifest must contain at least one "license" tag')
-
-        if package.authors is not None:
-            for author in package.authors:
-                Person.validate(author)
+        if self.authors is not None:
+            for author in self.authors:
+                author.validate()
 
 
 class Dependency(object):
@@ -173,14 +171,14 @@ class Person(object):
     def __str__(self):
         return '%s <%s>' % (self.name, self.email) if self.email is not None else self.name
 
-    @staticmethod
-    def validate(person):
-        if person.email is None:
+    def validate(self):
+        print(self.email)
+        if self.email is None:
             return
         if not re.match('^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+\.[a-zA-Z]{2,6}$',
-                        person.email):
+                        self.email):
             raise InvalidPackage('Invalid email %s %s' %
-                                 (person.email, person.name))
+                                 (self.email, self.name))
 
 
 class Url(object):
@@ -368,7 +366,7 @@ def parse_package_string(data, filename=None):
                 export.attributes[str(key)] = str(value)
             exports.append(export)
         pkg.exports = exports
-    Package.validate(pkg)
+    pkg.validate()
     return pkg
 
 
