@@ -146,12 +146,7 @@ class PackageTest(unittest.TestCase):
         self.assertRaises(InvalidPackage, Package.validate, pack)
         maint.email = 'foo@bar.com'
 
-        for dep_type in [pack.build_depends,
-                         pack.buildtool_depends,
-                         pack.run_depends,
-                         pack.test_depends,
-                         pack.conflicts,
-                         pack.replaces]:
+        for dep_type in [pack.build_depends, pack.buildtool_depends, pack.run_depends, pack.test_depends]:
             pack.validate()
             depend = Dependency(pack.name)
             dep_type.append(depend)

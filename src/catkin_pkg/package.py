@@ -135,15 +135,10 @@ class Package(object):
             for author in self.authors:
                 author.validate()
 
-        for dep_type in [self.build_depends,
-                         self.buildtool_depends,
-                         self.run_depends,
-                         self.test_depends,
-                         self.conflicts,
-                         self.replaces]:
-            for depend in dep_type:
+        for dep_type, depends in {'build': self.build_depends, 'buildtool': self.buildtool_depends, 'run': self.run_depends, 'test': self.test_depends}.items():
+            for depend in depends:
                 if depend.name == self.name:
-                    raise InvalidPackage('The manifest must not depend on a package with the same name as this package')
+                    raise InvalidPackage('The manifest must not "%s_depend" on a package with the same name as this package' % dep_type)
 
 class Dependency(object):
     __slots__ = ['name', 'version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
@@ -416,7 +411,7 @@ def _get_optional_node_value(parent, tagname, default=None):
 
 def _get_node_attr(node, attr, default=False):
     """
-    :param default: False means value required required
+    :param default: False means value is required
     """
     if node.hasAttribute(attr):
         return str(node.getAttribute(attr))
