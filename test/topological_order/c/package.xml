@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<package>
+  <name>c</name>
+  <version>0.0.1</version>
+  <description>c</description>
+  <maintainer email="nobody@example.com"></maintainer>
+  <license>BSD</license>
+</package>
