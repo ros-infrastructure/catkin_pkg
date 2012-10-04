@@ -37,6 +37,7 @@ representation.
 
 import os
 import re
+import sys
 import xml.dom.minidom as dom
 
 
@@ -106,10 +107,11 @@ class Package(object):
         """
         if not self.name:
             raise InvalidPackage('Package name must not be empty')
-        if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_]*$', self.name):
+        # accepting upper case letters and hyphens only for backward compatibility
+        if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_-]*$', self.name):
             raise InvalidPackage('Package name "%s" does not follow naming conventions' % self.name)
-        # if not re.match('^[a-z][a-z0-9_]*$', self.name):
-        #     sys.stderr.write('WARNING: Package names should be lowercase and start with a letter: %s' % self.name)
+        if not re.match('^[a-z][a-z0-9_]*$', self.name):
+            sys.stderr.write('WARNING: Package name "%s" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.\n' % self.name)
 
         if self.package_format:
             if not re.match('^[0-9]+$', str(self.package_format)):
