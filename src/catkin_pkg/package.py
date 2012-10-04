@@ -176,7 +176,6 @@ class Person(object):
         return '%s <%s>' % (self.name, self.email) if self.email is not None else self.name
 
     def validate(self):
-        print(self.email)
         if self.email is None:
             return
         if not re.match('^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+\.[a-zA-Z]{2,6}$', self.email):
