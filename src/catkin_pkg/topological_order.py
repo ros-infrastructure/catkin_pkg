@@ -57,10 +57,10 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None):
         selected[path] = package
 
     # calculate transitive dependencies
-    for package in packages.values():
-        package.calculate_full_depends(packages)
+    for package in selected.values():
+        package.calculate_full_depends(selected)
 
-    return _sort_packages(packages)
+    return _sort_packages(selected)
 
 
 def _sort_packages(packages):
