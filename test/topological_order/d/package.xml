@@ -1,11 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>a</name>
+  <name>d</name>
   <version>0.0.1</version>
-  <description>a</description>
+  <description>d</description>
   <maintainer email="nobody@example.com"></maintainer>
   <license>BSD</license>
-
-  <build_depend>c</build_depend>
-  <run_depend>d</run_depend>
 </package>
