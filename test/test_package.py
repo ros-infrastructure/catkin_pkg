@@ -125,7 +125,8 @@ class PackageTest(unittest.TestCase):
         pack.name = 'bar bza'
         self.assertRaises(InvalidPackage, Package.validate, pack)
         pack.name = 'bar-bza'
-        self.assertRaises(InvalidPackage, Package.validate, pack)
+        # valid for now because for backward compatibility only
+        #self.assertRaises(InvalidPackage, Package.validate, pack)
         pack.name = 'BAR'
         pack.validate()
         # check authors emails
