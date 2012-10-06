@@ -3,9 +3,8 @@ import os
 import unittest
 import sys
 from mock import Mock, patch
-
 try:
-    from catkin_pkg.topological_order import topological_order, _PackageDecorator, \
+    from catkin_pkg.topological_order import topological_order_packages, _PackageDecorator, \
         _sort_decorated_packages
 except ImportError as e:
     raise ImportError('Please adjust your PYTHONPATH before running this test: %s' % str(e))
@@ -13,17 +12,30 @@ except ImportError as e:
 
 class TopologicalOrderTest(unittest.TestCase):
 
-    def test_recursive_run_depends(self):
-        test_dir = os.path.join(os.path.dirname(__file__), 'topological_order')
+    def test_topological_order_packages(self):
+        mc = Mock(exports=[], run_depends=[], build_depends=[], buildtool_depends=[], path='pc')
+        # cannot use name param in mock, as it has different semantics
+        mc.name='c'
+        md = Mock(exports=[], run_depends=[], build_depends=[], buildtool_depends=[], path='pd')
+        md.name='d'
+        ma = Mock(exports=[], build_depends=[mc], run_depends=[md], buildtool_depends=[], path='pa')
+        ma.name='a'
+        mb = Mock(exports=[], build_depends=[ma], run_depends=[], buildtool_depends=[], path='pb')
+        mb.name='b'
 
-        packages = topological_order(test_dir, blacklisted=['c'])
+        packages = {ma.path: ma,
+                    mb.path: mb,
+                    mc.path: mc,
+                    md.path: md}
+
+        ordered_packages = topological_order_packages(packages, blacklisted=['c'])
         # d before b because of the run dependency from a to d
         # a before d only because of alphabetic order, a run depend on d should not influence the order
-        self.assertEqual(['a', 'd', 'b'], [name for name, _ in packages])
+        self.assertEqual(['pa', 'pd', 'pb'], [path for path, _ in ordered_packages])
 
-        packages = topological_order(test_dir, whitelisted=['a', 'b', 'c'])
+        ordered_packages = topological_order_packages(packages, whitelisted=['a', 'b', 'c'])
         # c before a because of the run dependency from a to c
-        self.assertEqual(['c', 'a', 'b'], [name for name, _ in packages])
+        self.assertEqual(['pc', 'pa', 'pb'], [path for path, _ in ordered_packages])
 
     def test_package_decorator_init(self):
 
