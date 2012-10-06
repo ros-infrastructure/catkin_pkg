@@ -51,7 +51,7 @@ class TopologicalOrderTest(unittest.TestCase):
         self.assertEqual(mockexport.content, pd.message_generator)
         self.assertIsNotNone(str(pd))
 
-    def test_calculate_full_depends(self):
+    def test_calculate_depends_for_topological_order(self):
         mockproject1 = _PackageDecorator(Mock(name='n1', exports=[], run_depends=[]), 'p1')
         mockproject2 = _PackageDecorator(Mock(name='n2', exports=[], run_depends=[]), 'p2')
         mockproject3 = _PackageDecorator(Mock(name='n3', exports=[], run_depends=[]), 'p3')
@@ -69,8 +69,8 @@ class TopologicalOrderTest(unittest.TestCase):
                     mockproject5.name: mockproject5,
                     mockproject6.name: mockproject6}
 
-        pd.calculate_full_depends(packages)
-        self.assertEqual(set([mockproject1.name, mockproject4.name, mockproject5.name, mockproject6.name]), pd.full_depends)
+        pd.calculate_depends_for_topological_order(packages)
+        self.assertEqual(set([mockproject1.name, mockproject4.name, mockproject5.name, mockproject6.name]), pd.depends_for_topological_order)
 
     def test_sort_decorated_packages(self):
         projects = {}
@@ -78,16 +78,16 @@ class TopologicalOrderTest(unittest.TestCase):
         self.assertEqual([], sprojects)
 
         mock1 = Mock()
-        mock1.full_depends = set()
+        mock1.depends_for_topological_order = set()
 
         mock1.message_generator = True
 
         mock2 = Mock()
-        mock2.full_depends = set()
+        mock2.depends_for_topological_order = set()
         mock2.message_generator = False
 
         mock3 = Mock()
-        mock3.full_depends = set()
+        mock3.depends_for_topological_order = set()
         mock3.message_generator = False
 
         projects = {'baz': mock3, 'bar': mock2, 'foo': mock1}
