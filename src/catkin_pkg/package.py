@@ -105,6 +105,10 @@ class Package(object):
         :param package: Package to check
         :raises InvalidPackage: in case validation fails
         """
+        if self.package_format:
+            if not re.match('^[1-9][0-9]*$', str(self.package_format)):
+                raise InvalidPackage('The "format" attribute of the package must contain a positive integer if present')
+
         if not self.name:
             raise InvalidPackage('Package name must not be empty')
         # accepting upper case letters and hyphens only for backward compatibility
@@ -113,14 +117,13 @@ class Package(object):
         if not re.match('^[a-z][a-z0-9_]*$', self.name):
             sys.stderr.write('WARNING: Package name "%s" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.\n' % self.name)
 
-        if self.package_format:
-            if not re.match('^[0-9]+$', str(self.package_format)):
-                raise InvalidPackage('The "format" attribute of the package must contain a positive integer if present')
-
         if not self.version:
             raise InvalidPackage('Package version must not be empty')
         if not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', self.version):
             raise InvalidPackage('Package version "%s" does not follow version conventions' % self.version)
+
+        if not self.description:
+            raise InvalidPackage('Package description must not be empty')
 
         if not self.maintainers:
             raise InvalidPackage('Package must declare at least one maintainer')
@@ -131,6 +134,7 @@ class Package(object):
 
         if not self.licenses:
             raise InvalidPackage('The manifest must contain at least one "license" tag')
+
         if self.authors is not None:
             for author in self.authors:
                 author.validate()
