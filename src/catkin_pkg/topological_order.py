@@ -17,10 +17,11 @@ class _PackageDecorator(object):
 
     def calculate_full_depends(self, packages):
         """
-        changes self.full_depends using packages to reflect
-        dependencies, collect direct build dependencies, buildtool
-        dependencies (both without non-catkin dependencies), and
-        recursively all runtime dependencies.
+        Sets self.full_depends to the recursive dependencies required
+        for topological order. It contains all direct build- and
+        buildtool dependencies and their recursive runtime
+        dependencies. The set only contains packages which are in the
+        passed packages dictionary.
 
         :param packages: dict of name to ``_PackageDecorator``
         """
@@ -31,8 +32,11 @@ class _PackageDecorator(object):
 
     def _add_recursive_run_depends(self, packages, full_depends):
         """
-        Modifies full_depends argument by adding run_depends of self recursively.
+        Modifies full_depends argument by adding run_depends of self
+        recursively. Only packages which are in the passed packages
+        are added and recursed into.
 
+        :param packages: dict of name to ``_PackageDecorator``
         :param full_depends: set to be extended
         """
         full_depends.add(self.package.name)

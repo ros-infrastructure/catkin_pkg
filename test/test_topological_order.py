@@ -1,8 +1,6 @@
 from __future__ import print_function
-import os
 import unittest
-import sys
-from mock import Mock, patch
+from mock import Mock
 try:
     from catkin_pkg.topological_order import topological_order_packages, _PackageDecorator, \
         _sort_decorated_packages
@@ -15,13 +13,13 @@ class TopologicalOrderTest(unittest.TestCase):
     def test_topological_order_packages(self):
         mc = Mock(exports=[], run_depends=[], build_depends=[], buildtool_depends=[], path='pc')
         # cannot use name param in mock, as it has different semantics
-        mc.name='c'
+        mc.name = 'c'
         md = Mock(exports=[], run_depends=[], build_depends=[], buildtool_depends=[], path='pd')
-        md.name='d'
+        md.name = 'd'
         ma = Mock(exports=[], build_depends=[mc], run_depends=[md], buildtool_depends=[], path='pa')
-        ma.name='a'
+        ma.name = 'a'
         mb = Mock(exports=[], build_depends=[ma], run_depends=[], buildtool_depends=[], path='pb')
-        mb.name='b'
+        mb.name = 'b'
 
         packages = {ma.path: ma,
                     mb.path: mb,
@@ -54,13 +52,13 @@ class TopologicalOrderTest(unittest.TestCase):
         self.assertIsNotNone(str(pd))
 
     def test_calculate_full_depends(self):
-        mockproject1 = _PackageDecorator(Mock(name = 'n1', exports=[], run_depends=[]), 'p1')
-        mockproject2 = _PackageDecorator(Mock(name = 'n2', exports=[], run_depends=[]), 'p2')
-        mockproject3 = _PackageDecorator(Mock(name = 'n3', exports=[], run_depends=[]), 'p3')
-        mockproject4 = _PackageDecorator(Mock(name = 'n4', exports=[], run_depends=[]), 'p4')
-        mockproject5 = _PackageDecorator(Mock(name = 'n5', exports=[], run_depends=[mockproject4]), 'p5')
-        mockproject6 = _PackageDecorator(Mock(name = 'n6', exports=[], run_depends=[mockproject5]), 'p6')
-        mockproject7 = _PackageDecorator(Mock(name = 'n7', exports=[], run_depends=[]), 'p7')
+        mockproject1 = _PackageDecorator(Mock(name='n1', exports=[], run_depends=[]), 'p1')
+        mockproject2 = _PackageDecorator(Mock(name='n2', exports=[], run_depends=[]), 'p2')
+        mockproject3 = _PackageDecorator(Mock(name='n3', exports=[], run_depends=[]), 'p3')
+        mockproject4 = _PackageDecorator(Mock(name='n4', exports=[], run_depends=[]), 'p4')
+        mockproject5 = _PackageDecorator(Mock(name='n5', exports=[], run_depends=[mockproject4]), 'p5')
+        mockproject6 = _PackageDecorator(Mock(name='n6', exports=[], run_depends=[mockproject5]), 'p6')
+        mockproject7 = _PackageDecorator(Mock(name='n7', exports=[], run_depends=[]), 'p7')
 
         mockproject = Mock(exports=[], build_depends=[mockproject1, mockproject2], buildtool_depends=[mockproject3, mockproject6], run_repends=[mockproject7])
 
