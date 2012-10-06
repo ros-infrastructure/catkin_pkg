@@ -16,11 +16,25 @@ class _PackageDecorator(object):
         return getattr(self.package, name)
 
     def calculate_full_depends(self, packages):
+        """
+        changes self.full_depends using packages to reflect
+        dependencies, collect direct build dependencies, buildtool
+        dependencies (both without non-catkin dependencies), and
+        recursively all runtime dependencies.
+
+        :param packages: dict of name to ``_PackageDecorator``
+        """
         self.full_depends = set([])
+        # skip external dependencies, meaning names that are not known packages
         for name in [d.name for d in (self.package.build_depends + self.package.buildtool_depends) if d.name in packages.keys()]:
             packages[name]._add_recursive_run_depends(packages, self.full_depends)
 
     def _add_recursive_run_depends(self, packages, full_depends):
+        """
+        Modifies full_depends argument by adding run_depends of self recursively.
+
+        :param full_depends: set to be extended
+        """
         full_depends.add(self.package.name)
         package_names = packages.keys()
         for name in [d.name for d in self.package.run_depends if d.name in package_names and d.name not in full_depends]:
@@ -48,7 +62,7 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None):
     :param packages: A dict mapping relative paths to ``Package`` objects ``dict``
     :param whitelisted: A list of whitelisted package names, ``list``
     :param blacklisted: A list of blacklisted package names, ``list``
-    :returns: A List of tuples contain the relative path and a ``Package`` object ``list``
+    :returns: A List of tuples contain the relative path and a ``Package`` object, ``list``
     '''
     decorators_by_name = {}
     for path, package in packages.items():
@@ -73,8 +87,8 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None):
 
 def _sort_decorated_packages(packages):
     '''
-    :param packages: A dict mapping relative paths to ``_PackageDecorator`` objects ``dict``
-    :returns: A List of tuples contain the relative path and a ``Package`` object ``list``
+    :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
+    :returns: A List of tuples containing the relative path and a ``Package`` object ``list``
     '''
     ordered_packages = []
     while len(packages) > 0:
