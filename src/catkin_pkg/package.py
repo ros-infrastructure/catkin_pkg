@@ -373,7 +373,48 @@ def parse_package_string(data, filename=None):
                 export.attributes[str(key)] = str(value)
             exports.append(export)
         pkg.exports = exports
+
+    # verify that no unsupported tags and attributes are present
+    unknown_root_attributes = [attr for attr in root.attributes.keys() if str(attr) != 'format']
+    if unknown_root_attributes:
+        print('WARNING %s: The "package" tag must not have the following attributes: %s' % (filename, ', '.join(unknown_root_attributes)))
+        #raise InvalidPackage('The "package" tag must not have the following attributes: %s' % ', '.join(unknown_root_attributes))
+    depend_attributes = ['version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
+    known = {
+        'name': [],
+        'version': ['abi'],
+        'description': [],
+        'maintainer': ['email'],
+        'license': [],
+        'url': ['type'],
+        'author': ['email'],
+        'build_depend': depend_attributes,
+        'buildtool_depend': depend_attributes,
+        'run_depend': depend_attributes,
+        'test_depend': depend_attributes,
+        'conflict_depend': depend_attributes,
+        'replace_depend': depend_attributes,
+        'export': [],
+    }
+    nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
+    unknown_tags = [n.tagName for n in nodes if n.tagName not in known.keys()]
+    if unknown_tags:
+        print('WARNING %s: The manifest must not contain the following tags: %s' % (filename, ', '.join(unknown_tags)))
+        #raise InvalidPackage('The manifest must not contain the following tags: %s' % ', '.join(unknown_tags))
+    for node in [n for n in nodes if n.tagName in known.keys()]:
+    #for node in nodes:
+        unknown_attrs = [str(attr) for attr in node.attributes.keys() if str(attr) not in known[node.tagName]]
+        if unknown_attrs:
+            print('WARNING %s: The "%s" tag must not have the following attributes: %s' % (filename, node.tagName, ', '.join(unknown_attrs)))
+            #raise InvalidPackage('The "%s" tag must not have the following attributes: %s' % (node.tagName, ', '.join(unknown_attrs)))
+        if node.tagName not in ['description', 'export']:
+            subnodes = [n for n in node.childNodes if n.nodeType == n.ELEMENT_NODE]
+            if subnodes:
+                print('WARNING %s: The "%s" tag must not contain the following children: %s' % (filename, node.tagName, ', '.join([n.tagName for n in subnodes])))
+                #raise InvalidPackage('The "%s" tag must not contain the following children: %s' % (node.tagName, ', '.join([n.tagName for n in subnodes])))
+
     pkg.validate()
+
     return pkg
 
 
