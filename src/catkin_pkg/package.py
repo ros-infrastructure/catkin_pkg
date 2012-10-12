@@ -170,6 +170,16 @@ class Export(object):
         self.attributes = {}
         self.content = content
 
+    def __str__(self):
+        txt = '<%s' % self.tagname
+        for key in sorted(self.attributes.keys()):
+            txt += ' %s="%s"' % (key, self.attributes[key])
+        if self.content:
+            txt += '>%s</%s>' % (self.content, self.tagname)
+        else:
+            txt += '/>'
+        return txt
+
 
 class Person(object):
     __slots__ = ['name', 'email']
