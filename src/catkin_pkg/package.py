@@ -105,44 +105,53 @@ class Package(object):
         :param package: Package to check
         :raises InvalidPackage: in case validation fails
         """
+        errors = []
         if self.package_format:
             if not re.match('^[1-9][0-9]*$', str(self.package_format)):
-                raise InvalidPackage('The "format" attribute of the package must contain a positive integer if present')
+                errors.append('The "format" attribute of the package must contain a positive integer if present')
 
         if not self.name:
-            raise InvalidPackage('Package name must not be empty')
+            errors.append('Package name must not be empty')
         # accepting upper case letters and hyphens only for backward compatibility
         if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_-]*$', self.name):
-            raise InvalidPackage('Package name "%s" does not follow naming conventions' % self.name)
-        if not re.match('^[a-z][a-z0-9_]*$', self.name):
+            errors.append('Package name "%s" does not follow naming conventions' % self.name)
+        elif not re.match('^[a-z][a-z0-9_]*$', self.name):
             sys.stderr.write('WARNING: Package name "%s" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.\n' % self.name)
 
         if not self.version:
-            raise InvalidPackage('Package version must not be empty')
-        if not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', self.version):
-            raise InvalidPackage('Package version "%s" does not follow version conventions' % self.version)
+            errors.append('Package version must not be empty')
+        elif not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', self.version):
+            errors.append('Package version "%s" does not follow version conventions' % self.version)
 
         if not self.description:
-            raise InvalidPackage('Package description must not be empty')
+            errors.append('Package description must not be empty')
 
         if not self.maintainers:
-            raise InvalidPackage('Package must declare at least one maintainer')
+            errors.append('Package must declare at least one maintainer')
         for maintainer in self.maintainers:
-            maintainer.validate()
+            try:
+                maintainer.validate()
+            except InvalidPackage as inp:
+                errors.append(str(invp))
             if not maintainer.email:
-                raise InvalidPackage('Maintainers must have an email address')
+                errors.append('Maintainers must have an email address')
 
         if not self.licenses:
-            raise InvalidPackage('The manifest must contain at least one "license" tag')
+            errors.append('The package node must contain at least one "license" tag')
 
         if self.authors is not None:
             for author in self.authors:
-                author.validate()
+                try:
+                    author.validate()
+                except InvalidPackage as invp:
+                    errors.append(str(invp))
 
         for dep_type, depends in {'build': self.build_depends, 'buildtool': self.buildtool_depends, 'run': self.run_depends, 'test': self.test_depends}.items():
             for depend in depends:
                 if depend.name == self.name:
-                    raise InvalidPackage('The manifest must not "%s_depend" on a package with the same name as this package' % dep_type)
+                    errors.append('The package must not "%s_depend" on a package with the same name as this package' % dep_type)
+        if errors:
+            raise InvalidPackage('\n'.join(errors))
 
 
 class Dependency(object):
