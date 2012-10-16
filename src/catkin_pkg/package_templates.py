@@ -95,12 +95,15 @@ class CatkinTemplate(Template):
     delimiter = '@'
     escape = '@'
 
+
 def create_cmakelists(package_template):
     """
     :param package_template: contains the required information
     :returns: file contents as string
     """
-    ctemp = CatkinTemplate(CMAKELISTS_TXT_TEMPLATE)
+    with open(os.path.join(os.path.dirname(__file__), 'templates', 'CMakeLists.txt.in'), 'r') as fhand:
+        cmakelists_txt_template = fhand.read()
+    ctemp = CatkinTemplate(cmakelists_txt_template)
     if package_template.components == []:
         components = ''
     else:
@@ -141,7 +144,9 @@ def create_package_xml(package_template):
     :param package_template: contains the required information
     :returns: file contents as string
     """
-    ctemp = CatkinTemplate(PACKAGE_XML_TEMPLATE)
+    with open(os.path.join(os.path.dirname(__file__), 'templates', 'package.xml.in'), 'r') as fhand:
+        package_xml_template = fhand.read()
+    ctemp = CatkinTemplate(package_xml_template)
     temp_dict = {}
     for key in package_template.__slots__:
         temp_dict[key] = getattr(package_template, key)
@@ -213,136 +218,8 @@ def create_package_xml(package_template):
                 exports.append('    <%s%s/>\n' % (export.tagname, ''.join(attribs)))
     temp_dict['exports'] = ''.join(exports)
 
+    temp_dict['components'] = package_template.components
+
     return ctemp.substitute(temp_dict)
 
 
-## Python template string: @@ escapes @, @foo is replaced from dict
-## with key foo
-CMAKELISTS_TXT_TEMPLATE = """cmake_minimum_required(VERSION 2.8)
-project(@name)
-
-# Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED@components)
-
-catkin_project(${PROJECT_NAME}
-#  LIBRARIES ${PROJECT_NAME}
-#  INCLUDE_DIRS include
-#  DEPENDS
-  )
-
-
-## uncomment if the package has a setup.py
-# catkin_python_setup()
-
-
-## Declare ROS messages and services here
-
-# add_message_files(
-#   DIRECTORY msg
-#   FILES
-#     MyMessage1.msg
-#     MyMessage2.msg
-# )
-
-# add_service_files(
-#   DIRECTORY srv
-#   FILES
-#     MyService1.srv
-#     MyService2.srv
-# )
-
-## Uncomment this if you have declared any messages or services
-## and specify dependencies if any
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs)
-
-
-## System dependencies, Boost as an example, can be found like this
-## usage examples below
-# find_package(Boost REQUIRED COMPONENTS system)
-
-## Use this to declare libraries that this package creates
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/main.cpp
-#   )
-
-## Use this to declare executables that this package creates
-# add_executable(${PROJECT_NAME}_node src/main.cpp)
-
-## Use this to e.g. make your executables depend on your libraries
-# add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME})
-
-## Specify additional locations of header files
-# include_directories(include)
-
-## specify what c++ libraries your c++ executable should be linked against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${Boost_LIBRARIES}
-#   )
-
-## Use this to declare executable scripts (Python etc.)
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PROJECT_BIN_DESTINATION})
-
-## Use this to declare c++ executables and/or libraries
-# install(TARGETS ${PROJECT_NAME}_node
-#   ARCHIVE DESTINATION ${CATKIN_PROJECT_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PROJECT_LIB_DESTINATION})
-
-## If specific folders are to be installed (no executable or library), use this
-# install(DIRECTORY include/
-#   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE)
-
-## This is for any other files that should go into an install
-# install(FILES
-#   myfile1
-#   myfile2
-#   DESTINATION ${CATKIN_PROJECT_INCLUDE_DESTINATION}
-# )
-
-## Use this for c++ gtest unit tests
-# catkin_add_gtest(${PROJECT_NAME}-test test/mytest)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test_version)
-# endif()
-
-## Use this to declare python unit test folders
-# catkin_add_nosetests(test)
-"""
-
-PACKAGE_XML_TEMPLATE = """<?xml version="1.0"?>
-<package>
-  <name>@name</name>
-  <version@version_abi>@version</version>
-  <description>@description</description>
-
-  <!-- multiple maintainer tags allowed, one name per tag-->
-  <!-- <maintainer email="jane.doe@@example.com">Jane Doe</maintainer> -->
-@maintainers
-  <!-- Commonly used license strings:
-  BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3-->
-@licenses
-  <!-- url type could be one of website (default), bugtracker and repository -->
-  <!-- <url type="website">http://wiki.ros.org/@name</url> -->
-@urls
-  <!-- multiple authors tags allowed, one name per tag-->
-  <!-- <author email="jane.doe@@example.com">Jane Doe</author> -->
-@authors
-  <!--Any system dependency or dependency to catkin packages. Examples:-->
-  <!--<build_depend>genmsg</build_depend> for libraries for compiling-->
-  <!--<buildtool_depend>cmake</buildtool_depend> for build tools-->
-  <!--<run_depend>python-yaml</run_depend> for packages used at runtime-->
-  <!--<test_depend>gtest</test_depend> for packages needed for testing-->
-@dependencies
-  <export>
-    <!-- This section contains any information that other tools require-->
-    <!-- <architecture_independent/> -->
-    <!-- <meta_package/> -->
-@exports\
-  </export>
-</package>
-"""
