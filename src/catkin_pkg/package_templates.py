@@ -47,10 +47,11 @@ class PackageTemplate(Package):
         self.validate()
 
 
-def _create_files(newfiles, target_dir):
+def create_files(newfiles, target_dir):
     """
     writes file contents to target_dir/filepath for all entries of newfiles.
     Aborts early if files exist in places for new files or directories
+
     :param newfiles: a dict {filepath: contents}
     :param target_dir: a string
     """
@@ -76,41 +77,22 @@ def _create_files(newfiles, target_dir):
             fhand.write(content)
 
 
-def create_package_files(target_path, package_template):
+def create_package_files(target_path, package_template, newfiles):
     """
-    creates several files from templates to start a new package.
+    creates given newfiles and a package.xml from package template.
+
     :param target_path: parent folder where to create the package
     :param package_template: contains the required information
+    :param newfiles: dict {filepath: file_contents_str}
     """
-    newfiles = {os.path.join(target_path, 'CMakeLists.txt'):
-                    create_cmakelists(package_template),
-                os.path.join(target_path, 'package.xml'):
-                    create_package_xml(package_template)}
-    _create_files(newfiles, target_path)
-
+    newfiles[os.path.join(target_path, 'package.xml')] = create_package_xml(package_template)
+    create_files(newfiles, target_path)
 
 
 class CatkinTemplate(Template):
     """subclass to use @ instead of $ as markers"""
     delimiter = '@'
     escape = '@'
-
-
-def create_cmakelists(package_template):
-    """
-    :param package_template: contains the required information
-    :returns: file contents as string
-    """
-    with open(os.path.join(os.path.dirname(__file__), 'templates', 'CMakeLists.txt.in'), 'r') as fhand:
-        cmakelists_txt_template = fhand.read()
-    ctemp = CatkinTemplate(cmakelists_txt_template)
-    if package_template.components == []:
-        components = ''
-    else:
-        components = ' COMPONENTS %s' % ' '.join(package_template.components)
-    temp_dict = {'name': package_template.name,
-                 'components': components}
-    return ctemp.substitute(temp_dict)
 
 
 def _create_depend_tag(dep_type,
@@ -221,5 +203,3 @@ def create_package_xml(package_template):
     temp_dict['components'] = package_template.components
 
     return ctemp.substitute(temp_dict)
-
-
