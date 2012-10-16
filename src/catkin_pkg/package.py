@@ -35,6 +35,8 @@ Library for parsing package.xml and providing an object
 representation.
 """
 
+from __future__ import print_function
+
 import os
 import re
 import sys
@@ -116,7 +118,7 @@ class Package(object):
         if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_-]*$', self.name):
             errors.append('Package name "%s" does not follow naming conventions' % self.name)
         elif not re.match('^[a-z][a-z0-9_]*$', self.name):
-            sys.stderr.write('WARNING: Package name "%s" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.\n' % self.name)
+            print('WARNING: Package name "%s" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.' % self.name, file=sys.stderr)
 
         if not self.version:
             errors.append('Package version must not be empty')
@@ -393,11 +395,11 @@ def parse_package_string(data, filename=None):
             exports.append(export)
         pkg.exports = exports
 
+    errors = []
     # verify that no unsupported tags and attributes are present
     unknown_root_attributes = [attr for attr in root.attributes.keys() if str(attr) != 'format']
     if unknown_root_attributes:
-        sys.stderr.write('WARNING %s: The "package" tag must not have the following attributes: %s' % (filename, ', '.join(unknown_root_attributes)))
-        #raise InvalidPackage('The "package" tag must not have the following attributes: %s' % ', '.join(unknown_root_attributes))
+        errors.append('The "package" tag must not have the following attributes: %s' % ', '.join(unknown_root_attributes))
     depend_attributes = ['version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
     known = {
         'name': [],
@@ -418,19 +420,19 @@ def parse_package_string(data, filename=None):
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
     unknown_tags = [n.tagName for n in nodes if n.tagName not in known.keys()]
     if unknown_tags:
-        sys.stderr.write('WARNING %s: The manifest must not contain the following tags: %s' % (filename, ', '.join(unknown_tags)))
-        #raise InvalidPackage('The manifest must not contain the following tags: %s' % ', '.join(unknown_tags))
+        errors.append('The manifest must not contain the following tags: %s' % ', '.join(unknown_tags))
     for node in [n for n in nodes if n.tagName in known.keys()]:
-    #for node in nodes:
         unknown_attrs = [str(attr) for attr in node.attributes.keys() if str(attr) not in known[node.tagName]]
         if unknown_attrs:
-            sys.stderr.write('WARNING %s: The "%s" tag must not have the following attributes: %s' % (filename, node.tagName, ', '.join(unknown_attrs)))
-            #raise InvalidPackage('The "%s" tag must not have the following attributes: %s' % (node.tagName, ', '.join(unknown_attrs)))
+            errors.append('The "%s" tag must not have the following attributes: %s' % (node.tagName, ', '.join(unknown_attrs)))
         if node.tagName not in ['description', 'export']:
             subnodes = [n for n in node.childNodes if n.nodeType == n.ELEMENT_NODE]
             if subnodes:
-                sys.stderr.write('WARNING %s: The "%s" tag must not contain the following children: %s' % (filename, node.tagName, ', '.join([n.tagName for n in subnodes])))
-                #raise InvalidPackage('The "%s" tag must not contain the following children: %s' % (node.tagName, ', '.join([n.tagName for n in subnodes])))
+                errors.append('The "%s" tag must not contain the following children: %s' % (node.tagName, ', '.join([n.tagName for n in subnodes])))
+    if errors:
+        # for now only output a warning instead of raising an exception
+        #raise InvalidPackage('\n'.join(errors))
+        print('WARNING:%s' % ''.join(['\n- %s' % e for e in errors]), file=sys.stderr)
 
     pkg.validate()
 

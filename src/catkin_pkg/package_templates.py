@@ -194,7 +194,7 @@ def create_package_xml(package_template):
     if package_template.exports is not None:
         for export in package_template.exports:
             if export.content is not None:
-                sys.stderr.write('WARNING: Create package does not know how to serialize exports with content: %s, %s, %s' % (export.tagname, export.attributes, export.content))
+                print('WARNING: Create package does not know how to serialize exports with content: %s, %s, %s' % (export.tagname, export.attributes, export.content), file=sys.stderr)
             else:
                 attribs = ['%s="%s"' % (k, v) for (k, v) in export.attributes]
                 exports.append('    <%s%s/>\n' % (export.tagname, ''.join(attribs)))
