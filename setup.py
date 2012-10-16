@@ -12,6 +12,7 @@ setup(
     version=__version__,
     packages=['catkin_pkg'],
     package_dir={'': 'src'},
+    package_data={'catkin_pkg': ['templates/*.in']},
     scripts=[],
     author='Dirk Thomas',
     author_email='dthomas@willowgarage.com',
