@@ -105,44 +105,53 @@ class Package(object):
         :param package: Package to check
         :raises InvalidPackage: in case validation fails
         """
+        errors = []
         if self.package_format:
             if not re.match('^[1-9][0-9]*$', str(self.package_format)):
-                raise InvalidPackage('The "format" attribute of the package must contain a positive integer if present')
+                errors.append('The "format" attribute of the package must contain a positive integer if present')
 
         if not self.name:
-            raise InvalidPackage('Package name must not be empty')
+            errors.append('Package name must not be empty')
         # accepting upper case letters and hyphens only for backward compatibility
         if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_-]*$', self.name):
-            raise InvalidPackage('Package name "%s" does not follow naming conventions' % self.name)
-        if not re.match('^[a-z][a-z0-9_]*$', self.name):
+            errors.append('Package name "%s" does not follow naming conventions' % self.name)
+        elif not re.match('^[a-z][a-z0-9_]*$', self.name):
             sys.stderr.write('WARNING: Package name "%s" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.\n' % self.name)
 
         if not self.version:
-            raise InvalidPackage('Package version must not be empty')
-        if not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', self.version):
-            raise InvalidPackage('Package version "%s" does not follow version conventions' % self.version)
+            errors.append('Package version must not be empty')
+        elif not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', self.version):
+            errors.append('Package version "%s" does not follow version conventions' % self.version)
 
         if not self.description:
-            raise InvalidPackage('Package description must not be empty')
+            errors.append('Package description must not be empty')
 
         if not self.maintainers:
-            raise InvalidPackage('Package must declare at least one maintainer')
+            errors.append('Package must declare at least one maintainer')
         for maintainer in self.maintainers:
-            maintainer.validate()
+            try:
+                maintainer.validate()
+            except InvalidPackage as inp:
+                errors.append(str(invp))
             if not maintainer.email:
-                raise InvalidPackage('Maintainers must have an email address')
+                errors.append('Maintainers must have an email address')
 
         if not self.licenses:
-            raise InvalidPackage('The manifest must contain at least one "license" tag')
+            errors.append('The package node must contain at least one "license" tag')
 
         if self.authors is not None:
             for author in self.authors:
-                author.validate()
+                try:
+                    author.validate()
+                except InvalidPackage as invp:
+                    errors.append(str(invp))
 
         for dep_type, depends in {'build': self.build_depends, 'buildtool': self.buildtool_depends, 'run': self.run_depends, 'test': self.test_depends}.items():
             for depend in depends:
                 if depend.name == self.name:
-                    raise InvalidPackage('The manifest must not "%s_depend" on a package with the same name as this package' % dep_type)
+                    errors.append('The package must not "%s_depend" on a package with the same name as this package' % dep_type)
+        if errors:
+            raise InvalidPackage('\n'.join(errors))
 
 
 class Dependency(object):
@@ -387,7 +396,7 @@ def parse_package_string(data, filename=None):
     # verify that no unsupported tags and attributes are present
     unknown_root_attributes = [attr for attr in root.attributes.keys() if str(attr) != 'format']
     if unknown_root_attributes:
-        sys.stderr.write('WARNING %s: The "package" tag must not have the following attributes: %s' % (filename, ', '.join(unknown_root_attributes)))
+        sys.stderr.write('WARNING %s: The "package" tag must not have the following attributes: %s\n' % (filename, ', '.join(unknown_root_attributes)))
         #raise InvalidPackage('The "package" tag must not have the following attributes: %s' % ', '.join(unknown_root_attributes))
     depend_attributes = ['version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
     known = {
@@ -409,18 +418,18 @@ def parse_package_string(data, filename=None):
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
     unknown_tags = [n.tagName for n in nodes if n.tagName not in known.keys()]
     if unknown_tags:
-        sys.stderr.write('WARNING %s: The manifest must not contain the following tags: %s' % (filename, ', '.join(unknown_tags)))
+        sys.stderr.write('WARNING %s: The package node must not contain the following tags: %s\n' % (filename, ', '.join(unknown_tags)))
         #raise InvalidPackage('The manifest must not contain the following tags: %s' % ', '.join(unknown_tags))
     for node in [n for n in nodes if n.tagName in known.keys()]:
     #for node in nodes:
         unknown_attrs = [str(attr) for attr in node.attributes.keys() if str(attr) not in known[node.tagName]]
         if unknown_attrs:
-            sys.stderr.write('WARNING %s: The "%s" tag must not have the following attributes: %s' % (filename, node.tagName, ', '.join(unknown_attrs)))
+            sys.stderr.write('WARNING %s: The "%s" tag must not have the following attributes: %s\n' % (filename, node.tagName, ', '.join(unknown_attrs)))
             #raise InvalidPackage('The "%s" tag must not have the following attributes: %s' % (node.tagName, ', '.join(unknown_attrs)))
         if node.tagName not in ['description', 'export']:
             subnodes = [n for n in node.childNodes if n.nodeType == n.ELEMENT_NODE]
             if subnodes:
-                sys.stderr.write('WARNING %s: The "%s" tag must not contain the following children: %s' % (filename, node.tagName, ', '.join([n.tagName for n in subnodes])))
+                sys.stderr.write('WARNING %s: The "%s" tag must not contain the following children: %s\n' % (filename, node.tagName, ', '.join([n.tagName for n in subnodes])))
                 #raise InvalidPackage('The "%s" tag must not contain the following children: %s' % (node.tagName, ', '.join([n.tagName for n in subnodes])))
 
     pkg.validate()
