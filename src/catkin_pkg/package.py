@@ -42,10 +42,12 @@ import re
 import sys
 import xml.dom.minidom as dom
 
+PACKAGE_MANIFEST_FILENAME = 'package.xml'
+
 
 class Package(object):
     """
-    Object representation of a ``package.xml`` file
+    Object representation of a package manifest file
     """
     __slots__ = [
         'package_format',
@@ -296,11 +298,11 @@ def parse_package(path):
     if os.path.isfile(path):
         filename = path
     elif os.path.isdir(path):
-        filename = os.path.join(path, 'package.xml')
+        filename = os.path.join(path, PACKAGE_MANIFEST_FILENAME)
         if not os.path.isfile(filename):
-            raise IOError('Directory "%s" does not contain a "package.xml"' % (path))
+            raise IOError('Directory "%s" does not contain a "%s"' % (path, PACKAGE_MANIFEST_FILENAME))
     else:
-        raise IOError('Path "%s" is neither a directory containing a "package.xml" file nor a file' % (path))
+        raise IOError('Path "%s" is neither a directory containing a "%s" file nor a file' % (path, PACKAGE_MANIFEST_FILENAME))
 
     with open(filename, 'r') as f:
         try:

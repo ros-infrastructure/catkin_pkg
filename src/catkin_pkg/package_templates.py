@@ -36,7 +36,7 @@ import sys
 import os
 from string import Template
 
-from catkin_pkg.package import Package
+from catkin_pkg.package import Package, PACKAGE_MANIFEST_FILENAME
 
 
 class PackageTemplate(Package):
@@ -85,7 +85,7 @@ def create_package_files(target_path, package_template, newfiles):
     :param package_template: contains the required information
     :param newfiles: dict {filepath: file_contents_str}
     """
-    newfiles[os.path.join(target_path, 'package.xml')] = create_package_xml(package_template)
+    newfiles[os.path.join(target_path, PACKAGE_MANIFEST_FILENAME)] = create_package_xml(package_template)
     create_files(newfiles, target_path)
 
 

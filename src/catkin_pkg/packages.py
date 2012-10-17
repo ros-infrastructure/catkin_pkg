@@ -35,23 +35,23 @@ Library to find packages in the filesystem.
 """
 
 import os
-from .package import parse_package
+from .package import parse_package, PACKAGE_MANIFEST_FILENAME
 
 
 def find_package_paths(basepath):
     """
-    Crawls the filesystem to find package.xml files.
+    Crawls the filesystem to find package manifest files.
 
     When a subfolder contains a file ``CATKIN_NO_SUBDIRS`` its
     subdirectories are ignored.
 
     :param basepath: The path to search in, ``str``
-    :returns: A list of relative paths containing package.xml files
+    :returns: A list of relative paths containing package manifest files
     ``list``
     """
     paths = []
     for dirpath, dirnames, filenames in os.walk(basepath, followlinks=True):
-        if 'package.xml' in filenames:
+        if PACKAGE_MANIFEST_FILENAME in filenames:
             basename = os.path.basename(dirpath)
             if basename not in paths:
                 paths.append(os.path.relpath(dirpath, basepath))
@@ -68,7 +68,7 @@ def find_package_paths(basepath):
 
 def find_packages(basepath):
     """
-    Crawls the filesystem to find package.xml files and parses them.
+    Crawls the filesystem to find package manifest files and parses them.
 
     :param basepath: The path to search in, ``str``
     :returns: A dict mapping relative paths to ``Package`` objects
