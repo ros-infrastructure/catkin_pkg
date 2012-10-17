@@ -8,7 +8,7 @@ from mock import MagicMock, Mock
 from catkin_pkg.package_templates import create_files, create_package_files, \
     create_package_xml, PackageTemplate
 from catkin_pkg.package import parse_package_for_distutils, parse_package, \
-    Dependency, Export, Url
+    Dependency, Export, Url, PACKAGE_MANIFEST_FILENAME
 
 
 class TemplateTest(unittest.TestCase):
@@ -56,7 +56,7 @@ class TemplateTest(unittest.TestCase):
         try:
             rootdir = tempfile.mkdtemp()
             file1 = os.path.join(rootdir, 'CMakeLists.txt')
-            file2 = os.path.join(rootdir, 'package.xml')
+            file2 = os.path.join(rootdir, PACKAGE_MANIFEST_FILENAME)
             create_package_files(rootdir, pack, {file1: ''})
             self.assertTrue(os.path.isfile(file1))
             self.assertTrue(os.path.isfile(file2))
@@ -75,7 +75,7 @@ class TemplateTest(unittest.TestCase):
                                licenses=['BSD'])
         try:
             rootdir = tempfile.mkdtemp()
-            file2 = os.path.join(rootdir, 'package.xml')
+            file2 = os.path.join(rootdir, PACKAGE_MANIFEST_FILENAME)
             create_package_files(rootdir, pack, {})
             self.assertTrue(os.path.isfile(file2))
 
@@ -149,7 +149,7 @@ class TemplateTest(unittest.TestCase):
 
         try:
             rootdir = tempfile.mkdtemp()
-            file2 = os.path.join(rootdir, 'package.xml')
+            file2 = os.path.join(rootdir, PACKAGE_MANIFEST_FILENAME)
             create_package_files(rootdir, pack, {})
             self.assertTrue(os.path.isfile(file2))
 
