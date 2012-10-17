@@ -53,7 +53,7 @@ def topological_order(root_dir, whitelisted=None, blacklisted=None):
     :param root_dir: The path to search in, ``str``
     :param whitelisted: A list of whitelisted package names, ``list``
     :param blacklisted: A list of blacklisted package names, ``list``
-    :returns: A dict mapping relative paths to ``Package`` objects ``dict``
+    :returns: A list of tuples containining relative paths and ``Package`` objects ``dict``
     '''
     packages = find_packages(root_dir)
     return topological_order_packages(packages, whitelisted, blacklisted)
@@ -69,7 +69,7 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None):
     :param packages: A dict mapping relative paths to ``Package`` objects ``dict``
     :param whitelisted: A list of whitelisted package names, ``list``
     :param blacklisted: A list of blacklisted package names, ``list``
-    :returns: A List of tuples contain the relative path and a ``Package`` object, ``list``
+    :returns: A list of tuples containining the relative path and a ``Package`` object, ``list``
     '''
     decorators_by_name = {}
     for path, package in packages.items():
