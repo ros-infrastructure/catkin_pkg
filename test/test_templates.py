@@ -5,8 +5,8 @@ import shutil
 
 from mock import MagicMock, Mock
 
-from catkin_pkg.package_templates import create_files, create_package_files, \
-    create_package_xml, PackageTemplate
+from catkin_pkg.package_templates import _safe_write_files, create_package_files, \
+    create_cmakelists, create_package_xml, PackageTemplate
 from catkin_pkg.package import parse_package_for_distutils, parse_package, \
     Dependency, Export, Url, PACKAGE_MANIFEST_FILENAME
 
@@ -19,19 +19,31 @@ class TemplateTest(unittest.TestCase):
         maint.name = 'John Foo'
         return maint
 
-    def test_create_files(self):
+    def test_safe_write_files(self):
         file1 = os.path.join('foo', 'bar')
         file2 = os.path.join('foo', 'baz')
         newfiles = {file1: 'foobar', file2: 'barfoo'}
         try:
             rootdir = tempfile.mkdtemp()
-            create_files(newfiles, rootdir)
+            _safe_write_files(newfiles, rootdir)
             self.assertTrue(os.path.isfile(os.path.join(rootdir, file1)))
             self.assertTrue(os.path.isfile(os.path.join(rootdir, file2)))
-            self.assertRaises(ValueError, create_files, newfiles, rootdir)
+            self.assertRaises(ValueError, _safe_write_files, newfiles, rootdir)
         finally:
             shutil.rmtree(rootdir)
 
+    def test_create_cmakelists(self):
+        mock_pack = MagicMock()
+        mock_pack.name = 'foo'
+        mock_pack.components = []
+        result = create_cmakelists(mock_pack, 'groovy')
+        self.assertTrue('project(foo)' in result, result)
+        self.assertTrue('find_package(catkin REQUIRED)' in result, result)
+
+        mock_pack.components = ['bar', 'baz']
+        result = create_cmakelists(mock_pack, 'groovy')
+        self.assertTrue('project(foo)' in result, result)
+        self.assertTrue('find_package(catkin REQUIRED COMPONENTS bar baz)' in result, result)
 
     def test_create_package_xml(self):
         maint = self.get_maintainer()
@@ -41,7 +53,7 @@ class TemplateTest(unittest.TestCase):
                                maintainers=[maint],
                                licenses=['BSD'])
 
-        result = create_package_xml(pack)
+        result = create_package_xml(pack, 'groovy')
         self.assertTrue('<name>foo</name>' in result, result)
 
     def test_create_package(self):
@@ -57,7 +69,7 @@ class TemplateTest(unittest.TestCase):
             rootdir = tempfile.mkdtemp()
             file1 = os.path.join(rootdir, 'CMakeLists.txt')
             file2 = os.path.join(rootdir, PACKAGE_MANIFEST_FILENAME)
-            create_package_files(rootdir, pack, {file1: ''})
+            create_package_files(rootdir, pack, 'groovy', {file1: ''})
             self.assertTrue(os.path.isfile(file1))
             self.assertTrue(os.path.isfile(file2))
         finally:
@@ -75,8 +87,10 @@ class TemplateTest(unittest.TestCase):
                                licenses=['BSD'])
         try:
             rootdir = tempfile.mkdtemp()
+            file1 = os.path.join(rootdir, 'CMakeLists.txt')
             file2 = os.path.join(rootdir, PACKAGE_MANIFEST_FILENAME)
-            create_package_files(rootdir, pack, {})
+            create_package_files(rootdir, pack, 'groovy')
+            self.assertTrue(os.path.isfile(file1))
             self.assertTrue(os.path.isfile(file2))
 
             pack_result = parse_package(file2)
@@ -149,8 +163,10 @@ class TemplateTest(unittest.TestCase):
 
         try:
             rootdir = tempfile.mkdtemp()
+            file1 = os.path.join(rootdir, 'CMakeLists.txt')
             file2 = os.path.join(rootdir, PACKAGE_MANIFEST_FILENAME)
-            create_package_files(rootdir, pack, {})
+            create_package_files(rootdir, pack, 'groovy')
+            self.assertTrue(os.path.isfile(file1))
             self.assertTrue(os.path.isfile(file2))
 
             pack_result = parse_package(file2)

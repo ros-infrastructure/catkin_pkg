@@ -1,0 +1,64 @@
+import os
+import sys
+import unittest
+import tempfile
+import shutil
+
+import mock
+
+try:
+    import catkin_pkg
+    from catkin_pkg.package_templates import PackageTemplate
+except ImportError as impe:
+    raise ImportError(
+        'Please adjust your pythonpath before running this test: %s' % str(impe))
+
+import imp
+imp.load_source('catkin_create_pkg',
+                os.path.join(os.path.dirname(__file__),
+                             '..', 'bin', 'catkin_create_pkg'))
+
+from catkin_create_pkg import main
+
+
+class CreatePkgTest(unittest.TestCase):
+
+    def test_create_package_template(self):
+        template = PackageTemplate._create_package_template('fooPackage')
+        self.assertEqual('fooPackage', template.name)
+        self.assertEqual('0.0.0', template.version)
+        self.assertEqual('The fooPackage package', template.description)
+        self.assertEqual([], template.components)
+        self.assertEqual([], template.authors)
+        self.assertEqual(1, len(template.maintainers))
+        self.assertIsNotNone(template.maintainers[0].email)
+        self.assertEqual([], template.urls)
+        # with args
+        template = PackageTemplate._create_package_template(
+            'fooPackage',
+            description='foo_desc',
+            licenses=['a', 'b'],
+            maintainer_names=['John Doe', 'Jim Daniels'],
+            author_names=['Harry Smith'],
+            version='1.2.3',
+            dependencies=['foobar', 'baz'])
+        self.assertEqual('fooPackage', template.name)
+        self.assertEqual('1.2.3', template.version)
+        self.assertEqual('foo_desc', template.description)
+        self.assertEqual(['foobar', 'baz'], template.components)
+        self.assertEqual(1, len(template.authors))
+        self.assertEqual('John Doe', template.maintainers[0].name)
+        self.assertEqual('Jim Daniels', template.maintainers[1].name)
+        self.assertEqual('Harry Smith', template.authors[0].name)
+        self.assertEqual(2, len(template.maintainers))
+        self.assertEqual([], template.urls)
+
+    def test_main(self):
+        try:
+            root_dir = tempfile.mkdtemp()
+            main(['foo'], root_dir)
+            self.assertTrue(os.path.isdir(os.path.join(root_dir, 'foo')))
+            self.assertTrue(os.path.isfile(os.path.join(root_dir, 'foo', 'CMakeLists.txt')))
+            self.assertTrue(os.path.isfile(os.path.join(root_dir, 'foo', 'package.xml')))
+        finally:
+            shutil.rmtree(root_dir)
