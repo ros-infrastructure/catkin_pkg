@@ -36,12 +36,12 @@ class TemplateTest(unittest.TestCase):
         mock_pack = MagicMock()
         mock_pack.name = 'foo'
         mock_pack.components = []
-        result = create_cmakelists(mock_pack)
+        result = create_cmakelists(mock_pack, 'groovy')
         self.assertTrue('project(foo)' in result, result)
         self.assertTrue('find_package(catkin REQUIRED)' in result, result)
 
         mock_pack.components = ['bar', 'baz']
-        result = create_cmakelists(mock_pack)
+        result = create_cmakelists(mock_pack, 'groovy')
         self.assertTrue('project(foo)' in result, result)
         self.assertTrue('find_package(catkin REQUIRED COMPONENTS bar baz)' in result, result)
 
@@ -53,7 +53,7 @@ class TemplateTest(unittest.TestCase):
                                maintainers=[maint],
                                licenses=['BSD'])
 
-        result = create_package_xml(pack)
+        result = create_package_xml(pack, 'groovy')
         self.assertTrue('<name>foo</name>' in result, result)
 
     def test_create_package(self):
@@ -69,7 +69,7 @@ class TemplateTest(unittest.TestCase):
             rootdir = tempfile.mkdtemp()
             file1 = os.path.join(rootdir, 'CMakeLists.txt')
             file2 = os.path.join(rootdir, PACKAGE_MANIFEST_FILENAME)
-            create_package_files(rootdir, pack, {file1: ''})
+            create_package_files(rootdir, pack, 'groovy', {file1: ''})
             self.assertTrue(os.path.isfile(file1))
             self.assertTrue(os.path.isfile(file2))
         finally:
@@ -89,7 +89,7 @@ class TemplateTest(unittest.TestCase):
             rootdir = tempfile.mkdtemp()
             file1 = os.path.join(rootdir, 'CMakeLists.txt')
             file2 = os.path.join(rootdir, PACKAGE_MANIFEST_FILENAME)
-            create_package_files(rootdir, pack, {})
+            create_package_files(rootdir, pack, 'groovy')
             self.assertTrue(os.path.isfile(file1))
             self.assertTrue(os.path.isfile(file2))
 
@@ -165,7 +165,7 @@ class TemplateTest(unittest.TestCase):
             rootdir = tempfile.mkdtemp()
             file1 = os.path.join(rootdir, 'CMakeLists.txt')
             file2 = os.path.join(rootdir, PACKAGE_MANIFEST_FILENAME)
-            create_package_files(rootdir, pack, {})
+            create_package_files(rootdir, pack, 'groovy')
             self.assertTrue(os.path.isfile(file1))
             self.assertTrue(os.path.isfile(file2))
 

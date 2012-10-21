@@ -35,8 +35,10 @@ from __future__ import print_function
 import sys
 import os
 from string import Template
+import getpass
 
-from catkin_pkg.package import Package, PACKAGE_MANIFEST_FILENAME
+from catkin_pkg.package import Package, PACKAGE_MANIFEST_FILENAME, \
+    Person, Url, Export, Dependency
 
 
 class PackageTemplate(Package):
@@ -45,6 +47,57 @@ class PackageTemplate(Package):
         super(PackageTemplate, self).__init__(**kwargs)
         self.components = components or []
         self.validate()
+
+    @staticmethod
+    def _create_package_template(package_name, description=None, licenses=None,
+                                 maintainer_names=None, author_names=None,
+                                 version=None, dependencies=None):
+        """
+        alternative factory method mapping CLI args to argument for
+        Package class
+
+        :param package_name:
+        :param description:
+        :param licenses:
+        :param maintainer_names:
+        :param authors:
+        :param version:
+        :param dependencies:
+        """
+        if not licenses:
+            licenses = ["TODO"]
+        if not maintainer_names:
+            maintainer_names = [getpass.getuser()]
+        maintainers = []
+        for maintainer_name in maintainer_names or []:
+            maintainers.append(Person(maintainer_name, '%s@todo.todo' % maintainer_name.split()[-1]))
+        authors = []
+        for author_name in author_names or []:
+            authors.append(Person(author_name))
+        pkg_dependencies = []
+        for dep in dependencies or []:
+            pkg_dependencies.append(Dependency(dep))
+        package_temp = PackageTemplate(
+            name=package_name,
+            version=version or '0.0.0',
+            description=description or 'The %s package' % package_name,
+            build_depends=pkg_dependencies,
+            components=dependencies,
+            licenses=licenses,
+            authors=authors or [],
+            maintainers=maintainers,
+            urls=[])
+        newfiles = {}
+        return package_temp
+
+
+def read_template_file(filename, rosdistro):
+    template = os.path.join(os.path.dirname(__file__), 'templates', rosdistro, '%s.in' % filename)
+    if not os.path.isfile(template):
+        raise ValueError('Unknown distro' % rosdistro)
+    with open(template, 'r') as fhand:
+        template_contents = fhand.read()
+    return template_contents
 
 
 def _safe_write_files(newfiles, target_dir):
@@ -77,21 +130,22 @@ def _safe_write_files(newfiles, target_dir):
             fhand.write(content)
 
 
-def create_package_files(target_path, package_template, newfiles=None):
+def create_package_files(target_path, package_template, rosdistro='groovy', newfiles=None):
     """
     creates several files from templates to start a new package.
 
     :param target_path: parent folder where to create the package
     :param package_template: contains the required information
+    :param rosdistro: name of the distro to look up respective template
     :param newfiles: dict {filepath: contents} any additional file contents to write
     """
     if newfiles is None:
         newfiles = {}
     # allow to replace default templates when path string is equal
     if not os.path.join(target_path, PACKAGE_MANIFEST_FILENAME) in newfiles:
-        newfiles[os.path.join(target_path, PACKAGE_MANIFEST_FILENAME)] = create_package_xml(package_template)
+        newfiles[os.path.join(target_path, PACKAGE_MANIFEST_FILENAME)] = create_package_xml(package_template, rosdistro)
     if not os.path.join(target_path, 'CMakeLists.txt') in newfiles:
-        newfiles[os.path.join(target_path, 'CMakeLists.txt')] = create_cmakelists(package_template)
+        newfiles[os.path.join(target_path, 'CMakeLists.txt')] = create_cmakelists(package_template, rosdistro)
     _safe_write_files(newfiles, target_path)
 
 
@@ -101,13 +155,12 @@ class CatkinTemplate(Template):
     escape = '@'
 
 
-def create_cmakelists(package_template):
+def create_cmakelists(package_template, rosdistro):
     """
     :param package_template: contains the required information
     :returns: file contents as string
     """
-    with open(os.path.join(os.path.dirname(__file__), 'templates', 'CMakeLists.txt.in'), 'r') as fhand:
-        cmakelists_txt_template = fhand.read()
+    cmakelists_txt_template = read_template_file('CMakeLists.txt', rosdistro)
     ctemp = CatkinTemplate(cmakelists_txt_template)
     if package_template.components == []:
         components = ''
@@ -144,13 +197,12 @@ def _create_depend_tag(dep_type,
     return result
 
 
-def create_package_xml(package_template):
+def create_package_xml(package_template, rosdistro):
     """
     :param package_template: contains the required information
     :returns: file contents as string
     """
-    with open(os.path.join(os.path.dirname(__file__), 'templates', 'package.xml.in'), 'r') as fhand:
-        package_xml_template = fhand.read()
+    package_xml_template = read_template_file(PACKAGE_MANIFEST_FILENAME, rosdistro)
     ctemp = CatkinTemplate(package_xml_template)
     temp_dict = {}
     for key in package_template.__slots__:

@@ -13,7 +13,7 @@ setup(
     packages=['catkin_pkg'],
     package_dir={'': 'src'},
     package_data={'catkin_pkg': ['templates/*.in']},
-    scripts=[],
+    scripts=['bin/catkin_create_pkg'],
     author='Dirk Thomas',
     author_email='dthomas@willowgarage.com',
     url='http://www.ros.org/wiki/catkin_pkg',
