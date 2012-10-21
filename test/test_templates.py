@@ -5,7 +5,7 @@ import shutil
 
 from mock import MagicMock, Mock
 
-from catkin_pkg.package_templates import _create_files, create_package_files, \
+from catkin_pkg.package_templates import _safe_write_files, create_package_files, \
     create_cmakelists, create_package_xml, PackageTemplate
 from catkin_pkg.package import parse_package_for_distutils, parse_package, \
     Dependency, Export, Url, PACKAGE_MANIFEST_FILENAME
@@ -19,16 +19,16 @@ class TemplateTest(unittest.TestCase):
         maint.name = 'John Foo'
         return maint
 
-    def test_create_files(self):
+    def test_safe_write_files(self):
         file1 = os.path.join('foo', 'bar')
         file2 = os.path.join('foo', 'baz')
         newfiles = {file1: 'foobar', file2: 'barfoo'}
         try:
             rootdir = tempfile.mkdtemp()
-            _create_files(newfiles, rootdir)
+            _safe_write_files(newfiles, rootdir)
             self.assertTrue(os.path.isfile(os.path.join(rootdir, file1)))
             self.assertTrue(os.path.isfile(os.path.join(rootdir, file2)))
-            self.assertRaises(ValueError, _create_files, newfiles, rootdir)
+            self.assertRaises(ValueError, _safe_write_files, newfiles, rootdir)
         finally:
             shutil.rmtree(rootdir)
 

@@ -47,7 +47,7 @@ class PackageTemplate(Package):
         self.validate()
 
 
-def _create_files(newfiles, target_dir):
+def _safe_write_files(newfiles, target_dir):
     """
     writes file contents to target_dir/filepath for all entries of newfiles.
     Aborts early if files exist in places for new files or directories
@@ -83,12 +83,16 @@ def create_package_files(target_path, package_template, newfiles=None):
 
     :param target_path: parent folder where to create the package
     :param package_template: contains the required information
+    :param newfiles: dict {filepath: contents} any additional file contents to write
     """
     if newfiles is None:
         newfiles = {}
-    newfiles[os.path.join(target_path, PACKAGE_MANIFEST_FILENAME)] = create_package_xml(package_template)
-    newfiles[os.path.join(target_path, 'CMakeLists.txt')] = create_cmakelists(package_template)
-    _create_files(newfiles, target_path)
+    # allow to replace default templates when path string is equal
+    if not os.path.join(target_path, PACKAGE_MANIFEST_FILENAME) in newfiles:
+        newfiles[os.path.join(target_path, PACKAGE_MANIFEST_FILENAME)] = create_package_xml(package_template)
+    if not os.path.join(target_path, 'CMakeLists.txt') in newfiles:
+        newfiles[os.path.join(target_path, 'CMakeLists.txt')] = create_cmakelists(package_template)
+    _safe_write_files(newfiles, target_path)
 
 
 class CatkinTemplate(Template):
@@ -115,12 +119,12 @@ def create_cmakelists(package_template):
 
 
 def _create_depend_tag(dep_type,
-                      name,
-                      version_eq=None,
-                      version_lt=None,
-                      version_lte=None,
-                      version_gt=None,
-                      version_gte=None):
+                       name,
+                       version_eq=None,
+                       version_lt=None,
+                       version_lte=None,
+                       version_gt=None,
+                       version_gte=None):
     """
     Helper to create xml snippet for package.xml
     """
