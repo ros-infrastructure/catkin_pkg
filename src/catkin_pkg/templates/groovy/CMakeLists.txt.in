@@ -1,19 +1,17 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.3)
 project(@name)
 
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED@components)
 
-catkin_project(${PROJECT_NAME}
+catkin_package(
 #  LIBRARIES ${PROJECT_NAME}
 #  INCLUDE_DIRS include
 #  DEPENDS
-  )
-
+)
 
 ## uncomment if the package has a setup.py
 # catkin_python_setup()
-
 
 ## Declare ROS messages and services here
 
@@ -37,7 +35,6 @@ catkin_project(${PROJECT_NAME}
 #   DEPENDENCIES
 #   std_msgs)
 
-
 ## System dependencies, Boost as an example, can be found like this
 ## usage examples below
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -45,7 +42,7 @@ catkin_project(${PROJECT_NAME}
 ## Use this to declare libraries that this package creates
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/main.cpp
-#   )
+# )
 
 ## Use this to declare executables that this package creates
 # add_executable(${PROJECT_NAME}_node src/main.cpp)
@@ -59,21 +56,21 @@ catkin_project(${PROJECT_NAME}
 ## specify what c++ libraries your c++ executable should be linked against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${Boost_LIBRARIES}
-#   )
+# )
 
 ## Use this to declare executable scripts (Python etc.)
 # install(PROGRAMS
 #   scripts/my_python_script
-#   DESTINATION ${CATKIN_PROJECT_BIN_DESTINATION})
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ## Use this to declare c++ executables and/or libraries
 # install(TARGETS ${PROJECT_NAME}_node
-#   ARCHIVE DESTINATION ${CATKIN_PROJECT_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PROJECT_LIB_DESTINATION})
+#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 ## If specific folders are to be installed (no executable or library), use this
-# install(DIRECTORY include/
-#   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+# install(DIRECTORY include/${PROJECT_NAME}/
+#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 #   FILES_MATCHING PATTERN "*.h"
 #   PATTERN ".svn" EXCLUDE)
 
@@ -81,7 +78,7 @@ catkin_project(${PROJECT_NAME}
 # install(FILES
 #   myfile1
 #   myfile2
-#   DESTINATION ${CATKIN_PROJECT_INCLUDE_DESTINATION}
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
 ## Use this for c++ gtest unit tests
