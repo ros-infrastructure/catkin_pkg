@@ -34,4 +34,4 @@
 Library for retrieving information about catkin packages.
 """
 
-__version__ = '0.1.0'
+__version__ = '0.1.4'
