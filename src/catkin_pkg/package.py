@@ -420,7 +420,7 @@ def parse_package_string(data, filename=None):
         'export': [],
     }
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
-    unknown_tags = [n.tagName for n in nodes if n.tagName not in known.keys()]
+    unknown_tags = set([n.tagName for n in nodes if n.tagName not in known.keys()])
     if unknown_tags:
         errors.append('The manifest must not contain the following tags: %s' % ', '.join(unknown_tags))
     for node in [n for n in nodes if n.tagName in known.keys()]:
