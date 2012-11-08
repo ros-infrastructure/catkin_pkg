@@ -2,8 +2,10 @@
 
 from distutils.core import setup
 
+import os
 import sys
-sys.path.insert(0, 'src')
+source = os.path.join(os.path.dirname(__file__), 'src')
+sys.path.insert(0, source)
 
 from catkin_pkg import __version__
 
@@ -12,7 +14,7 @@ setup(
     version=__version__,
     packages=['catkin_pkg'],
     package_dir={'': 'src'},
-    package_data={'catkin_pkg': ['templates/*.in']},
+    package_data={'catkin_pkg': ['templates/*/*.in']},
     scripts=['bin/catkin_create_pkg'],
     author='Dirk Thomas',
     author_email='dthomas@willowgarage.com',

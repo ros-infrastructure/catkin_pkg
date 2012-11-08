@@ -94,7 +94,11 @@ class PackageTemplate(Package):
 def read_template_file(filename, rosdistro):
     template = os.path.join(os.path.dirname(__file__), 'templates', rosdistro, '%s.in' % filename)
     if not os.path.isfile(template):
-        raise ValueError('Unknown distro' % rosdistro)
+        raise IOError(
+            "Could not read template for ROS distro "
+            "'{}' at '{}': ".format(rosdistro, template) + \
+            "no such file or directory"
+        )
     with open(template, 'r') as fhand:
         template_contents = fhand.read()
     return template_contents
