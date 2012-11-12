@@ -69,29 +69,37 @@ class PackageTemplate(Package):
         if not licenses:
             licenses = ["TODO"]
         # Sort so they are alphebetical
-        licenses = list(licenses).sort()
+        licenses = list(licenses) if licenses is not None else []
+        licenses.sort()
         if not maintainer_names:
             maintainer_names = [getpass.getuser()]
-        maintainer_names = list(maintainer_names).sort()
+        maintainer_names = list(maintainer_names or [])
+        maintainer_names.sort()
         maintainers = []
-        for maintainer_name in maintainer_names or []:
+        for maintainer_name in maintainer_names:
             maintainers.append(
                 Person(maintainer_name,
                        '%s@todo.todo' % maintainer_name.split()[-1])
             )
-        author_names = list(author_names).sort()
+        author_names = list(author_names or [])
+        author_names.sort()
         authors = []
-        for author_name in author_names or []:
+        for author_name in author_names:
             authors.append(Person(author_name))
-        dependencies = list(dependencies).sort()
+        dependencies = list(dependencies or [])
+        dependencies.sort()
         pkg_dependencies = []
         for dep in dependencies or []:
+            if dep.lower() == 'catkin':
+                dependencies.remove(dep)
+                continue
             pkg_dependencies.append(Dependency(dep))
         package_temp = PackageTemplate(
             name=package_name,
             version=version or '0.0.0',
             description=description or 'The %s package' % package_name,
             build_depends=pkg_dependencies,
+            buildtool_depends=[Dependency('catkin')],
             components=dependencies,
             licenses=licenses,
             authors=authors,
