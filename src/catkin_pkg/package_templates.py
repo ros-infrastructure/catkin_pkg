@@ -66,10 +66,8 @@ class PackageTemplate(Package):
         :param version:
         :param dependencies:
         """
-        if not licenses:
-            licenses = ["TODO"]
         # Sort so they are alphebetical
-        licenses = list(licenses) if licenses is not None else []
+        licenses = list(licenses or ["TODO"])
         licenses.sort()
         if not maintainer_names:
             maintainer_names = [getpass.getuser()]
