@@ -3,11 +3,7 @@
 NAME=catkin_pkg
 VERSION=`./setup.py --version`
 
-USERNAME := $(shell whoami)
-# If william, use my WG login wwoodall
-ifeq ($(USERNAME),william)
-	USERNAME := wwoodall
-endif
+USERNAME ?= $(shell whoami)
 
 CHANGENAME=catkinpkg
 
