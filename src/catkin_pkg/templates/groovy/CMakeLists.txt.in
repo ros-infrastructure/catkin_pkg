@@ -16,10 +16,20 @@ find_package(catkin REQUIRED@components)
 ## Declare ROS messages and services
 
 ## Generate messages in the 'msg' folder
-# add_message_files()
+# add_message_files(
+#   DIRECTORY msg
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
-# add_service_files()
+# add_service_files(
+#   DIRECTORY srv
+#   FILES
+#   Service1.srv
+#   Service2.srv
+# )
 
 ## Generate added messages and services with any dependencies
 # generate_messages(DEPENDENCIES std_msgs)
