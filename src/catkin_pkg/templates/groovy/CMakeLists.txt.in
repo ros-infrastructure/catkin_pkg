@@ -31,8 +31,11 @@ find_package(catkin REQUIRED@components)
 #   Service2.srv
 # )
 
-## Generate added messages and services with any dependencies
-# generate_messages(DEPENDENCIES std_msgs)
+## Generate added messages and services with any dependencies listed here
+# generate_messages(
+#   DEPENDENCIES
+# #  std_msgs
+# )
 
 ## Declare things to be passed to other projects
 catkin_package(
