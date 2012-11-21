@@ -34,7 +34,7 @@ find_package(catkin REQUIRED@components)
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-# #  std_msgs
+# #  std_msgs  # Or other packages containing msgs
 # )
 
 ## Declare things to be passed to other projects
