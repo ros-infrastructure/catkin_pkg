@@ -420,7 +420,7 @@ def parse_package_string(data, filename=None):
         'export': [],
     }
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
-    unknown_tags = [n.tagName for n in nodes if n.tagName not in known.keys()]
+    unknown_tags = set([n.tagName for n in nodes if n.tagName not in known.keys()])
     if unknown_tags:
         errors.append('The manifest must not contain the following tags: %s' % ', '.join(unknown_tags))
     for node in [n for n in nodes if n.tagName in known.keys()]:
@@ -433,8 +433,8 @@ def parse_package_string(data, filename=None):
                 errors.append('The "%s" tag must not contain the following children: %s' % (node.tagName, ', '.join([n.tagName for n in subnodes])))
     if errors:
         # for now only output a warning instead of raising an exception
-        #raise InvalidPackage('\n'.join(errors))
-        print('WARNING:%s' % ''.join(['\n- %s' % e for e in errors]), file=sys.stderr)
+        #raise InvalidPackage('Error(s) in %s:%s' % (filename ,''.join(['\n- %s' % e for e in errors])))
+        print('WARNING(s) in %s:%s' % (filename ,''.join(['\n- %s' % e for e in errors])), file=sys.stderr)
 
     pkg.validate()
 

@@ -3,6 +3,8 @@
 NAME=catkin_pkg
 VERSION=`./setup.py --version`
 
+USERNAME ?= $(shell whoami)
+
 CHANGENAME=catkinpkg
 
 OUTPUT_DIR=deb_dist
@@ -23,7 +25,7 @@ distro: setup clean_dist
 
 push: distro
 	python setup.py sdist register upload
-	scp dist/${NAME}-${VERSION}.tar.gz ipr:/var/www/pr.willowgarage.com/html/downloads/${NAME}
+	scp dist/${NAME}-${VERSION}.tar.gz ${USERNAME}@ipr:/var/www/pr.willowgarage.com/html/downloads/${NAME}
 
 clean: clean_dist
 	echo "clean"

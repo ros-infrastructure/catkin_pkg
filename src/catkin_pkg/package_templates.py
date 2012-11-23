@@ -32,13 +32,15 @@
 
 from __future__ import print_function
 
-import sys
-import os
-from string import Template
 import getpass
+import os
+import string
+import sys
 
-from catkin_pkg.package import Package, PACKAGE_MANIFEST_FILENAME, \
-    Person, Url, Export, Dependency
+from catkin_pkg.package import Dependency
+from catkin_pkg.package import Package
+from catkin_pkg.package import PACKAGE_MANIFEST_FILENAME
+from catkin_pkg.package import Person
 
 
 class PackageTemplate(Package):
@@ -64,37 +66,55 @@ class PackageTemplate(Package):
         :param version:
         :param dependencies:
         """
-        if not licenses:
-            licenses = ["TODO"]
+        # Sort so they are alphebetical
+        licenses = list(licenses or ["TODO"])
+        licenses.sort()
         if not maintainer_names:
             maintainer_names = [getpass.getuser()]
+        maintainer_names = list(maintainer_names or [])
+        maintainer_names.sort()
         maintainers = []
-        for maintainer_name in maintainer_names or []:
-            maintainers.append(Person(maintainer_name, '%s@todo.todo' % maintainer_name.split()[-1]))
+        for maintainer_name in maintainer_names:
+            maintainers.append(
+                Person(maintainer_name,
+                       '%s@todo.todo' % maintainer_name.split()[-1])
+            )
+        author_names = list(author_names or [])
+        author_names.sort()
         authors = []
-        for author_name in author_names or []:
+        for author_name in author_names:
             authors.append(Person(author_name))
+        dependencies = list(dependencies or [])
+        dependencies.sort()
         pkg_dependencies = []
         for dep in dependencies or []:
+            if dep.lower() == 'catkin':
+                dependencies.remove(dep)
+                continue
             pkg_dependencies.append(Dependency(dep))
         package_temp = PackageTemplate(
             name=package_name,
             version=version or '0.0.0',
             description=description or 'The %s package' % package_name,
             build_depends=pkg_dependencies,
+            buildtool_depends=[Dependency('catkin')],
             components=dependencies,
             licenses=licenses,
-            authors=authors or [],
+            authors=authors,
             maintainers=maintainers,
             urls=[])
-        newfiles = {}
         return package_temp
 
 
 def read_template_file(filename, rosdistro):
-    template = os.path.join(os.path.dirname(__file__), 'templates', rosdistro, '%s.in' % filename)
+    template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+    template = os.path.join(template_dir, rosdistro, '%s.in' % filename)
     if not os.path.isfile(template):
-        raise ValueError('Unknown distro' % rosdistro)
+        raise IOError(
+            "Could not read template for ROS distro "
+            "'{}' at '{}': ".format(rosdistro, template) +
+            "no such file or directory"
+        )
     with open(template, 'r') as fhand:
         template_contents = fhand.read()
     return template_contents
@@ -130,26 +150,30 @@ def _safe_write_files(newfiles, target_dir):
             fhand.write(content)
 
 
-def create_package_files(target_path, package_template, rosdistro='groovy', newfiles=None):
+def create_package_files(target_path, package_template, rosdistro='groovy',
+                         newfiles=None):
     """
     creates several files from templates to start a new package.
 
     :param target_path: parent folder where to create the package
     :param package_template: contains the required information
     :param rosdistro: name of the distro to look up respective template
-    :param newfiles: dict {filepath: contents} any additional file contents to write
+    :param newfiles: dict {filepath: contents} for additional files to write
     """
     if newfiles is None:
         newfiles = {}
     # allow to replace default templates when path string is equal
-    if not os.path.join(target_path, PACKAGE_MANIFEST_FILENAME) in newfiles:
-        newfiles[os.path.join(target_path, PACKAGE_MANIFEST_FILENAME)] = create_package_xml(package_template, rosdistro)
-    if not os.path.join(target_path, 'CMakeLists.txt') in newfiles:
-        newfiles[os.path.join(target_path, 'CMakeLists.txt')] = create_cmakelists(package_template, rosdistro)
+    manifest_path = os.path.join(target_path, PACKAGE_MANIFEST_FILENAME)
+    if manifest_path not in newfiles:
+        newfiles[manifest_path] = \
+            create_package_xml(package_template, rosdistro)
+    cmake_path = os.path.join(target_path, 'CMakeLists.txt')
+    if not cmake_path in newfiles:
+        newfiles[cmake_path] = create_cmakelists(package_template, rosdistro)
     _safe_write_files(newfiles, target_path)
 
 
-class CatkinTemplate(Template):
+class CatkinTemplate(string.Template):
     """subclass to use @ instead of $ as markers"""
     delimiter = '@'
     escape = '@'
@@ -202,7 +226,8 @@ def create_package_xml(package_template, rosdistro):
     :param package_template: contains the required information
     :returns: file contents as string
     """
-    package_xml_template = read_template_file(PACKAGE_MANIFEST_FILENAME, rosdistro)
+    package_xml_template = \
+        read_template_file(PACKAGE_MANIFEST_FILENAME, rosdistro)
     ctemp = CatkinTemplate(package_xml_template)
     temp_dict = {}
     for key in package_template.__slots__:
@@ -222,10 +247,11 @@ def create_package_xml(package_template, rosdistro):
     temp_dict['licenses'] = ''.join(licenses)
 
     def get_person_tag(tagname, person):
-        email_string = (""
-                        if person.email is None
-                        else 'email="%s"' % person.email)
-        return '  <%s %s>%s</%s>\n' % (tagname, email_string, person.name, tagname)
+        email_string = (
+            "" if person.email is None else 'email="%s"' % person.email
+        )
+        return '  <%s %s>%s</%s>\n' % (tagname, email_string,
+                                       person.name, tagname)
 
     maintainers = []
     for maintainer in package_template.maintainers:
@@ -245,21 +271,27 @@ def create_package_xml(package_template, rosdistro):
     temp_dict['authors'] = ''.join(authors)
 
     dependencies = []
-    for dep_type, dep_list in {'build_depend': package_template.build_depends,
-                               'buildtool_depend': package_template.buildtool_depends,
-                               'run_depend': package_template.run_depends,
-                               'test_depend': package_template.test_depends,
-                               'conflict': package_template.conflicts,
-                               'replace': package_template.replaces}.items():
+    dep_map = {
+        'build_depend': package_template.build_depends,
+        'buildtool_depend': package_template.buildtool_depends,
+        'run_depend': package_template.run_depends,
+        'test_depend': package_template.test_depends,
+        'conflict': package_template.conflicts,
+        'replace': package_template.replaces
+    }
+    for dep_type, dep_list in dep_map.items():
         for dep in dep_list:
             if 'depend' in dep_type:
-                dependencies.append(_create_depend_tag(dep_type,
-                                                       dep.name,
-                                                       dep.version_eq,
-                                                       dep.version_lt,
-                                                       dep.version_lte,
-                                                       dep.version_gt,
-                                                       dep.version_gte))
+                dep_tag = _create_depend_tag(
+                    dep_type,
+                    dep.name,
+                    dep.version_eq,
+                    dep.version_lt,
+                    dep.version_lte,
+                    dep.version_gt,
+                    dep.version_gte
+                )
+                dependencies.append(dep_tag)
             else:
                 dependencies.append(_create_depend_tag(dep_type,
                                                        dep.name))
@@ -269,10 +301,15 @@ def create_package_xml(package_template, rosdistro):
     if package_template.exports is not None:
         for export in package_template.exports:
             if export.content is not None:
-                print('WARNING: Create package does not know how to serialize exports with content: %s, %s, %s' % (export.tagname, export.attributes, export.content), file=sys.stderr)
+                print('WARNING: Create package does not know how to '
+                      'serialize exports with content: '
+                      '%s, %s, ' % (export.tagname, export.attributes) +
+                      '%s' % (export.content),
+                      file=sys.stderr)
             else:
                 attribs = ['%s="%s"' % (k, v) for (k, v) in export.attributes]
-                exports.append('    <%s%s/>\n' % (export.tagname, ''.join(attribs)))
+                line = '    <%s%s/>\n' % (export.tagname, ''.join(attribs))
+                exports.append(line)
     temp_dict['exports'] = ''.join(exports)
 
     temp_dict['components'] = package_template.components
