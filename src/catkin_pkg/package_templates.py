@@ -92,9 +92,13 @@ class PackageTemplate(Package):
         pkg_catkin_deps = []
         build_depends=[]
         run_depends=[]
+        buildtool_depends=[Dependency('catkin')]
         for dep in catkin_deps:
             if dep.lower() == 'catkin':
                 catkin_deps.remove(dep)
+                continue
+            if dep.lower() == 'genmsg':
+                buildtool_depends.append(Dependency('genmsg'))
                 continue
             pkg_catkin_deps.append(Dependency(dep))
         for dep in system_deps or []:
@@ -110,8 +114,8 @@ class PackageTemplate(Package):
             name=package_name,
             version=version or '0.0.0',
             description=description or 'The %s package' % package_name,
+            buildtool_depends=buildtool_depends,
             build_depends=pkg_catkin_deps,
-            buildtool_depends=[Dependency('catkin')],
             run_depends=run_depends,
             catkin_deps=catkin_deps,
             system_deps=system_deps,
