@@ -171,7 +171,11 @@ def create_package_files(target_path, package_template, rosdistro='groovy',
     if not cmake_path in newfiles:
         newfiles[cmake_path] = create_cmakelists(package_template, rosdistro)
     _safe_write_files(newfiles, target_path)
-
+    if 'roscpp' in package_template.catkin_deps:
+       os.makedirs(os.path.join(target_path, 'include'))
+    if 'roscpp' in package_template.catkin_deps or \
+            'rospy' in package_template.catkin_deps:
+       os.makedirs(os.path.join(target_path, 'src'))
 
 class CatkinTemplate(string.Template):
     """subclass to use @ instead of $ as markers"""
