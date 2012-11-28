@@ -18,6 +18,12 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
     parser.add_argument('dependencies',
                         nargs='*',
                         help='Catkin package Dependencies')
+    parser.add_argument('-s', '--sys-deps',
+                        nargs='*',
+                        help='System Dependencies')
+    parser.add_argument('-b', '--boost-comps',
+                        nargs='*',
+                        help='Boost Components')
     parser.add_argument('-V', '--pkg_version',
                         action='store',
                         help='Initial Package version')
@@ -47,6 +53,8 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
             author_names=args.author,
             version=args.pkg_version,
             catkin_deps=args.dependencies,
+            system_deps=args.sys_deps,
+            boost_comps=args.boost_comps)
         create_package_files(target_path=target_path,
                              package_template=package_template,
                              rosdistro='groovy',
