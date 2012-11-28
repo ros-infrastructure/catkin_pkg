@@ -19,7 +19,6 @@ find_package(catkin REQUIRED@components)
 
 ## Generate messages in the 'msg' folder
 # add_message_files(
-#   DIRECTORY msg
 #   FILES
 #   Message1.msg
 #   Message2.msg
@@ -27,7 +26,6 @@ find_package(catkin REQUIRED@components)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
-#   DIRECTORY srv
 #   FILES
 #   Service1.srv
 #   Service2.srv
