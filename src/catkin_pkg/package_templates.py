@@ -102,7 +102,8 @@ class PackageTemplate(Package):
                 continue
             pkg_catkin_deps.append(Dependency(dep))
         for dep in system_deps or []:
-            build_depends.append(Dependency(dep))
+            if not dep.lower().startswith('python-'):
+                build_depends.append(Dependency(dep))
             run_depends.append(Dependency(dep))
         for dep in catkin_deps:
             build_depends.append(Dependency(dep))
@@ -222,6 +223,8 @@ def create_cmakelists(package_template, rosdistro):
                ' '.join(package_template.boost_comps)))
     system_find_package = ''
     for sysdep in package_template.system_deps:
+        if sysdep.startswith('python-'):
+            system_find_package += '# '
         system_find_package += 'find_package(%s REQUIRED)\n' % sysdep
     # provide dummy values
     catkin_depends = (' '.join(package_template.catkin_deps)
@@ -272,7 +275,10 @@ def _create_include_macro(package_template):
         deplist = ', '.join(package_template.system_deps)
         deplist_libs = ''
         for sysdep in package_template.system_deps:
-            deplist_libs += '\n  ${%s_INCLUDE_DIRS}' % sysdep
+            deplist_libs += '\n'
+            if sysdep.startswith('python-'):
+                deplist_libs += '# '
+            deplist_libs += '  ${%s_INCLUDE_DIRS}' % sysdep
         result = ('# TODO: Check names of system library IDs (%s)\n%s%s' %
                   (deplist,
                    result,
