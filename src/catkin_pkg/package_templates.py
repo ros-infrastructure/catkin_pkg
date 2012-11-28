@@ -279,8 +279,9 @@ def create_package_xml(package_template, rosdistro):
         'conflict': package_template.conflicts,
         'replace': package_template.replaces
     }
-    for dep_type, dep_list in dep_map.items():
-        for dep in dep_list:
+    for dep_type in ['buildtool_depend', 'build_depend', 'run_depend',
+                     'test_depend', 'conflict', 'replace']:
+        for dep in sorted(dep_map[dep_type], key=lambda x: x.name):
             if 'depend' in dep_type:
                 dep_tag = _create_depend_tag(
                     dep_type,
@@ -290,7 +291,7 @@ def create_package_xml(package_template, rosdistro):
                     dep.version_lte,
                     dep.version_gt,
                     dep.version_gte
-                )
+                    )
                 dependencies.append(dep_tag)
             else:
                 dependencies.append(_create_depend_tag(dep_type,
