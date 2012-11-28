@@ -45,15 +45,15 @@ from catkin_pkg.package import Person
 
 class PackageTemplate(Package):
 
-    def __init__(self, components=None, **kwargs):
+    def __init__(self, catkin_deps=None, **kwargs):
         super(PackageTemplate, self).__init__(**kwargs)
-        self.components = components or []
+        self.catkin_deps = catkin_deps or []
         self.validate()
 
     @staticmethod
     def _create_package_template(package_name, description=None, licenses=None,
                                  maintainer_names=None, author_names=None,
-                                 version=None, dependencies=None):
+                                 version=None, catkin_deps=None):
         """
         alternative factory method mapping CLI args to argument for
         Package class
@@ -64,7 +64,7 @@ class PackageTemplate(Package):
         :param maintainer_names:
         :param authors:
         :param version:
-        :param dependencies:
+        :param catkin_deps:
         """
         # Sort so they are alphebetical
         licenses = list(licenses or ["TODO"])
@@ -84,21 +84,21 @@ class PackageTemplate(Package):
         authors = []
         for author_name in author_names:
             authors.append(Person(author_name))
-        dependencies = list(dependencies or [])
-        dependencies.sort()
-        pkg_dependencies = []
-        for dep in dependencies or []:
+        catkin_deps = list(catkin_deps or [])
+        catkin_deps.sort()
+        pkg_catkin_deps = []
+        for dep in catkin_deps:
             if dep.lower() == 'catkin':
-                dependencies.remove(dep)
+                catkin_deps.remove(dep)
                 continue
-            pkg_dependencies.append(Dependency(dep))
+            pkg_catkin_deps.append(Dependency(dep))
         package_temp = PackageTemplate(
             name=package_name,
             version=version or '0.0.0',
             description=description or 'The %s package' % package_name,
-            build_depends=pkg_dependencies,
+            build_depends=pkg_catkin_deps,
             buildtool_depends=[Dependency('catkin')],
-            components=dependencies,
+            catkin_deps=catkin_deps,
             licenses=licenses,
             authors=authors,
             maintainers=maintainers,
@@ -186,10 +186,10 @@ def create_cmakelists(package_template, rosdistro):
     """
     cmakelists_txt_template = read_template_file('CMakeLists.txt', rosdistro)
     ctemp = CatkinTemplate(cmakelists_txt_template)
-    if package_template.components == []:
+    if package_template.catkin_deps == []:
         components = ''
     else:
-        components = ' COMPONENTS %s' % ' '.join(package_template.components)
+        components = ' COMPONENTS %s' % ' '.join(package_template.catkin_deps)
     temp_dict = {'name': package_template.name,
                  'components': components}
     return ctemp.substitute(temp_dict)
@@ -313,6 +313,6 @@ def create_package_xml(package_template, rosdistro):
                 exports.append(line)
     temp_dict['exports'] = ''.join(exports)
 
-    temp_dict['components'] = package_template.components
+    temp_dict['components'] = package_template.catkin_deps
 
     return ctemp.substitute(temp_dict)

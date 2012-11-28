@@ -17,7 +17,7 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
                         help='The name for the package')
     parser.add_argument('dependencies',
                         nargs='*',
-                        help='Package Dependencies')
+                        help='Catkin package Dependencies')
     parser.add_argument('-V', '--pkg_version',
                         action='store',
                         help='Initial Package version')
@@ -46,7 +46,7 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
             maintainer_names=args.maintainer,
             author_names=args.author,
             version=args.pkg_version,
-            dependencies=args.dependencies)
+            catkin_deps=args.dependencies,
         create_package_files(target_path=target_path,
                              package_template=package_template,
                              rosdistro='groovy',

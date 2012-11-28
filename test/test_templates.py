@@ -35,12 +35,12 @@ class TemplateTest(unittest.TestCase):
     def test_create_cmakelists(self):
         mock_pack = MagicMock()
         mock_pack.name = 'foo'
-        mock_pack.components = []
+        mock_pack.catkin_deps = []
         result = create_cmakelists(mock_pack, 'groovy')
         self.assertTrue('project(foo)' in result, result)
         self.assertTrue('find_package(catkin REQUIRED)' in result, result)
 
-        mock_pack.components = ['bar', 'baz']
+        mock_pack.catkin_deps = ['bar', 'baz']
         result = create_cmakelists(mock_pack, 'groovy')
         self.assertTrue('project(foo)' in result, result)
         self.assertTrue('find_package(catkin REQUIRED COMPONENTS bar baz)' in result, result)
