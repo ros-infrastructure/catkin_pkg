@@ -226,6 +226,11 @@ def create_cmakelists(package_template, rosdistro):
     system_depends = (' '.join(package_template.system_deps)
                       if package_template.system_deps
                       else 'system_lib')
+    message_pkgs = [pkg for pkg in package_template.catkin_deps if pkg.endswith('_msgs')]
+    if message_pkgs:
+        message_depends = '#   %s' % '#   '.join(message_pkgs)
+    else:
+        message_depends = '#   std_msgs  # Or other packages containing msgs'
     temp_dict = {'name': package_template.name,
                  'components': components,
                  'include_folder_comment': ' ' if has_include_folder else '#',
@@ -234,7 +239,8 @@ def create_cmakelists(package_template, rosdistro):
                  'systems_find': system_find_package,
                  'catkin_depends': catkin_depends,
                  'system_depends': system_depends,
-                 'target_libraries': _create_targetlib_args(package_template)
+                 'target_libraries': _create_targetlib_args(package_template),
+                 'message_dependencies': message_depends
                  }
     return ctemp.substitute(temp_dict)
 
