@@ -170,6 +170,7 @@ def _safe_write_files(newfiles, target_dir):
         # print(target_file, content)
         with open(target_file, 'ab') as fhand:
             fhand.write(content)
+        print('Created file %s' % os.path.relpath(target_file, os.path.dirname(target_dir)))
 
 
 def create_package_files(target_path, package_template, rosdistro='groovy',
@@ -194,10 +195,15 @@ def create_package_files(target_path, package_template, rosdistro='groovy',
         newfiles[cmake_path] = create_cmakelists(package_template, rosdistro)
     _safe_write_files(newfiles, target_path)
     if 'roscpp' in package_template.catkin_deps:
-       os.makedirs(os.path.join(target_path, 'include'))
+        fname = os.path.join(target_path, 'include')
+        os.makedirs(fname)
+        print('Created folder %s' % os.path.relpath(fname, os.path.dirname(target_path)))
     if 'roscpp' in package_template.catkin_deps or \
             'rospy' in package_template.catkin_deps:
-       os.makedirs(os.path.join(target_path, 'src'))
+        fname = os.path.join(target_path, 'src')
+        os.makedirs(fname)
+        print('Created folder %s' % os.path.relpath(fname, os.path.dirname(target_path)))
+
 
 class CatkinTemplate(string.Template):
     """subclass to use @ instead of $ as markers"""
