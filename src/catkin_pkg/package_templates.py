@@ -45,15 +45,18 @@ from catkin_pkg.package import Person
 
 class PackageTemplate(Package):
 
-    def __init__(self, components=None, **kwargs):
+    def __init__(self, catkin_deps=None, system_deps=None, boost_comps=None, **kwargs):
         super(PackageTemplate, self).__init__(**kwargs)
-        self.components = components or []
+        self.catkin_deps = catkin_deps or []
+        self.system_deps = system_deps or []
+        self.boost_comps=boost_comps or []
         self.validate()
 
     @staticmethod
     def _create_package_template(package_name, description=None, licenses=None,
                                  maintainer_names=None, author_names=None,
-                                 version=None, dependencies=None):
+                                 version=None, catkin_deps=None, system_deps=None,
+                                 boost_comps=None):
         """
         alternative factory method mapping CLI args to argument for
         Package class
@@ -64,7 +67,7 @@ class PackageTemplate(Package):
         :param maintainer_names:
         :param authors:
         :param version:
-        :param dependencies:
+        :param catkin_deps:
         """
         # Sort so they are alphebetical
         licenses = list(licenses or ["TODO"])
@@ -84,21 +87,40 @@ class PackageTemplate(Package):
         authors = []
         for author_name in author_names:
             authors.append(Person(author_name))
-        dependencies = list(dependencies or [])
-        dependencies.sort()
-        pkg_dependencies = []
-        for dep in dependencies or []:
+        catkin_deps = list(catkin_deps or [])
+        catkin_deps.sort()
+        pkg_catkin_deps = []
+        build_depends=[]
+        run_depends=[]
+        buildtool_depends=[Dependency('catkin')]
+        for dep in catkin_deps:
             if dep.lower() == 'catkin':
-                dependencies.remove(dep)
+                catkin_deps.remove(dep)
                 continue
-            pkg_dependencies.append(Dependency(dep))
+            if dep.lower() == 'genmsg':
+                buildtool_depends.append(Dependency('genmsg'))
+                continue
+            pkg_catkin_deps.append(Dependency(dep))
+        for dep in system_deps or []:
+            if not dep.lower().startswith('python-'):
+                build_depends.append(Dependency(dep))
+            run_depends.append(Dependency(dep))
+        for dep in catkin_deps:
+            build_depends.append(Dependency(dep))
+            run_depends.append(Dependency(dep))
+        if boost_comps and not 'boost' in system_deps:
+            build_depends.append(Dependency('boost'))
+            run_depends.append(Dependency('boost'))
         package_temp = PackageTemplate(
             name=package_name,
             version=version or '0.0.0',
             description=description or 'The %s package' % package_name,
-            build_depends=pkg_dependencies,
-            buildtool_depends=[Dependency('catkin')],
-            components=dependencies,
+            buildtool_depends=buildtool_depends,
+            build_depends=pkg_catkin_deps,
+            run_depends=run_depends,
+            catkin_deps=catkin_deps,
+            system_deps=system_deps,
+            boost_comps=boost_comps,
             licenses=licenses,
             authors=authors,
             maintainers=maintainers,
@@ -148,6 +170,7 @@ def _safe_write_files(newfiles, target_dir):
         # print(target_file, content)
         with open(target_file, 'ab') as fhand:
             fhand.write(content)
+        print('Created file %s' % os.path.relpath(target_file, os.path.dirname(target_dir)))
 
 
 def create_package_files(target_path, package_template, rosdistro='groovy',
@@ -171,6 +194,15 @@ def create_package_files(target_path, package_template, rosdistro='groovy',
     if not cmake_path in newfiles:
         newfiles[cmake_path] = create_cmakelists(package_template, rosdistro)
     _safe_write_files(newfiles, target_path)
+    if 'roscpp' in package_template.catkin_deps:
+        fname = os.path.join(target_path, 'include')
+        os.makedirs(fname)
+        print('Created folder %s' % os.path.relpath(fname, os.path.dirname(target_path)))
+    if 'roscpp' in package_template.catkin_deps or \
+            'rospy' in package_template.catkin_deps:
+        fname = os.path.join(target_path, 'src')
+        os.makedirs(fname)
+        print('Created folder %s' % os.path.relpath(fname, os.path.dirname(target_path)))
 
 
 class CatkinTemplate(string.Template):
@@ -186,13 +218,79 @@ def create_cmakelists(package_template, rosdistro):
     """
     cmakelists_txt_template = read_template_file('CMakeLists.txt', rosdistro)
     ctemp = CatkinTemplate(cmakelists_txt_template)
-    if package_template.components == []:
+    if package_template.catkin_deps == []:
         components = ''
     else:
-        components = ' COMPONENTS %s' % ' '.join(package_template.components)
+        components = ' COMPONENTS %s' % ' '.join(package_template.catkin_deps)
+    has_include_folder = 'roscpp' in package_template.catkin_deps
+    boost_find_package = \
+        ('' if not package_template.boost_comps
+         else ('find_package(Boost REQUIRED COMPONENTS %s)\n' %
+               ' '.join(package_template.boost_comps)))
+    system_find_package = ''
+    for sysdep in package_template.system_deps:
+        if sysdep.startswith('python-'):
+            system_find_package += '# '
+        system_find_package += 'find_package(%s REQUIRED)\n' % sysdep
+    # provide dummy values
+    catkin_depends = (' '.join(package_template.catkin_deps)
+                      if package_template.catkin_deps
+                      else 'other_catkin_pkg')
+    system_depends = (' '.join(package_template.system_deps)
+                      if package_template.system_deps
+                      else 'system_lib')
+    message_pkgs = [pkg for pkg in package_template.catkin_deps if pkg.endswith('_msgs')]
+    if message_pkgs:
+        message_depends = '#   %s' % '#   '.join(message_pkgs)
+    else:
+        message_depends = '#   std_msgs  # Or other packages containing msgs'
     temp_dict = {'name': package_template.name,
-                 'components': components}
+                 'components': components,
+                 'include_folder_comment': ' ' if has_include_folder else '#',
+                 'include_directories': _create_include_macro(package_template),
+                 'boost_find': boost_find_package,
+                 'systems_find': system_find_package,
+                 'catkin_depends': catkin_depends,
+                 'system_depends': system_depends,
+                 'target_libraries': _create_targetlib_args(package_template),
+                 'message_dependencies': message_depends
+                 }
     return ctemp.substitute(temp_dict)
+
+
+def _create_targetlib_args(package_template):
+    result = '#   ${catkin_LIBRARIES}\n'
+    if package_template.boost_comps:
+        result += '#   ${Boost_LIBRARIES}\n'
+    if package_template.system_deps:
+        result += (''.join(
+                ['#   ${%s_LIBRARIES}\n' %
+                 sdep for sdep in package_template.system_deps]))
+    return result
+
+
+def _create_include_macro(package_template):
+    if not  'roscpp' in package_template.catkin_deps:
+        return "# include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})"
+    result = 'include_directories(include'
+    if package_template.catkin_deps:
+        result+= '\n  ${catkin_INCLUDE_DIRS}'
+    if package_template.boost_comps:
+        result += '\n  ${Boost_INCLUDE_DIRS}'
+    if package_template.system_deps:
+        deplist = ', '.join(package_template.system_deps)
+        deplist_libs = ''
+        for sysdep in package_template.system_deps:
+            deplist_libs += '\n'
+            if sysdep.startswith('python-'):
+                deplist_libs += '# '
+            deplist_libs += '  ${%s_INCLUDE_DIRS}' % sysdep
+        result = ('# TODO: Check names of system library IDs (%s)\n%s%s' %
+                  (deplist,
+                   result,
+                   deplist_libs))
+    result += '\n)'
+    return result
 
 
 def _create_depend_tag(dep_type,
@@ -279,8 +377,9 @@ def create_package_xml(package_template, rosdistro):
         'conflict': package_template.conflicts,
         'replace': package_template.replaces
     }
-    for dep_type, dep_list in dep_map.items():
-        for dep in dep_list:
+    for dep_type in ['buildtool_depend', 'build_depend', 'run_depend',
+                     'test_depend', 'conflict', 'replace']:
+        for dep in sorted(dep_map[dep_type], key=lambda x: x.name):
             if 'depend' in dep_type:
                 dep_tag = _create_depend_tag(
                     dep_type,
@@ -290,7 +389,7 @@ def create_package_xml(package_template, rosdistro):
                     dep.version_lte,
                     dep.version_gt,
                     dep.version_gte
-                )
+                    )
                 dependencies.append(dep_tag)
             else:
                 dependencies.append(_create_depend_tag(dep_type,
@@ -312,6 +411,6 @@ def create_package_xml(package_template, rosdistro):
                 exports.append(line)
     temp_dict['exports'] = ''.join(exports)
 
-    temp_dict['components'] = package_template.components
+    temp_dict['components'] = package_template.catkin_deps
 
     return ctemp.substitute(temp_dict)

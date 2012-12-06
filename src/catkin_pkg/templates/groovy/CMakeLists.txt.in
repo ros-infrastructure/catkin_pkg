@@ -19,7 +19,6 @@ find_package(catkin REQUIRED@components)
 
 ## Generate messages in the 'msg' folder
 # add_message_files(
-#   DIRECTORY msg
 #   FILES
 #   Message1.msg
 #   Message2.msg
@@ -27,7 +26,6 @@ find_package(catkin REQUIRED@components)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
-#   DIRECTORY srv
 #   FILES
 #   Service1.srv
 #   Service2.srv
@@ -36,7 +34,7 @@ find_package(catkin REQUIRED@components)
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-# #  std_msgs  # Or other packages containing msgs
+@message_dependencies
 # )
 
 ###################################################
@@ -47,10 +45,10 @@ find_package(catkin REQUIRED@components)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES ${PROJECT_NAME}
-#  CATKIN_DEPENDS # catkin-pkg1 catkin-pkg2
-#  DEPENDS Boost # other-3rd-party-libraries
+@include_folder_comment  INCLUDE_DIRS include
+#  LIBRARIES @{name}
+#  CATKIN_DEPENDS @catkin_depends
+#  DEPENDS @system_depends
 )
 
 ###########
@@ -58,37 +56,36 @@ catkin_package(
 ###########
 
 ## Specify additional locations of header files
-# include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+@include_directories
 
 ## Declare a cpp library
-# add_library(${PROJECT_NAME}
+# add_library(@{name}
 #   src/${PROJECT_NAME}/@name.cpp
 # )
 
 ## Declare a cpp executable
-# add_executable(${PROJECT_NAME}_node src/@{name}_node.cpp)
+# add_executable(@{name}_node src/@{name}_node.cpp)
 
 ## Add dependencies to the executable
-# add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME})
+# add_dependencies(@{name}_node ${PROJECT_NAME})
 
-## Specify libraries to link the executable against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES} ${Boost_LIBRARIES}
-# )
+## Specify libraries to link a library or executable target against
+# target_link_libraries(@{name}_node
+@target_libraries# )
 
 #############
 ## Install ##
 #############
 
 ## Mark executable scripts (Python etc.) for installation
-## not required when using catkin_python_setup()
+## not required for python when using catkin_python_setup()
 # install(PROGRAMS
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
+# install(TARGETS @{name} @{name}_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

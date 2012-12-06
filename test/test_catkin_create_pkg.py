@@ -28,7 +28,7 @@ class CreatePkgTest(unittest.TestCase):
         self.assertEqual('fooPackage', template.name)
         self.assertEqual('0.0.0', template.version)
         self.assertEqual('The fooPackage package', template.description)
-        self.assertEqual([], template.components)
+        self.assertEqual([], template.catkin_deps)
         self.assertEqual([], template.authors)
         self.assertEqual(1, len(template.maintainers))
         self.assertIsNotNone(template.maintainers[0].email)
@@ -41,11 +41,11 @@ class CreatePkgTest(unittest.TestCase):
             maintainer_names=['John Doe', 'Jim Daniels'],
             author_names=['Harry Smith'],
             version='1.2.3',
-            dependencies=['foobar', 'baz'])
+            catkin_deps=['foobar', 'baz'])
         self.assertEqual('fooPackage', template.name)
         self.assertEqual('1.2.3', template.version)
         self.assertEqual('foo_desc', template.description)
-        self.assertEqual(['baz', 'foobar'], template.components)
+        self.assertEqual(['baz', 'foobar'], template.catkin_deps)
         self.assertEqual(1, len(template.authors))
         self.assertEqual('Jim Daniels', template.maintainers[0].name)
         self.assertEqual('John Doe', template.maintainers[1].name)
