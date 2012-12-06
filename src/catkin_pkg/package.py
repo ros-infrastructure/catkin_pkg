@@ -223,61 +223,9 @@ class Url(object):
 
 
 def parse_package_for_distutils(path=None):
-    """
-    Extract the information relevant for distutils from the package
-    manifest.  It sets the following keys: name, version, maintainer,
-    long_description, license, keywords.
-
-    The following keys depend on information which are
-    optional: author, author_email, maintainer_email, url
-
-    :param path: The path of the package.xml file, it may or may not
-    include the filename
-
-    :returns: return dict populated with parsed fields
-    :raises: :exc:`InvalidPackage`
-    :raises: :exc:`IOError`
-    """
-    if path is None:
-        path = '.'
-    package = parse_package(path)
-
-    data = {}
-    data['name'] = package.name
-    data['version'] = package.version
-
-    # either set one author with one email or join all in a single field
-    if len(package.authors) == 1 and package.authors[0].email is not None:
-        data['author'] = package.authors[0].name
-        data['author_email'] = package.authors[0].email
-    else:
-        data['author'] = ', '.join([('%s <%s>' % (a.name, a.email) if a.email is not None else a.name) for a in package.authors])
-
-    # either set one maintainer with one email or join all in a single field
-    if len(package.maintainers) == 1:
-        data['maintainer'] = package.maintainers[0].name
-        data['maintainer_email'] = package.maintainers[0].email
-    else:
-        data['maintainer'] = ', '.join(['%s <%s>' % (m.name, m.email) for m in package.maintainers])
-
-    # either set the first URL with the type 'website' or the first URL of any type
-    websites = [url.url for url in package.urls if url.type == 'website']
-    if websites:
-        data['url'] = websites[0]
-    elif package.urls:
-        data['url'] = package.urls[0].url
-
-    if len(package.description) <= 200:
-        data['description'] = package.description
-    else:
-        data['description'] = package.description[:200]
-        data['long_description'] = package.description
-
-    #data['classifiers'] = ['Programming Language :: Python']
-
-    data['license'] = ', '.join(package.licenses)
-    data['keywords'] = ['ROS']
-    return data
+    print('WARNING: %s/setup.py: catkin_pkg.package.parse_package_for_distutils() is deprecated. Please use catkin_pkg.python_setup.generate_distutils_setup(**kwargs) instead.' % os.path.basename(os.path.abspath('.')))
+    from .python_setup import generate_distutils_setup
+    return generate_distutils_setup()
 
 
 class InvalidPackage(Exception):
