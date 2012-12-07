@@ -37,17 +37,31 @@ manifest for the Python setup.py file.
 
 from __future__ import print_function
 
+import os
+
 from .package import InvalidPackage, parse_package
 
 
-def generate_distutils_setup(**kwargs):
+def generate_distutils_setup(package_xml_path=os.path.curdir, **kwargs):
     """
     Extract the information relevant for distutils from the package
-    manifest.  It sets the following keys: name, version, maintainer,
-    long_description, license, keywords.
+    manifest. The following keys will be set:
 
-    The following keys depend on information which are
-    optional: author, author_email, maintainer_email, url
+    The "name" and "version" are taken from the eponymous tags.
+
+    A single maintainer will set the keys "maintainer" and
+    "maintainer_email" while multiple maintainers are merged into the
+    "maintainer" fields (including their emails). Authors are handled
+    likewise.
+
+    The first URL of type "website" (or without a type) is used for
+    the "url" field.
+
+    The "description" is taken from the eponymous tag if it does not
+    exceed 200 characters. If it does "description" contains the
+    truncated text while "description_long" contains the complete.
+
+    All licenses are merged into the "license" field.
 
     :param kwargs: All keyword arguments are passed through. The
     above mentioned keys are verified to be identical if passed as
@@ -58,7 +72,7 @@ def generate_distutils_setup(**kwargs):
     :raises: :exc:`InvalidPackage`
     :raises: :exc:`IOError`
     """
-    package = parse_package('.')
+    package = parse_package(package_xml_path)
 
     data = {}
     data['name'] = package.name
@@ -100,11 +114,5 @@ def generate_distutils_setup(**kwargs):
                 raise InvalidPackage('The keyword argument "%s" does not match the information from package.xml: "%s" != "%s"' % (k, v, data[k]))
         else:
             data[k] = v
-
-    # set 'keywords' after kwargs so that it can be overridden
-    if 'keywords' not in data:
-        data['keywords'] = []
-    if 'ROS' not in data['keywords']:
-        data['keywords'].insert(0, 'ROS')
 
     return data
