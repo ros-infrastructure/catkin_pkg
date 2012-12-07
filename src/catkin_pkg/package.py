@@ -225,7 +225,10 @@ class Url(object):
 def parse_package_for_distutils(path=None):
     print('WARNING: %s/setup.py: catkin_pkg.package.parse_package_for_distutils() is deprecated. Please use catkin_pkg.python_setup.generate_distutils_setup(**kwargs) instead.' % os.path.basename(os.path.abspath('.')))
     from .python_setup import generate_distutils_setup
-    return generate_distutils_setup()
+    data = {}
+    if path is not None:
+        data['package_xml_path'] = path
+    return generate_distutils_setup(**data)
 
 
 class InvalidPackage(Exception):
