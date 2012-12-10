@@ -31,7 +31,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 """
-Library for retrieving information about catkin packages.
+API provided for rospack to reorder include/library paths
+according to the chained workspaces
 """
 
-__version__ = '0.1.8'
+from __future__ import print_function
+
+from .workspaces import get_spaces, order_paths
+
+
+def reorder_paths(paths):
+    paths_to_order = paths.split(' ') if paths else []
+    ordered_paths = order_paths(paths_to_order, get_spaces())
+    return ' '.join(ordered_paths)

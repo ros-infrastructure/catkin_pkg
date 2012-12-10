@@ -42,8 +42,7 @@ def find_package_paths(basepath):
     """
     Crawls the filesystem to find package manifest files.
 
-    When a subfolder contains a file ``CATKIN_IGNORE`` its
-    subdirectories are ignored.
+    When a subfolder contains a file ``CATKIN_IGNORE`` it is ignored.
 
     :param basepath: The path to search in, ``str``
     :returns: A list of relative paths containing package manifest files
@@ -51,13 +50,13 @@ def find_package_paths(basepath):
     """
     paths = []
     for dirpath, dirnames, filenames in os.walk(basepath, followlinks=True):
-        if PACKAGE_MANIFEST_FILENAME in filenames:
+        if 'CATKIN_IGNORE' in filenames:
+            del dirnames[:]
+            continue
+        elif PACKAGE_MANIFEST_FILENAME in filenames:
             basename = os.path.basename(dirpath)
             if basename not in paths:
                 paths.append(os.path.relpath(dirpath, basepath))
-            del dirnames[:]
-            continue
-        elif 'CATKIN_IGNORE' in filenames:
             del dirnames[:]
             continue
         for dirname in dirnames:
@@ -80,7 +79,7 @@ def find_packages(basepath):
     paths = find_package_paths(basepath)
     for path in paths:
         package = parse_package(os.path.join(basepath, path))
-        paths_with_same_name = [p for p, pkg in packages.iteritems() if pkg.name == package.name]
+        paths_with_same_name = [p for p, pkg in packages.items() if pkg.name == package.name]
         if paths_with_same_name:
             raise RuntimeError('Two packages found with the same name "%s":\n- %s\n- %s' % (package.name, path, paths_with_same_name[0]))
         packages[path] = package

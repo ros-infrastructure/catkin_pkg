@@ -6,9 +6,10 @@ import shutil
 from mock import MagicMock, Mock
 
 from catkin_pkg.package_templates import _safe_write_files, create_package_files, \
-    create_cmakelists, create_package_xml, PackageTemplate
-from catkin_pkg.package import parse_package_for_distutils, parse_package, \
-    Dependency, Export, Url, PACKAGE_MANIFEST_FILENAME
+    create_cmakelists, create_package_xml, PackageTemplate, _create_include_macro, \
+    _create_targetlib_args
+from catkin_pkg.package import parse_package, Dependency, Export, Url, PACKAGE_MANIFEST_FILENAME
+from catkin_pkg.python_setup import generate_distutils_setup
 
 
 class TemplateTest(unittest.TestCase):
@@ -35,12 +36,12 @@ class TemplateTest(unittest.TestCase):
     def test_create_cmakelists(self):
         mock_pack = MagicMock()
         mock_pack.name = 'foo'
-        mock_pack.components = []
+        mock_pack.catkin_deps = []
         result = create_cmakelists(mock_pack, 'groovy')
         self.assertTrue('project(foo)' in result, result)
         self.assertTrue('find_package(catkin REQUIRED)' in result, result)
 
-        mock_pack.components = ['bar', 'baz']
+        mock_pack.catkin_deps = ['bar', 'baz']
         result = create_cmakelists(mock_pack, 'groovy')
         self.assertTrue('project(foo)' in result, result)
         self.assertTrue('find_package(catkin REQUIRED COMPONENTS bar baz)' in result, result)
@@ -55,6 +56,64 @@ class TemplateTest(unittest.TestCase):
 
         result = create_package_xml(pack, 'groovy')
         self.assertTrue('<name>foo</name>' in result, result)
+
+    def test_create_targetlib_args(self):
+        mock_pack = MagicMock()
+        mock_pack.name = 'foo'
+        mock_pack.catkin_deps = []
+        mock_pack.boost_comps = []
+        mock_pack.system_deps = []
+        statement = _create_targetlib_args(mock_pack)
+        self.assertEqual('#   ${catkin_LIBRARIES}\n', statement)
+        mock_pack.catkin_deps = ['roscpp', 'rospy']
+        mock_pack.boost_comps = []
+        mock_pack.system_deps = []
+        statement = _create_targetlib_args(mock_pack)
+        self.assertEqual('#   ${catkin_LIBRARIES}\n', statement)
+        mock_pack.catkin_deps = ['roscpp']
+        mock_pack.boost_comps = ['thread', 'filesystem']
+        mock_pack.system_deps = []
+        statement = _create_targetlib_args(mock_pack)
+        self.assertEqual('#   ${catkin_LIBRARIES}\n#   ${Boost_LIBRARIES}\n', statement)
+        mock_pack.catkin_deps = ['roscpp']
+        mock_pack.boost_comps = []
+        mock_pack.system_deps = ['log4cxx', 'BZip2']
+        statement = _create_targetlib_args(mock_pack)
+        self.assertEqual('#   ${catkin_LIBRARIES}\n#   ${log4cxx_LIBRARIES}\n#   ${BZip2_LIBRARIES}\n', statement)
+        mock_pack.catkin_deps = ['roscpp']
+        mock_pack.boost_comps = ['thread', 'filesystem']
+        mock_pack.system_deps = ['log4cxx', 'BZip2']
+        statement = _create_targetlib_args(mock_pack)
+        self.assertEqual('#   ${catkin_LIBRARIES}\n#   ${Boost_LIBRARIES}\n#   ${log4cxx_LIBRARIES}\n#   ${BZip2_LIBRARIES}\n', statement)
+
+    def test_create_include_macro(self):
+        mock_pack = MagicMock()
+        mock_pack.name = 'foo'
+        mock_pack.catkin_deps = []
+        mock_pack.boost_comps = []
+        mock_pack.system_deps = []
+        statement = _create_include_macro(mock_pack)
+        self.assertEqual('# include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})', statement)
+        mock_pack.catkin_deps = ['roscpp', 'rospy']
+        mock_pack.boost_comps = []
+        mock_pack.system_deps = []
+        statement = _create_include_macro(mock_pack)
+        self.assertEqual('include_directories(include\n  ${catkin_INCLUDE_DIRS}\n)', statement)
+        mock_pack.catkin_deps = ['roscpp']
+        mock_pack.boost_comps = ['thread', 'filesystem']
+        mock_pack.system_deps = []
+        statement = _create_include_macro(mock_pack)
+        self.assertEqual('include_directories(include\n  ${catkin_INCLUDE_DIRS}\n  ${Boost_INCLUDE_DIRS}\n)', statement)
+        mock_pack.catkin_deps = ['roscpp']
+        mock_pack.boost_comps = []
+        mock_pack.system_deps = ['log4cxx', 'BZip2']
+        statement = _create_include_macro(mock_pack)
+        self.assertEqual('# TODO: Check names of system library IDs (log4cxx, BZip2)\ninclude_directories(include\n  ${catkin_INCLUDE_DIRS}\n  ${log4cxx_INCLUDE_DIRS}\n  ${BZip2_INCLUDE_DIRS}\n)', statement)
+        mock_pack.catkin_deps = ['roscpp']
+        mock_pack.boost_comps = ['thread', 'filesystem']
+        mock_pack.system_deps = ['log4cxx', 'BZip2']
+        statement = _create_include_macro(mock_pack)
+        self.assertEqual('# TODO: Check names of system library IDs (log4cxx, BZip2)\ninclude_directories(include\n  ${catkin_INCLUDE_DIRS}\n  ${Boost_INCLUDE_DIRS}\n  ${log4cxx_INCLUDE_DIRS}\n  ${BZip2_INCLUDE_DIRS}\n)', statement)
 
     def test_create_package(self):
         maint = self.get_maintainer()
@@ -113,7 +172,7 @@ class TemplateTest(unittest.TestCase):
             self.assertEqual(pack.replaces, pack_result.replaces)
             self.assertEqual(pack.exports, pack_result.exports)
 
-            rdict = parse_package_for_distutils(file2)
+            rdict = generate_distutils_setup(package_xml_path=file2)
             self.assertEqual({'name': 'bar',
                               'maintainer': u'John Foo',
                               'maintainer_email': 'foo@bar.com',
@@ -121,8 +180,7 @@ class TemplateTest(unittest.TestCase):
                               'license': 'BSD',
                               'version': '0.0.0',
                               'author': '',
-                              'url': 'foo',
-                              'keywords': ['ROS']}, rdict)
+                              'url': 'foo'}, rdict)
         finally:
             shutil.rmtree(rootdir)
 
@@ -198,14 +256,13 @@ class TemplateTest(unittest.TestCase):
             self.assertEqual(pack.exports[0].tagname, pack_result.exports[0].tagname)
             self.assertEqual(pack.exports[1].tagname, pack_result.exports[1].tagname)
 
-            rdict = parse_package_for_distutils(file2)
+            rdict = generate_distutils_setup(package_xml_path=file2)
             self.assertEqual({'name': 'bar',
                               'maintainer': u'John Foo <foo@bar.com>, John Foo <foo@bar.com>',
                               'description': 'pdesc',
                               'license': 'BSD, MIT',
                               'version': '0.0.0',
                               'author': u'John Foo <foo@bar.com>, John Foo <foo@bar.com>',
-                              'url': 'bar',
-                              'keywords': ['ROS']}, rdict)
+                              'url': 'bar'}, rdict)
         finally:
             shutil.rmtree(rootdir)
