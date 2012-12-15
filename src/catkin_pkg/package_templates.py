@@ -101,22 +101,24 @@ class PackageTemplate(Package):
                 buildtool_depends.append(Dependency('genmsg'))
                 continue
             pkg_catkin_deps.append(Dependency(dep))
+        for dep in pkg_catkin_deps:
+            build_depends.append(Dependency(dep))
+            run_depends.append(Dependency(dep))
+        if boost_comps:
+            if not system_deps:
+                system_deps = ['boost']
+            elif not 'boost' in system_deps:
+                system_deps.append('boost')
         for dep in system_deps or []:
             if not dep.lower().startswith('python-'):
                 build_depends.append(Dependency(dep))
             run_depends.append(Dependency(dep))
-        for dep in catkin_deps:
-            build_depends.append(Dependency(dep))
-            run_depends.append(Dependency(dep))
-        if boost_comps and not 'boost' in system_deps:
-            build_depends.append(Dependency('boost'))
-            run_depends.append(Dependency('boost'))
         package_temp = PackageTemplate(
             name=package_name,
             version=version or '0.0.0',
             description=description or 'The %s package' % package_name,
             buildtool_depends=buildtool_depends,
-            build_depends=pkg_catkin_deps,
+            build_depends=build_depends,
             run_depends=run_depends,
             catkin_deps=catkin_deps,
             system_deps=system_deps,
@@ -229,6 +231,8 @@ def create_cmakelists(package_template, rosdistro):
                ' '.join(package_template.boost_comps)))
     system_find_package = ''
     for sysdep in package_template.system_deps:
+        if sysdep == 'boost':
+            continue
         if sysdep.startswith('python-'):
             system_find_package += '# '
         system_find_package += 'find_package(%s REQUIRED)\n' % sysdep
