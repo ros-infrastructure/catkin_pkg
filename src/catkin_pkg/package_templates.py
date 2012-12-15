@@ -98,7 +98,18 @@ class PackageTemplate(Package):
                 catkin_deps.remove(dep)
                 continue
             if dep.lower() == 'genmsg':
+                sys.stderr.write('WARNING: Packages with messages or services should not depend on genmsg, but on message_generation and message_runtime\n')
                 buildtool_depends.append(Dependency('genmsg'))
+                continue
+            if dep.lower() == 'message_generation':
+                if not 'message_runtime' in catkin_deps:
+                    sys.stderr.write('WARNING: Packages with messages or services should depend on both message_generation and message_runtime\n')
+                build_depends.append(Dependency('message_generation'))
+                continue
+            if dep.lower() == 'message_runtime':
+                if not 'message_generation' in catkin_deps:
+                    sys.stderr.write('WARNING: Packages with messages or services should depend on both message_generation and message_runtime\n')
+                run_depends.append(Dependency('message_runtime'))
                 continue
             pkg_catkin_deps.append(Dependency(dep))
         for dep in pkg_catkin_deps:
