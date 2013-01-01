@@ -77,12 +77,20 @@ def find_packages(basepath):
     """
     packages = {}
     paths = find_package_paths(basepath)
+    duplicates = {}
     for path in paths:
         package = parse_package(os.path.join(basepath, path))
         paths_with_same_name = [p for p, pkg in packages.items() if pkg.name == package.name]
         if paths_with_same_name:
-            raise RuntimeError('Two packages found with the same name "%s":\n- %s\n- %s' % (package.name, path, paths_with_same_name[0]))
+            if package.name in duplicates:
+                duplicates[package.name].add(path)
+                duplicates[package.name].add(paths_with_same_name[0])
+            else:
+                duplicates[package.name] = set([path, paths_with_same_name[0]])
         packages[path] = package
+    if len(duplicates) > 0:
+        duplicate_list = [list(duplicates[key]) for key in duplicates]
+        raise RuntimeError('Packages found with the same name %s' % (duplicate_list))
     return packages
 
 
