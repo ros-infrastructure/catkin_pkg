@@ -54,9 +54,7 @@ def find_package_paths(basepath):
             del dirnames[:]
             continue
         elif PACKAGE_MANIFEST_FILENAME in filenames:
-            basename = os.path.basename(dirpath)
-            if basename not in paths:
-                paths.append(os.path.relpath(dirpath, basepath))
+            paths.append(os.path.relpath(dirpath, basepath))
             del dirnames[:]
             continue
         for dirname in dirnames:
