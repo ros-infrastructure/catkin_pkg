@@ -337,6 +337,13 @@ def parse_package_string(data, filename=None):
     pkg.conflicts = _get_dependencies(root, 'conflict')
     pkg.replaces = _get_dependencies(root, 'replace')
 
+    errors = []
+    for test_depend in pkg.test_depends:
+        same_build_depends = ['build_depend' for d in pkg.build_depends if d.name == test_depend.name]
+        same_run_depends = ['run_depend' for d in pkg.run_depends if d.name == test_depend.name]
+        if same_build_depends or same_run_depends:
+            errors.append('The test dependency on "%s" is redundant with: %s' % (test_depend.name, ', '.join(same_build_depends + same_run_depends)))
+
     # exports
     export_node = _get_optional_node(root, 'export')
     if export_node is not None:
@@ -348,7 +355,6 @@ def parse_package_string(data, filename=None):
             exports.append(export)
         pkg.exports = exports
 
-    errors = []
     # verify that no unsupported tags and attributes are present
     unknown_root_attributes = [attr for attr in root.attributes.keys() if str(attr) != 'format']
     if unknown_root_attributes:
@@ -382,6 +388,7 @@ def parse_package_string(data, filename=None):
             subnodes = [n for n in node.childNodes if n.nodeType == n.ELEMENT_NODE]
             if subnodes:
                 errors.append('The "%s" tag must not contain the following children: %s' % (node.tagName, ', '.join([n.tagName for n in subnodes])))
+
     if errors:
         # for now only output a warning instead of raising an exception
         #raise InvalidPackage('Error(s) in %s:%s' % (filename ,''.join(['\n- %s' % e for e in errors])))
