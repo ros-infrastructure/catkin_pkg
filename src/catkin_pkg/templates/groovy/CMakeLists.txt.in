@@ -66,8 +66,9 @@ catkin_package(
 ## Declare a cpp executable
 # add_executable(@{name}_node src/@{name}_node.cpp)
 
-## Add dependencies to the executable
-# add_dependencies(@{name}_node ${PROJECT_NAME})
+## Add cmake target dependencies of the executable/library
+## as an example, message headers may need to be generated before nodes
+# add_dependencies(@{name}_node @{name}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(@{name}_node
