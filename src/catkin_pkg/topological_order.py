@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from .packages import find_packages
-
+import copy
 
 class _PackageDecorator(object):
 
@@ -124,8 +124,8 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None):
     return _sort_decorated_packages(decorators_by_name)
 
 
-def _sort_decorated_packages(packages):
     '''
+def _sort_decorated_packages(packages_orig):
     '''
     sorts packages according to dependency ordering, preferring
     message generators.
@@ -136,6 +136,7 @@ def _sort_decorated_packages(packages):
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
     :returns: A List of tuples containing the relative path and a ``Package`` object ``list``
     '''
+    packages = copy.copy(packages_orig)
     ordered_packages = []
     while len(packages) > 0:
         # find all packages without build dependencies
