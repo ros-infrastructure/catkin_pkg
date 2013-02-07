@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from .packages import find_packages
-
+import copy
 
 class _PackageDecorator(object):
 
@@ -124,11 +124,44 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None):
     return _sort_decorated_packages(decorators_by_name)
 
 
-def _sort_decorated_packages(packages):
+def _reduce_cycle_set(packages_orig):
     '''
+    This function iteratively removes some packages from a set that are definitely not part of any cycle.
+
+    When there is a cycle in the package dependencies,
+    _sort_decorated_packages only knows the set of packages containing
+    the cycle.
+    :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
+    :returns: A list of packagenames fromthe input which could not easily be detected as nt being part of a cycle.
+    '''
+    assert(packages_orig)
+    packages = copy.copy(packages_orig)
+    last_depended = None
+    while len(packages) > 0:
+        depended = set([])
+        for name, decorator in packages.items():
+            if decorator.depends_for_topological_order:
+                depended = depended.union(decorator.depends_for_topological_order)
+        for name in packages.keys():
+            if not name in depended:
+                del packages[name]
+        if last_depended:
+            if last_depended == depended:
+                return packages.keys()
+        last_depended = depended
+
+def _sort_decorated_packages(packages_orig):
+    '''
+    sorts packages according to dependency ordering, preferring
+    message generators.
+
+    When a circle is detected, a tupel with None and a string giving a
+    superset of the guilty packages
+
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
     :returns: A List of tuples containing the relative path and a ``Package`` object ``list``
     '''
+    packages = copy.copy(packages_orig)
     ordered_packages = []
     while len(packages) > 0:
         # find all packages without build dependencies
@@ -146,8 +179,10 @@ def _sort_decorated_packages(packages):
         elif non_message_generators:
             names = non_message_generators
         else:
-            # in case of a circular dependency pass the list of remaining package names
-            ordered_packages.append([None, ', '.join(sorted(packages.keys()))])
+            # in case of a circular dependency pass a string with
+            # the names list of remaining package names, with path
+            # None to indicate cycle
+            ordered_packages.append([None, ', '.join(sorted(_reduce_cycle_set(packages)))])
             break
 
         # alphabetic order only for convenience
