@@ -97,7 +97,6 @@ class TopologicalOrderTest(unittest.TestCase):
 
         mock1 = Mock()
         mock1.depends_for_topological_order = set()
-
         mock1.message_generator = True
 
         mock2 = Mock()
@@ -115,3 +114,26 @@ class TopologicalOrderTest(unittest.TestCase):
         self.assertEqual([[mock1.path, mock1.package],
                           [mock2.path, mock2.package],
                           [mock3.path, mock3.package]], sprojects)
+
+    def test_sort_decorated_packages_cycles(self):
+        mock1 = Mock()
+        mock2 = Mock()
+        mock3 = Mock()
+        mock4 = Mock()
+        # creating a cycle for cycle detection
+        mock1.depends_for_topological_order = set(['mock3'])
+        mock2.depends_for_topological_order = set(['mock1'])
+        mock3.depends_for_topological_order = set(['mock2'])
+        mock4.depends_for_topological_order = set(['mock3'])
+        projects = {'mock3': mock3, 'mock2': mock2, 'mock1': mock1, 'mock4': mock4}
+        sprojects = _sort_decorated_packages(projects)
+        self.assertEqual([[None, 'mock1, mock2, mock3']], sprojects)
+        # remove cycle
+        mock1.depends_for_topological_order = set()
+        sprojects = _sort_decorated_packages(projects)
+        # mock1 has message generator, come first
+        # mock2 before mock3 because of alphabetical ordering
+        self.assertEqual([[mock1.path, mock1.package],
+                          [mock2.path, mock2.package],
+                          [mock3.path, mock3.package],
+                          [mock4.path, mock4.package]], sprojects)
