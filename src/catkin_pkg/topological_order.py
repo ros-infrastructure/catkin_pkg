@@ -126,6 +126,13 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None):
 
 def _sort_decorated_packages(packages):
     '''
+    '''
+    sorts packages according to dependency ordering, preferring
+    message generators.
+
+    When a circle is detected, a tupel with None and a string giving a
+    superset of the guilty packages
+
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
     :returns: A List of tuples containing the relative path and a ``Package`` object ``list``
     '''
@@ -146,7 +153,9 @@ def _sort_decorated_packages(packages):
         elif non_message_generators:
             names = non_message_generators
         else:
-            # in case of a circular dependency pass the list of remaining package names
+            # in case of a circular dependency pass a string with
+            # the names list of remaining package names, with path
+            # None to indicate cycle
             ordered_packages.append([None, ', '.join(sorted(packages.keys()))])
             break
 
