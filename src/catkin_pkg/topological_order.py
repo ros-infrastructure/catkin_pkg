@@ -30,8 +30,10 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from .packages import find_packages
 import copy
+
+from .packages import find_packages
+
 
 class _PackageDecorator(object):
 
@@ -132,7 +134,7 @@ def _reduce_cycle_set(packages_orig):
     _sort_decorated_packages only knows the set of packages containing
     the cycle.
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
-    :returns: A list of packagenames fromthe input which could not easily be detected as nt being part of a cycle.
+    :returns: A list of package names from the input which could not easily be detected as not being part of a cycle.
     '''
     assert(packages_orig)
     packages = copy.copy(packages_orig)
@@ -150,13 +152,14 @@ def _reduce_cycle_set(packages_orig):
                 return packages.keys()
         last_depended = depended
 
+
 def _sort_decorated_packages(packages_orig):
     '''
-    sorts packages according to dependency ordering, preferring
+    Sorts packages according to dependency ordering, preferring
     message generators.
 
-    When a circle is detected, a tupel with None and a string giving a
-    superset of the guilty packages
+    When a circle is detected, a tuple with None and a string giving a
+    superset of the guilty packages.
 
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
     :returns: A List of tuples containing the relative path and a ``Package`` object ``list``
