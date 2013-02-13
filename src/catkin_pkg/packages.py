@@ -38,19 +38,21 @@ import os
 from .package import parse_package, PACKAGE_MANIFEST_FILENAME
 
 
-def find_package_paths(basepath):
+def find_package_paths(basepath, exclude_paths=None):
     """
     Crawls the filesystem to find package manifest files.
 
     When a subfolder contains a file ``CATKIN_IGNORE`` it is ignored.
 
     :param basepath: The path to search in, ``str``
+    :param exclude_paths: A list of paths which should not be searched, ``list``
     :returns: A list of relative paths containing package manifest files
     ``list``
     """
     paths = []
+    real_exclude_paths = [os.path.realpath(p) for p in exclude_paths] if exclude_paths is not None else []
     for dirpath, dirnames, filenames in os.walk(basepath, followlinks=True):
-        if 'CATKIN_IGNORE' in filenames:
+        if 'CATKIN_IGNORE' in filenames or os.path.realpath(dirpath) in real_exclude_paths:
             del dirnames[:]
             continue
         elif PACKAGE_MANIFEST_FILENAME in filenames:
@@ -63,11 +65,12 @@ def find_package_paths(basepath):
     return paths
 
 
-def find_packages(basepath):
+def find_packages(basepath, exclude_paths=None):
     """
     Crawls the filesystem to find package manifest files and parses them.
 
     :param basepath: The path to search in, ``str``
+    :param exclude_paths: A list of paths which should not be searched, ``list``
     :returns: A dict mapping relative paths to ``Package`` objects
     ``dict``
     :raises: :exc:RuntimeError` If multiple packages have the same
@@ -75,7 +78,7 @@ def find_packages(basepath):
     """
     packages = {}
     duplicates = {}
-    paths = find_package_paths(basepath)
+    paths = find_package_paths(basepath, exclude_paths)
     for path in paths:
         package = parse_package(os.path.join(basepath, path))
         paths_with_same_name = [path_ for path_, pkg in packages.items() if pkg.name == package.name]
