@@ -38,6 +38,7 @@ manifest for the Python setup.py file.
 from __future__ import print_function
 
 import os
+import sys
 
 from .package import InvalidPackage, parse_package
 
@@ -116,3 +117,60 @@ def generate_distutils_setup(package_xml_path=os.path.curdir, **kwargs):
             data[k] = v
 
     return data
+
+
+def get_global_bin_destination():
+    return 'bin'
+
+
+def get_global_etc_destination():
+    return 'etc'
+
+
+def get_global_include_destination():
+    return 'include'
+
+
+def get_global_lib_destination():
+    return 'lib'
+
+
+def get_global_libexec_destination():
+    return 'lib'
+
+
+def get_global_python_destination():
+    dest = 'lib/python%u.%u/' % (sys.version_info[0], sys.version_info[1])
+    if '--install-layout=deb' not in sys.argv[1:]:
+        dest += 'site-packages'
+    else:
+        dest += 'dist-packages'
+    return dest
+
+
+def get_global_share_destination():
+    return 'share'
+
+
+def get_package_bin_destination(pkgname):
+    return os.path.join(get_global_libexec_destination(), pkgname)
+
+
+def get_package_etc_destination(pkgname):
+    return os.path.join(get_global_etc_destination(), pkgname)
+
+
+def get_package_include_destination(pkgname):
+    return os.path.join(get_global_include_destination(), pkgname)
+
+
+def get_package_lib_destination(_pkgname):
+    return get_global_lib_destination()
+
+
+def get_package_python_destination(pkgname):
+    return os.path.join(get_global_python_destination(), pkgname)
+
+
+def get_package_share_destination(pkgname):
+    return os.path.join(get_global_share_destination(), pkgname)
