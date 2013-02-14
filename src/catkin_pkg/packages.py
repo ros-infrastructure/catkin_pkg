@@ -38,7 +38,7 @@ import os
 from .package import parse_package, PACKAGE_MANIFEST_FILENAME
 
 
-def find_package_paths(basepath, exclude_paths=None):
+def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
     """
     Crawls the filesystem to find package manifest files.
 
@@ -46,13 +46,16 @@ def find_package_paths(basepath, exclude_paths=None):
 
     :param basepath: The path to search in, ``str``
     :param exclude_paths: A list of paths which should not be searched, ``list``
+    :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be searched, ``bool``
     :returns: A list of relative paths containing package manifest files
     ``list``
     """
     paths = []
     real_exclude_paths = [os.path.realpath(p) for p in exclude_paths] if exclude_paths is not None else []
     for dirpath, dirnames, filenames in os.walk(basepath, followlinks=True):
-        if 'CATKIN_IGNORE' in filenames or os.path.realpath(dirpath) in real_exclude_paths:
+        if 'CATKIN_IGNORE' in filenames or \
+            os.path.realpath(dirpath) in real_exclude_paths or \
+            (exclude_subspaces and '.catkin' in filenames):
             del dirnames[:]
             continue
         elif PACKAGE_MANIFEST_FILENAME in filenames:
@@ -65,12 +68,13 @@ def find_package_paths(basepath, exclude_paths=None):
     return paths
 
 
-def find_packages(basepath, exclude_paths=None):
+def find_packages(basepath, exclude_paths=None, exclude_subspaces=False):
     """
     Crawls the filesystem to find package manifest files and parses them.
 
     :param basepath: The path to search in, ``str``
     :param exclude_paths: A list of paths which should not be searched, ``list``
+    :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be searched, ``bool``
     :returns: A dict mapping relative paths to ``Package`` objects
     ``dict``
     :raises: :exc:RuntimeError` If multiple packages have the same
@@ -78,7 +82,7 @@ def find_packages(basepath, exclude_paths=None):
     """
     packages = {}
     duplicates = {}
-    paths = find_package_paths(basepath, exclude_paths)
+    paths = find_package_paths(basepath, exclude_paths, exclude_subspaces)
     for path in paths:
         package = parse_package(os.path.join(basepath, path))
         paths_with_same_name = [path_ for path_, pkg in packages.items() if pkg.name == package.name]
