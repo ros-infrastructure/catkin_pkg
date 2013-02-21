@@ -205,7 +205,7 @@ class Person(object):
         if self.email is not None:
             return '%s <%s>' % (self.name.encode('utf-8'), self.email)
         else:
-            return self.name.encode('utf-8')
+            return '%s' % self.name.encode('utf-8')
 
     def validate(self):
         if self.email is None:
