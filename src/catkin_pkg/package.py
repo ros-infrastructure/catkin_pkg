@@ -393,9 +393,7 @@ def parse_package_string(data, filename=None):
                 errors.append('The "%s" tag must not contain the following children: %s' % (node.tagName, ', '.join([n.tagName for n in subnodes])))
 
     if errors:
-        # for now only output a warning instead of raising an exception
-        #raise InvalidPackage('Error(s) in %s:%s' % (filename ,''.join(['\n- %s' % e for e in errors])))
-        print('WARNING(s) in %s:%s' % (filename ,''.join(['\n- %s' % e for e in errors])), file=sys.stderr)
+        raise InvalidPackage('Error(s) in %s:%s' % (filename, ''.join(['\n- %s' % e for e in errors])))
 
     pkg.validate()
 
