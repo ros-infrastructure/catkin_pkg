@@ -154,6 +154,14 @@ class Package(object):
             for depend in depends:
                 if depend.name == self.name:
                     errors.append('The package must not "%s_depend" on a package with the same name as this package' % dep_type)
+
+        if 'metapackage' in [e.tagname for e in self.exports]:
+            if not 'catkin' in [d.name for d in self.buildtool_depends]:
+                # TODO escalate to error in the future
+                print('WARNING: Metapackage "%s" must buildtool_depend on catkin.' % self.name, file=sys.stderr)
+            if len(self.build_depends + self.buildtool_depends + self.test_depends) > 1:
+                print('WARNING: Metapackage "%s" should not have other dependencies besides a buildtool_depend on catkin and run_depends.' % self.name, file=sys.stderr)
+
         if errors:
             raise InvalidPackage('\n'.join(errors))
 
