@@ -375,8 +375,8 @@ def parse_package_string(data, filename=None):
         'buildtool_depend': depend_attributes,
         'run_depend': depend_attributes,
         'test_depend': depend_attributes,
-        'conflict_depend': depend_attributes,
-        'replace_depend': depend_attributes,
+        'conflict': depend_attributes,
+        'replace': depend_attributes,
         'export': [],
     }
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
