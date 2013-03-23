@@ -341,7 +341,8 @@ class Changelog(object):
 
     def __unicode__(self):
         msg = []
-        msg.append("Changelog for package '{0}'".format(self.package_name))
+        if self.__package_name:
+            msg.append("Changelog for package '{0}'".format(self.package_name))
         for version, date, content in self.foreach_version(reverse=True):
             msg.append('  ' + version + ' ({0}):'.format(date))
             for item in content:
