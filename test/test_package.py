@@ -1,5 +1,9 @@
 import unittest
 
+# Redirect stderr to stdout to suppress output in tests
+import sys
+sys.stderr = sys.stdout
+
 from catkin_pkg.package import Dependency, InvalidPackage, Package, Person
 
 from mock import Mock
