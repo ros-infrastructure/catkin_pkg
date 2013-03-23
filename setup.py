@@ -15,7 +15,7 @@ setup(
     packages=['catkin_pkg'],
     package_dir={'': 'src'},
     package_data={'catkin_pkg': ['templates/*/*.in']},
-    scripts=['bin/catkin_create_pkg'],
+    scripts=['bin/catkin_create_pkg', 'bin/catkin_test_changelog'],
     author='Dirk Thomas',
     author_email='dthomas@willowgarage.com',
     url='http://www.ros.org/wiki/catkin_pkg',
@@ -27,5 +27,10 @@ setup(
     ],
     description='catkin package library',
     long_description='Library for retrieving information about catkin packages.',
-    license='BSD'
+    license='BSD',
+    install_requires=[
+        'argparse',
+        'docutils',
+        'python-dateutil'
+    ],
 )
