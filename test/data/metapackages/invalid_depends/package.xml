@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>invalid_depends</name>
+  <version>0.1.0</version>
+  <description>invalid_depends</description>
+
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>foo</run_depend>
+  <run_depend>bar</run_depend>
+  <run_depend>baz</run_depend>
+
+  <build_depend>ping</build_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+
+</package>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>no_buildtool_depend_catkin</name>
+  <version>0.1.0</version>
+  <description>no_buildtool_depend_catkin</description>
+
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>BSD</license>
+
+  <run_depend>foo</run_depend>
+  <run_depend>bar</run_depend>
+  <run_depend>baz</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+
+</package>
