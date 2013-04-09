@@ -426,7 +426,7 @@ class DuplicateVersionsException(Exception):
     '''Raised when more than one section per version is given'''
     def __init__(self, version):
         self.version = version
-        Exception.__init__(self, "Version '{0}' is specified twice")
+        Exception.__init__(self, "Version '{0}' is specified twice".format(version))
 
 
 class InvalidSectionTitle(Exception):
