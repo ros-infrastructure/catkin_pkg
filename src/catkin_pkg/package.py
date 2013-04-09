@@ -103,6 +103,37 @@ class Package(object):
             data[attr] = getattr(self, attr)
         return str(data)
 
+    def has_buildtool_depend_on_catkin(self):
+        """
+        Returns True if this Package buildtool depends on catkin, otherwise False
+
+        :returns: True if the given package buildtool depends on catkin
+        :rtype: bool
+        """
+        return 'catkin' in [d.name for d in self.buildtool_depends]
+
+
+    def has_invalid_metapackage_dependencies(self):
+        """
+        Returns True if this package has invalid dependencies for a metapackage
+
+        This is defined by REP-0127 as any non-run_depends dependencies other then a buildtool_depend on catkin.
+
+        :returns: True if the given package has any invalid dependencies, otherwise False
+        :rtype: bool
+        """
+        buildtool_depends = [d.name for d in self.buildtool_depends if d.name != 'catkin']
+        return len(self.build_depends + buildtool_depends + self.test_depends) > 0
+
+    def is_metapackage(self):
+        """
+        Returns True if this pacakge is a metapackage, otherwise False
+
+        :returns: True if metapackage, else False
+        :rtype: bool
+        """
+        return 'metapackage' in [e.tagname for e in self.exports]
+
     def validate(self):
         """
         makes sure all standards for packages are met
@@ -155,12 +186,13 @@ class Package(object):
                 if depend.name == self.name:
                     errors.append('The package must not "%s_depend" on a package with the same name as this package' % dep_type)
 
-        if 'metapackage' in [e.tagname for e in self.exports]:
-            if not 'catkin' in [d.name for d in self.buildtool_depends]:
-                # TODO escalate to error in the future
+        if self.is_metapackage():
+            if not self.has_buildtool_depend_on_catkin():
+                # TODO escalate to error in the future, or use metapackage.validate_metapackage
                 print('WARNING: Metapackage "%s" must buildtool_depend on catkin.' % self.name, file=sys.stderr)
-            if len(self.build_depends + self.buildtool_depends + self.test_depends) > 1:
-                print('WARNING: Metapackage "%s" should not have other dependencies besides a buildtool_depend on catkin and run_depends.' % self.name, file=sys.stderr)
+            if self.has_invalid_metapackage_dependencies():
+                print(('WARNING: Metapackage "%s" should not have other dependencies besides a ' +
+                       'buildtool_depend on catkin and run_depends.') % self.name, file=sys.stderr)
 
         if errors:
             raise InvalidPackage('\n'.join(errors))
@@ -246,6 +278,18 @@ class InvalidPackage(Exception):
     pass
 
 
+def package_exists_at(path):
+    """
+    Checks that a package exists at the given path
+
+    :param path: path to a package
+    :type path: str
+    :returns: True if package exists in given path, else False
+    :rtype: bool
+    """
+    return os.path.isdir(path) and os.path.isfile(os.path.join(path, PACKAGE_MANIFEST_FILENAME))
+
+
 def parse_package(path):
     """
     Parse package manifest.
@@ -259,7 +303,7 @@ def parse_package(path):
     """
     if os.path.isfile(path):
         filename = path
-    elif os.path.isdir(path):
+    elif package_exists_at(path):
         filename = os.path.join(path, PACKAGE_MANIFEST_FILENAME)
         if not os.path.isfile(filename):
             raise IOError('Directory "%s" does not contain a "%s"' % (path, PACKAGE_MANIFEST_FILENAME))
