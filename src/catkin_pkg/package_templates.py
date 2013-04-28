@@ -421,8 +421,8 @@ def create_package_xml(package_template, rosdistro):
                       '%s' % (export.content),
                       file=sys.stderr)
             else:
-                attribs = ['%s="%s"' % (k, v) for (k, v) in export.attributes]
-                line = '    <%s%s/>\n' % (export.tagname, ''.join(attribs))
+                attribs = ['%s="%s"' % (k, v) for (k, v) in export.attributes.items()]
+                line = '    <%s %s/>\n' % (export.tagname, ' '.join(attribs))
                 exports.append(line)
     temp_dict['exports'] = ''.join(exports)
 
