@@ -45,6 +45,7 @@ import dateutil.parser
 import docutils
 import docutils.core
 import logging
+import os
 import pkg_resources
 import re
 
@@ -53,6 +54,8 @@ __email__ = "william@osrfoundation.org"
 __maintainer__ = "William Woodall"
 
 log = logging.getLogger('changelog')
+
+CHANGELOG_FILENAME = 'CHANGELOG.rst'
 
 example_rst = """\
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -160,6 +163,25 @@ def mixed_text_from_docutils(node):
                 log.debug("Ignored {0} child of type {1}: '{2}'"
                           .format(type(node), type(child), child))
     return content
+
+
+def get_changelog_from_path(path, package_name=None):
+    '''
+    Changelog factory, which reads a changelog file into a class
+
+    :param path: ``str`` the path of the changelog including or excluding the filename CHANGELOG.rst
+    :param package_name: ``str`` the package name
+    :returns: ``Changelog`` changelog class or None if file was not readable
+    '''
+    changelog = Changelog(package_name)
+    if os.path.isdir(path):
+        path = os.path.join(path, CHANGELOG_FILENAME)
+    try:
+        with open(path, 'r') as f:
+            populate_changelog_from_rst(changelog, f.read())
+    except IOError:
+        return None
+    return changelog
 
 
 def populate_changelog_from_rst(changelog, rst):
