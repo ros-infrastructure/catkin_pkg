@@ -385,14 +385,28 @@ def parse_package_string(data, filename=None):
         pkg.licenses.append(_get_node_value(node))
 
     # dependencies and relationships
-    pkg.build_depends = _get_dependencies(root, 'build_depend')
+    depends = _get_dependencies(root, 'depend')
+
+    build_depends = _get_dependencies(root, 'build_depend')
+    pkg.build_depends = depends[:]
+    pkg.build_depends.extend(build_depends)
+
+    run_depends = _get_dependencies(root, 'run_depend')
+    pkg.run_depends = depends[:]
+    pkg.run_depends.extend(run_depends)
+
     pkg.buildtool_depends = _get_dependencies(root, 'buildtool_depend')
-    pkg.run_depends = _get_dependencies(root, 'run_depend')
     pkg.test_depends = _get_dependencies(root, 'test_depend')
     pkg.conflicts = _get_dependencies(root, 'conflict')
     pkg.replaces = _get_dependencies(root, 'replace')
 
     errors = []
+    for depend in depends:
+        same_build_depends = ['build_depend' for d in build_depends if d.name == depend.name]
+        same_run_depends = ['run_depend' for d in run_depends if d.name == depend.name]
+        if same_build_depends or same_run_depends:
+            errors.append('The general dependency on "%s" is redundant with: %s' % (depend.name, ', '.join(same_build_depends + same_run_depends)))
+
     for test_depend in pkg.test_depends:
         same_build_depends = ['build_depend' for d in pkg.build_depends if d.name == test_depend.name]
         same_run_depends = ['run_depend' for d in pkg.run_depends if d.name == test_depend.name]
@@ -423,6 +437,7 @@ def parse_package_string(data, filename=None):
         'license': [],
         'url': ['type'],
         'author': ['email'],
+        'depend': depend_attributes,
         'build_depend': depend_attributes,
         'buildtool_depend': depend_attributes,
         'run_depend': depend_attributes,
