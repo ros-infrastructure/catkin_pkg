@@ -36,6 +36,7 @@ Extract log information from repositories.
 '''
 
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -75,6 +76,9 @@ class VcsClientBase(object):
 
     def get_log_entries(self, from_tag, to_tag):
         raise NotImplementedError()
+
+    def replace_repository_references(self, line):
+        return line
 
     def _find_executable(self, file_name):
         for path in os.getenv('PATH').split(os.path.pathsep):
@@ -125,6 +129,9 @@ class GitClient(VcsClientBase):
     def __init__(self, path):
         super(GitClient, self).__init__(path)
         self._executable = self._find_executable('git')
+        self._repo_hosting = None
+        self._github_base_url = 'https://github.com/'
+        self._github_path = None
 
     def get_tags(self):
         cmd_tag = [self._executable, 'tag']
@@ -171,6 +178,49 @@ class GitClient(VcsClientBase):
                 affected_paths = result['output'].split('\n')
                 log_entries.append(LogEntry(msg, affected_paths))
         return log_entries
+
+    def replace_repository_references(self, line):
+        if self._repo_hosting is None:
+            self._repo_hosting = False
+            try:
+                self._determine_repo_hosting()
+            except RuntimeError:
+                pass
+        if self._repo_hosting == 'github':
+            line = self._replace_github_issue_references(line)
+        return line
+
+    def _determine_repo_hosting(self):
+        cmd = [self._executable, 'config', '--get', 'remote.origin.url']
+        result = self._run_command(cmd)
+        if result['returncode']:
+            raise RuntimeError('Could not fetch remote url:\n%s' % result['output'])
+
+        # detect github hosting
+        prefixes = ['git@github.com:', 'https://github.com/', 'git://github.com/']
+        for prefix in prefixes:
+            if result['output'].startswith(prefix) and result['output'].endswith('.git'):
+                self._repo_hosting = 'github'
+                self._github_path = result['output'][len(prefix):-4]
+                break
+
+    def _replace_github_issue_references(self, line):
+        valid_name = '[\\w\._-]+'
+        issue_pattern = '#(\\d+)'
+
+        def replace_issue_number(match):
+            issue_url = self._github_base_url
+            if match.group(1):
+                path = match.group(1)
+                issue_url += path
+            else:
+                path = ''
+                issue_url += self._github_path
+            issue_number = match.group(2)
+            issue_url += '/issues/' + issue_number
+            return '`%s#%s <%s>`_' % (path, issue_number, issue_url)
+        line = re.sub(('(%s/%s)?' % (valid_name, valid_name)) + issue_pattern, replace_issue_number, line)
+        return line
 
 
 class HgClient(VcsClientBase):

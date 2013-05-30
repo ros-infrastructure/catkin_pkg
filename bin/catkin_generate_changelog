@@ -11,6 +11,7 @@ import sys
 
 from catkin_pkg.changelog import CHANGELOG_FILENAME
 from catkin_pkg.changelog_generator import generate_changelogs, get_all_changes, get_forthcoming_changes, update_changelogs
+from catkin_pkg.changelog_generator_vcs import get_vcs_client
 from catkin_pkg.packages import find_packages
 
 
@@ -43,7 +44,7 @@ def main(sysargs=None):
     args = parser.parse_args(sysargs)
 
     base_path = '.'
-    #logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
     # find packages
     packages = find_packages(base_path)
@@ -58,6 +59,9 @@ def main(sysargs=None):
         if not os.path.exists(changelog_path):
             missing_changelogs.append(package.name)
 
+    if args.all and not missing_changelogs:
+        raise RuntimeError('All packages already have a changelog. Either remove (some of) them before using --all or invoke the script without --all.')
+
     if args.all and len(missing_changelogs) != len(packages):
         ignored = set([p.name for p in packages.values()]) - set(missing_changelogs)
         print('The following packages already have a changelog file and will be ignored: %s' % ', '.join(sorted(ignored)), file=sys.stderr)
@@ -69,25 +73,26 @@ def main(sysargs=None):
         if not args.non_interactive and not prompt_continue('Continue without --all option', default=False):
             raise RuntimeError('Skipping generation, rerun the script with --all.')
 
+    vcs_client = get_vcs_client(base_path)
     if args.all:
         print('Querying all tags and commit information...')
-        tag2log_entries = get_all_changes(base_path)
+        tag2log_entries = get_all_changes(vcs_client)
         print('Generating changelog files with all versions...')
-        generate_changelogs(base_path, packages, tag2log_entries, logger=logging)
+        generate_changelogs(base_path, packages, tag2log_entries, logger=logging, vcs_client=vcs_client)
     else:
         print('Querying commit information since latest tag...')
-        tag2log_entries = get_forthcoming_changes(base_path)
+        tag2log_entries = get_forthcoming_changes(vcs_client)
         # separate packages with/without a changelog file
         packages_without = {pkg_path: package for pkg_path, package in packages.items() if package.name in missing_changelogs}
         if packages_without:
             print('Generating changelog files with forthcoming version...')
-            generate_changelogs(base_path, packages_without, tag2log_entries, logger=logging)
+            generate_changelogs(base_path, packages_without, tag2log_entries, logger=logging, vcs_client=vcs_client)
         packages_with = {pkg_path: package for pkg_path, package in packages.items() if package.name not in missing_changelogs}
         if packages_with:
             print('Updating forthcoming section of changelog files...')
-            update_changelogs(base_path, packages_with, tag2log_entries, logger=logging)
+            update_changelogs(base_path, packages_with, tag2log_entries, logger=logging, vcs_client=vcs_client)
     print('Done.')
-    print('Please review the extracted commit messages and consolidate the changelog files!')
+    print('Please review the extracted commit messages and consolidate the changelog entries before committing the files!')
 
 
 if __name__ == '__main__':

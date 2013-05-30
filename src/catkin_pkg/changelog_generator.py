@@ -44,13 +44,12 @@ import os
 import re
 
 from catkin_pkg.changelog import CHANGELOG_FILENAME
-from catkin_pkg.changelog_generator_vcs import get_vcs_client, Tag
+from catkin_pkg.changelog_generator_vcs import Tag
 
 FORTHCOMING_LABEL = 'Forthcoming'
 
 
-def get_all_changes(base_path):
-    vcs_client = get_vcs_client(base_path)
+def get_all_changes(vcs_client):
     tags = _get_version_tags(vcs_client)
 
     # query all log entries per tag range
@@ -65,8 +64,7 @@ def get_all_changes(base_path):
     return tag2log_entries
 
 
-def get_forthcoming_changes(base_path):
-    vcs_client = get_vcs_client(base_path)
+def get_forthcoming_changes(vcs_client):
     tags = _get_version_tags(vcs_client)
 
     # query log entries since latest tag only
@@ -90,7 +88,7 @@ def _get_version_tags(vcs_client):
     return version_tags
 
 
-def generate_changelogs(base_path, packages, tag2log_entries, logger=None):
+def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None):
     for pkg_path, package in packages.iteritems():
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
         if os.path.exists(changelog_path):
@@ -99,12 +97,12 @@ def generate_changelogs(base_path, packages, tag2log_entries, logger=None):
         if logger:
             logger.debug("- creating '%s'" % os.path.join(pkg_path, CHANGELOG_FILENAME))
         pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path)
-        data = generate_changelog_file(package.name, pkg_tag2log_entries)
+        data = generate_changelog_file(package.name, pkg_tag2log_entries, vcs_client=vcs_client)
         with open(changelog_path, 'w') as f:
             f.write(data)
 
 
-def update_changelogs(base_path, packages, tag2log_entries, logger=None):
+def update_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None):
     for pkg_path in packages.keys():
         # update package specific changelog file
         if logger:
@@ -113,7 +111,7 @@ def update_changelogs(base_path, packages, tag2log_entries, logger=None):
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
         with open(changelog_path, 'r') as f:
             data = f.read()
-        data = update_changelog_file(data, pkg_tag2log_entries)
+        data = update_changelog_file(data, pkg_tag2log_entries, vcs_client=vcs_client)
         with open(changelog_path, 'w') as f:
             f.write(data)
 
@@ -133,25 +131,25 @@ def filter_package_changes(tag2log_entries, pkg_path):
     return pkg_tag2log_entries
 
 
-def generate_changelog_file(pkg_name, tag2log_entries):
+def generate_changelog_file(pkg_name, tag2log_entries, vcs_client=None):
     blocks = []
     blocks.append(generate_package_headline(pkg_name))
 
     for tag in sorted_tags(tag2log_entries.keys()):
         log_entries = tag2log_entries[tag]
         if log_entries is not None:
-            blocks.append(generate_version_block(tag.name, tag.timestamp, [log_entry.msg for log_entry in log_entries]))
+            blocks.append(generate_version_block(tag.name, tag.timestamp, [log_entry.msg for log_entry in log_entries], vcs_client=vcs_client))
 
     return '\n'.join(blocks)
 
 
-def update_changelog_file(data, tag2log_entries):
+def update_changelog_file(data, tag2log_entries, vcs_client=None):
     tags = sorted_tags(tag2log_entries.keys())
     for i, tag in enumerate(tags):
         log_entries = tag2log_entries[tag]
         if log_entries is None:
             continue
-        content = generate_version_content([log_entry.msg for log_entry in log_entries])
+        content = generate_version_content([log_entry.msg for log_entry in log_entries], vcs_client=vcs_client)
 
         # check if version section exists
         match = get_version_section_match(data, tag.name)
@@ -164,7 +162,7 @@ def update_changelog_file(data, tag2log_entries):
             for next_tag in list(tags)[i:]:
                 match = get_version_section_match(data, next_tag.name)
                 if match:
-                    block = generate_version_block(tag.name, tag.timestamp, log_entries)
+                    block = generate_version_block(tag.name, tag.timestamp, log_entries, vcs_client=vcs_client)
                     data = data[:match.start()] + block + '\n' + data[match.start():]
                     break
             if not match:
@@ -224,9 +222,9 @@ def generate_package_headline(pkg_name):
     return '%s\n%s\n%s\n' % (section_marker, headline, section_marker)
 
 
-def generate_version_block(version, timestamp, messages):
+def generate_version_block(version, timestamp, messages, vcs_client=None):
     data = generate_version_headline(version, timestamp)
-    data += generate_version_content(messages)
+    data += generate_version_content(messages, vcs_client=vcs_client)
     return data
 
 
@@ -244,13 +242,19 @@ def get_version_headline(version, timestamp):
     return headline
 
 
-def generate_version_content(messages):
+def generate_version_content(messages, vcs_client=None):
     data = ''
     for msg in messages:
         lines = msg.split('\n')
         lines = [l.strip() for l in lines]
         lines = [l for l in lines if l]
-        data += '* %s\n' % (lines[0] if lines else '')
+        data += '* %s\n' % (replace_repository_references(lines[0], vcs_client=vcs_client) if lines else '')
         for line in lines[1:]:
-            data += '  %s\n' % line
+            data += '  %s\n' % replace_repository_references(line, vcs_client=vcs_client)
     return data
+
+
+def replace_repository_references(line, vcs_client=None):
+    if vcs_client:
+        line = vcs_client.replace_repository_references(line)
+    return line
