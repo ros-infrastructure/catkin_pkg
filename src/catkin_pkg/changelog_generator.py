@@ -39,6 +39,7 @@ The Changelog format is described in REP-0132:
 http://ros.org/reps/rep-0132.html
 '''
 
+import logging
 import os
 import re
 
@@ -89,19 +90,25 @@ def _get_version_tags(vcs_client):
     return version_tags
 
 
-def generate_changelogs(base_path, packages, tag2log_entries):
+def generate_changelogs(base_path, packages, tag2log_entries, logger=None):
     for pkg_path, package in packages.iteritems():
+        changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
+        if os.path.exists(changelog_path):
+            continue
         # generate package specific changelog file
+        if logger:
+            logger.debug("- creating '%s'" % os.path.join(pkg_path, CHANGELOG_FILENAME))
         pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path)
         data = generate_changelog_file(package.name, pkg_tag2log_entries)
-        changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
         with open(changelog_path, 'w') as f:
             f.write(data)
 
 
-def update_changelogs(base_path, packages, tag2log_entries):
+def update_changelogs(base_path, packages, tag2log_entries, logger=None):
     for pkg_path in packages.keys():
         # update package specific changelog file
+        if logger:
+            logger.debug("- updating '%s'" % os.path.join(pkg_path, CHANGELOG_FILENAME))
         pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path)
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
         with open(changelog_path, 'r') as f:
