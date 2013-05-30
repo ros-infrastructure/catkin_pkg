@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+"""This script generates REP-0132 CHANGELOG.rst files for git or hg repositories"""
+
+from __future__ import print_function
+
+import argparse
+import os
+import sys
+
+from catkin_pkg.changelog import CHANGELOG_FILENAME
+from catkin_pkg.changelog_generator import generate_changelogs, get_all_changes, get_forthcoming_changes, update_changelogs
+from catkin_pkg.packages import find_packages
+
+
+def prompt_continue(msg, default):
+    """Prompt the user for continuation."""
+    if default:
+        msg += ' [Y/n]?'
+    else:
+        msg += ' [y/N]?'
+
+    while True:
+        response = raw_input(msg)
+        if not response:
+            response = 'y' if default else 'n'
+        else:
+            response = response.lower()
+
+        if response in ['y', 'n']:
+            return response == 'y'
+
+        print("Response '%s' was not recognized, please use one of the following options: y, Y, n, N" % response, file=sys.stderr)
+
+
+def main(sysargs=None):
+    parser = argparse.ArgumentParser(description='Generate a REP-0132 %s' % CHANGELOG_FILENAME)
+    parser.add_argument('-a', '--all', action='store_true', default=False,
+        help='Generate changelog for all versions instead of only the forthcoming one (only supported when no changelog file exists yet)')
+    parser.add_argument('-y', '--non-interactive', action='store_true', default=False,
+        help="Run without user interaction, confirming all questions with 'yes'")
+    args = parser.parse_args(sysargs)
+
+    base_path = '.'
+
+    # find packages
+    packages = find_packages(base_path)
+    if not packages:
+        raise RuntimeError('No packages found')
+    print('Found packages: %s' % ', '.join([p.name for p in packages.values()]))
+
+    # check for missing changelogs
+    missing_changelogs = []
+    for pkg_path, package in packages.iteritems():
+        changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
+        if not os.path.exists(changelog_path):
+            missing_changelogs.append(package.name)
+
+    if args.all and len(missing_changelogs) != len(packages):
+        raise RuntimeError('Option --all is only supported when the packages do not have changelog files yet.')
+
+    if not args.all and missing_changelogs and len(missing_changelogs) != len(packages):
+        raise RuntimeError('All packages must either have a changelog or not, a mixed state is not supported.')
+
+    # prompt to switch to --all
+    if not args.all and len(missing_changelogs) == len(packages):
+        print('None of the packages have a changelog file. You might consider to use --all to generate the changelogs for all versions (not only for the forthcoming version).')
+        if not args.non_interactive and not prompt_continue('Continue without --all option', default=False):
+            raise RuntimeError('Skipping generation, rerun the script with --all.')
+
+    if args.all:
+        print('Querying all tags and commit information...')
+        tag2log_entries = get_all_changes(base_path)
+        print('Generating changelog files for all versions...')
+        generate_changelogs(base_path, packages, tag2log_entries)
+    else:
+        print('Querying commit information since latest tag...')
+        tag2log_entries = get_forthcoming_changes(base_path)
+        if missing_changelogs:
+            print('Generating changelog files for forthcoming version...')
+            generate_changelogs(base_path, packages, tag2log_entries)
+        else:
+            print('Updating forthcoming section of changelog files...')
+            update_changelogs(base_path, packages, tag2log_entries)
+    print('Done.')
+    print('Please review the extracted commit messages and consolidate the changelog files!')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)

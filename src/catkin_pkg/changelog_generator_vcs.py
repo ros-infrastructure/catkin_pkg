@@ -1,0 +1,257 @@
+# Software License Agreement (BSD License)
+#
+# Copyright (c) 2013, Open Source Robotics Foundation, Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of Open Source Robotics Foundation, Inc. nor
+#    the names of its contributors may be used to endorse or promote
+#    products derived from this software without specific prior
+#    written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+'''
+Extract log information from repositories.
+'''
+
+import os
+import shutil
+import subprocess
+import tempfile
+
+
+class Tag(object):
+
+    def __init__(self, name, timestamp=None):
+        self.name = name
+        self.timestamp = timestamp
+
+
+class LogEntry(object):
+
+    def __init__(self, msg, affected_paths):
+        self.msg = msg
+        self._affected_paths = [p for p in affected_paths if p]
+
+    def affects_path(self, path):
+        for apath in self._affected_paths:
+            # if the path is the root of the repository
+            # it is affected by all changes
+            if path == '.':
+                return True
+            if apath.startswith(os.path.join(path, '')):
+                return True
+        return False
+
+
+class VcsClientBase(object):
+
+    def __init__(self, path):
+        self.path = path
+
+    def get_tags(self):
+        raise NotImplementedError()
+
+    def get_log_entries(self, from_tag, to_tag):
+        raise NotImplementedError()
+
+    def _find_executable(self, file_name):
+        for path in os.getenv('PATH').split(os.path.pathsep):
+            file_path = os.path.join(path, file_name)
+            if os.path.isfile(file_path):
+                return file_path
+        return None
+
+    def _run_command(self, cmd, env=None):
+        cwd = os.path.abspath(self.path)
+        result = {'cmd': ' '.join(cmd), 'cwd': cwd}
+        try:
+            proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
+            output, _ = proc.communicate()
+            result['output'] = output.rstrip()
+            result['returncode'] = proc.returncode
+        except subprocess.CalledProcessError as e:
+            result['output'] = e.output
+            result['returncode'] = e.returncode
+        return result
+
+    def _truncate_timestamps(self, tags):
+        # truncate timestamps to shortest unique representation
+        # - date only
+        # - date including hours and minutes
+        # - date include hours, minutes and seconds
+        lengths = [10, 16, 19]
+        for length in lengths:
+            # filter tags which have not been truncated yet
+            considered_tags = [t for t in tags if len(t.timestamp) > length]
+            # count tags which timestamps have the same truncated representation
+            grouped_by_timestamp = {}
+            for t in considered_tags:
+                truncated_timestamp = t.timestamp[:length]
+                if truncated_timestamp not in grouped_by_timestamp:
+                    grouped_by_timestamp[truncated_timestamp] = []
+                grouped_by_timestamp[truncated_timestamp].append(t)
+            # truncate timestamp of tags which are unique
+            for truncated_timestamp, similar_tags in grouped_by_timestamp.items():
+                if len(similar_tags) == 1:
+                    similar_tags[0].timestamp = truncated_timestamp
+
+
+class GitClient(VcsClientBase):
+
+    type = 'git'
+
+    def __init__(self, path):
+        super(GitClient, self).__init__(path)
+        self._executable = self._find_executable('git')
+
+    def get_tags(self):
+        cmd_tag = [self._executable, 'tag']
+        result_tag = self._run_command(cmd_tag)
+        if result_tag['returncode']:
+            raise RuntimeError('Could not fetch tags:\n%s' % result_tag['output'])
+        tag_names = result_tag['output'].split('\n')
+
+        tags = []
+        for tag_name in tag_names:
+            cmd = [self._executable, 'log', tag_name, '-n', '1', '--format=format:%ai']
+            result = self._run_command(cmd)
+            if result['returncode']:
+                raise RuntimeError('Could not fetch timestamp:\n%s' % result['output'])
+            tags.append(Tag(tag_name, result['output']))
+        self._truncate_timestamps(tags)
+        return tags
+
+    def get_log_entries(self, from_tag, to_tag):
+        # query all hashes in the range
+        cmd = [self._executable, 'log', '%s%s' % ('%s..' % to_tag if to_tag else '', from_tag if from_tag else ''), '--format=format:%H']
+        result = self._run_command(cmd)
+        if result['returncode']:
+            raise RuntimeError('Could not fetch commit hashes:\n%s' % result['output'])
+
+        log_entries = []
+        if result['output']:
+            # query further information for each changeset
+            hashes = result['output'].split('\n')
+            for hash_ in hashes:
+                # query commit message
+                cmd = [self._executable, 'log', hash_, '-n', '1', '--format=format:%B']
+                result = self._run_command(cmd)
+                if result['returncode']:
+                    raise RuntimeError('Could not fetch commit message:\n%s' % result['output'])
+                if result['output'] == from_tag:
+                    continue
+                msg = result['output']
+                # query affected paths
+                cmd = [self._executable, 'show', hash_, '--name-only', '--format=format:""']
+                result = self._run_command(cmd)
+                if result['returncode']:
+                    raise RuntimeError('Could not fetch affected paths:\n%s' % result['output'])
+                affected_paths = result['output'].split('\n')
+                log_entries.append(LogEntry(msg, affected_paths))
+        return log_entries
+
+
+class HgClient(VcsClientBase):
+
+    type = 'hg'
+
+    def __init__(self, path):
+        super(HgClient, self).__init__(path)
+        self._executable = self._find_executable('hg')
+
+    def get_tags(self):
+        cmd_tag = [self._executable, 'tags', '-q']
+        result_tag = self._run_command(cmd_tag)
+        if result_tag['returncode']:
+            raise RuntimeError('Could not fetch tags:\n%s' % result_tag['output'])
+        tag_names = result_tag['output'].split('\n')
+
+        tags = []
+        for tag_name in tag_names:
+            cmd = [self._executable, 'log', '-r', tag_name, '--template', '{date|isodatesec}']
+            result = self._run_command(cmd)
+            if result['returncode']:
+                raise RuntimeError('Could not fetch timestamp:\n%s' % result['output'])
+            tags.append(Tag(tag_name, result['output']))
+        self._truncate_timestamps(tags)
+        return tags
+
+    def get_log_entries(self, from_tag, to_tag):
+        # query all hashes in the range
+        # ascending chronological order since than it is easier to handle empty tag names
+        revrange = '%s:%s' % ((to_tag if to_tag else ''), (from_tag if from_tag else 'tip'))
+        if to_tag:
+            revrange += '-%s' % to_tag
+        if from_tag:
+            revrange += '-%s' % from_tag
+        cmd = [self._executable, 'log', '-r', revrange, '--template', '{rev}\n']
+        result = self._run_command(cmd)
+        if result['returncode']:
+            raise RuntimeError('Could not fetch commit hashes:\n%s' % result['output'])
+
+        tmp_base = tempfile.mkdtemp('-hg-style')
+        try:
+            style_file = os.path.join(tmp_base, 'hg-changeset-files-per-line.style')
+            with open(style_file, 'w') as f:
+                f.write("changeset = '{files}'\n")
+                f.write("file = '{file}\\n'\n")
+
+            log_entries = []
+            if result['output']:
+                # query further information for each changeset
+                revs = reversed(result['output'].split('\n'))
+                for rev in revs:
+                    # query commit message
+                    cmd = [self._executable, 'log', '-r', rev, '-l', '1', '--template', '{desc}']
+                    result = self._run_command(cmd)
+                    if result['returncode']:
+                        raise RuntimeError('Could not fetch commit message:\n%s' % result['output'])
+                    if result['output'] == from_tag:
+                        continue
+                    msg = result['output']
+                    # query affected paths
+                    cmd = [self._executable, 'log', '-r', rev, '-l', '1', '--style', style_file]
+                    result = self._run_command(cmd)
+                    if result['returncode']:
+                        raise RuntimeError('Could not fetch affected paths:\n%s' % result['output'])
+                    affected_paths = result['output'].split('\n')
+                    log_entries.append(LogEntry(msg, affected_paths))
+        finally:
+            shutil.rmtree(tmp_base)
+        return log_entries
+
+
+def get_vcs_client(base_path):
+    vcs_clients = []
+    vcs_clients.append(GitClient)
+    vcs_clients.append(HgClient)
+    client_types = [c.type for c in vcs_clients]
+    if len(client_types) != len(set(client_types)):
+        raise RuntimeError('Multiple vcs clients share the same type: %s' % ', '.join(sorted(client_types)))
+
+    for vcs_client in vcs_clients:
+        if os.path.exists(os.path.join(base_path, '.%s' % vcs_client.type)):
+            return vcs_client(base_path)
+    raise RuntimeError('Could not detect repository type - currently supports: %s', ', '.join([c.type for c in vcs_clients]))
