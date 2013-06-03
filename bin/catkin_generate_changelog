@@ -10,7 +10,7 @@ import os
 import sys
 
 from catkin_pkg.changelog import CHANGELOG_FILENAME
-from catkin_pkg.changelog_generator import generate_changelogs, get_all_changes, get_forthcoming_changes, update_changelogs
+from catkin_pkg.changelog_generator import generate_changelog_file, generate_changelogs, get_all_changes, get_forthcoming_changes, update_changelogs
 from catkin_pkg.changelog_generator_vcs import get_vcs_client
 from catkin_pkg.packages import find_packages
 
@@ -39,12 +39,31 @@ def main(sysargs=None):
     parser = argparse.ArgumentParser(description='Generate a REP-0132 %s' % CHANGELOG_FILENAME)
     parser.add_argument('-a', '--all', action='store_true', default=False,
         help='Generate changelog for all versions instead of only the forthcoming one (only supported when no changelog file exists yet)')
+    parser.add_argument('--print-root', action='store_true', default=False,
+        help='Output changelog content to the console as if there would be only one package in the root of the repository')
     parser.add_argument('-y', '--non-interactive', action='store_true', default=False,
         help="Run without user interaction, confirming all questions with 'yes'")
     args = parser.parse_args(sysargs)
 
     base_path = '.'
     logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+
+    vcs_client = get_vcs_client(base_path)
+
+    if args.print_root:
+        # printing status messages to stderr to allow piping the changelog to a file
+        if args.all:
+            print('Querying all tags and commit information...', file=sys.stderr)
+            tag2log_entries = get_all_changes(vcs_client)
+            print('Generating changelog output with all versions...', file=sys.stderr)
+        else:
+            print('Querying commit information since latest tag...', file=sys.stderr)
+            tag2log_entries = get_forthcoming_changes(vcs_client)
+            print('Generating changelog files with forthcoming version...', file=sys.stderr)
+        print('', file=sys.stderr)
+        data = generate_changelog_file('repository-level', tag2log_entries, vcs_client=vcs_client)
+        print(data)
+        return 0
 
     # find packages
     packages = find_packages(base_path)
@@ -73,7 +92,6 @@ def main(sysargs=None):
         if not args.non_interactive and not prompt_continue('Continue without --all option', default=False):
             raise RuntimeError('Skipping generation, rerun the script with --all.')
 
-    vcs_client = get_vcs_client(base_path)
     if args.all:
         print('Querying all tags and commit information...')
         tag2log_entries = get_all_changes(vcs_client)
