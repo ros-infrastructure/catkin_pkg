@@ -94,9 +94,9 @@ def main(sysargs=None):
             pass
         changelogs.append((package.name, changelog_path, changelog, forthcoming_label))
     if missing_forthcoming:
-        raise RuntimeError('The following packages do not have a forthcoming section in their changelog file: %s' % ', '.join(sorted(missing_forthcoming)))
+        print('The following packages do not have a forthcoming section in their changelog file: %s' % ', '.join(sorted(missing_forthcoming)), file=sys.stderr)
     if already_tagged:
-        raise RuntimeError("The following packages do already have a section '%s' in their changelog file: %s" % (new_version, ', '.join(sorted(already_tagged))))
+        print("The following packages do already have a section '%s' in their changelog file: %s" % (new_version, ', '.join(sorted(already_tagged))), file=sys.stderr)
 
     # rename forthcoming sections to new_version including current date
     new_changelog_data = []
