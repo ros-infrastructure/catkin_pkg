@@ -199,9 +199,12 @@ class GitClient(VcsClientBase):
         # detect github hosting
         prefixes = ['git@github.com:', 'https://github.com/', 'git://github.com/']
         for prefix in prefixes:
-            if result['output'].startswith(prefix) and result['output'].endswith('.git'):
+            if result['output'].startswith(prefix):
                 self._repo_hosting = 'github'
-                self._github_path = result['output'][len(prefix):-4]
+                path = result['output'][len(prefix):]
+                if path.endswith('.git'):
+                    path = path[:-4]
+                self._github_path = path
                 break
 
     def _replace_github_issue_references(self, line):
