@@ -73,8 +73,11 @@ Free form text about this minor release.
 0.1.26 (2012-12-26)
 -------------------
 * Utilizes caching to improve query performance (fix https://github.com/ros/ros_comm/pull/2)
-* Simplified API calls based on (https://github.com/ros/robot_model)
-  Note that these changes are based on REP 192
+* Simplified API calls based on (https://github.com/ros/robot_model):
+
+  * Note that these changes are based on REP 192
+  * Also they fix a problem related to initialization
+
 * Fixed synchronization issue on startup
 
 .. not mentioning secret feature on purpose
@@ -153,6 +156,10 @@ def mixed_text_from_docutils(node):
             content.texts.append('\n\n    ' + child.astext() + '\n')
         elif isinstance(child, docutils.nodes.target):
             pass
+        elif isinstance(child, docutils.nodes.system_message):
+            log.debug("Skipping system_message: {0}".format(child))
+        elif isinstance(child, docutils.nodes.bullet_list):
+            content.texts.append(bullet_list_class_from_docutils(child))
         else:
             try:
                 # Try to add it as plain text
@@ -460,7 +467,7 @@ class InvalidSectionTitle(Exception):
 
 
 class MixedText(object):
-    '''Represents text mixed with references'''
+    '''Represents text mixed with references and nested bullets'''
     def __init__(self, texts=[]):
         self.texts = list(texts)
 
@@ -472,7 +479,18 @@ class MixedText(object):
         return unicode(self).encode('utf-8')
 
     def __unicode__(self):
-        return unicode(''.join([str(t) for t in self]))
+        return unicode(self.to_txt())
+
+    def to_txt(self, bullet_indent='  '):
+        lines = []
+        for t in self:
+            if isinstance(t, BulletList):
+                bullets = [bullet_indent + x for x in str(t).splitlines()]
+                bullets = ['', ''] + bullets + ['']
+                lines.extend('\n'.join(bullets))
+            else:
+                lines.append(str(t))
+        return ''.join(lines)
 
 
 class Reference(object):
