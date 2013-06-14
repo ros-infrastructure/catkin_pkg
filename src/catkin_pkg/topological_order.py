@@ -160,8 +160,9 @@ def _reduce_cycle_set(packages_orig):
 
 def _sort_decorated_packages(packages_orig):
     '''
-    Sorts packages according to dependency ordering, preferring
-    message generators.
+    Sorts packages according to dependency ordering,
+    first considering the message generators and their recursive dependencies
+    and then the rest of the packages.
 
     When a circle is detected, a tuple with None and a string giving a
     superset of the guilty packages.
@@ -169,7 +170,21 @@ def _sort_decorated_packages(packages_orig):
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
     :returns: A List of tuples containing the relative path and a ``Package`` object ``list``
     '''
-    packages = copy.copy(packages_orig)
+    packages = copy.deepcopy(packages_orig)
+
+    # mark all packages which are (recursively) dependent on by message generators
+    dependency_names_to_follow = set([name for name, decorator in packages.items() if decorator.message_generator])
+    not_marked_package_names = set(packages.keys()) - dependency_names_to_follow
+    while dependency_names_to_follow:
+        pkg_name = dependency_names_to_follow.pop()
+        for name in packages[pkg_name].depends_for_topological_order:
+            if name in not_marked_package_names:
+                # mark package
+                packages[name].message_generator = True
+                not_marked_package_names.remove(name)
+                # queue for recursion
+                dependency_names_to_follow.add(name)
+
     ordered_packages = []
     while len(packages) > 0:
         # find all packages without build dependencies
