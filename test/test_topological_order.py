@@ -95,45 +95,71 @@ class TopologicalOrderTest(unittest.TestCase):
         sprojects = _sort_decorated_packages(projects)
         self.assertEqual([], sprojects)
 
-        mock1 = Mock()
-        mock1.depends_for_topological_order = set()
-        mock1.message_generator = True
+        def create_mock(path):
+            m = Mock()
+            m.path = path
+            m.depends_for_topological_order = set()
+            m.message_generator = False
+            return m
 
-        mock2 = Mock()
-        mock2.depends_for_topological_order = set()
-        mock2.message_generator = False
+        mock1 = create_mock('mock1')
+        mock2 = create_mock('mock2')
+        mock3 = create_mock('mock3')
+        mock3.message_generator = True
 
-        mock3 = Mock()
-        mock3.depends_for_topological_order = set()
-        mock3.message_generator = False
-
-        projects = {'baz': mock3, 'bar': mock2, 'foo': mock1}
+        projects = {'mock3': mock3, 'mock2': mock2, 'mock1': mock1}
         sprojects = _sort_decorated_packages(projects)
-        # mock1 has message generator, come first
-        # mock2 before mock3 because of alphabetical ordering
-        self.assertEqual([[mock1.path, mock1.package],
-                          [mock2.path, mock2.package],
-                          [mock3.path, mock3.package]], sprojects)
+
+        # mock3 first since it is a message generator
+        # mock1 before mock2 due to alphabetic order 
+        self.assertEqual(['mock3', 'mock1', 'mock2'], [path for path, _ in sprojects])
+
+    def test_sort_decorated_packages_favoring_message_generators(self):
+        def create_mock(path):
+            m = Mock()
+            m.path = path
+            m.depends_for_topological_order = set()
+            m.message_generator = False
+            return m
+
+        mock1 = create_mock('mock1')
+        mock2 = create_mock('mock2')
+        mock3 = create_mock('mock3')
+        mock3.depends_for_topological_order = set(['mock2'])
+        mock3.message_generator = True
+
+        projects = {'mock3': mock3, 'mock2': mock2, 'mock1': mock1}
+        sprojects = _sort_decorated_packages(projects)
+
+        # mock2 first since it is the dependency of a message generator
+        # mock3 since it is a message generator
+        # mock1 last, although having no dependencies and being first in alphabetic order 
+        self.assertEqual(['mock2', 'mock3', 'mock1'], [path for path, _ in sprojects])
 
     def test_sort_decorated_packages_cycles(self):
-        mock1 = Mock()
-        mock2 = Mock()
-        mock3 = Mock()
-        mock4 = Mock()
+        def create_mock(path, depend):
+            m = Mock()
+            m.path = path
+            m.depends_for_topological_order = set([depend])
+            m.message_generator = False
+            return m
+
         # creating a cycle for cycle detection
-        mock1.depends_for_topological_order = set(['mock3'])
-        mock2.depends_for_topological_order = set(['mock1'])
-        mock3.depends_for_topological_order = set(['mock2'])
-        mock4.depends_for_topological_order = set(['mock3'])
+        mock1 = create_mock('mock1', 'mock2')
+        mock2 = create_mock('mock2', 'mock3')
+        mock3 = create_mock('mock3', 'mock4')
+        mock4 = create_mock('mock4', 'mock2')
+
         projects = {'mock3': mock3, 'mock2': mock2, 'mock1': mock1, 'mock4': mock4}
         sprojects = _sort_decorated_packages(projects)
-        self.assertEqual([[None, 'mock1, mock2, mock3']], sprojects)
+        self.assertEqual([[None, 'mock2, mock3, mock4']], sprojects)
+
         # remove cycle
-        mock1.depends_for_topological_order = set()
+        mock4.depends_for_topological_order = set()
         sprojects = _sort_decorated_packages(projects)
-        # mock1 has message generator, come first
-        # mock2 before mock3 because of alphabetical ordering
-        self.assertEqual([[mock1.path, mock1.package],
-                          [mock2.path, mock2.package],
-                          [mock3.path, mock3.package],
-                          [mock4.path, mock4.package]], sprojects)
+
+        # mock4 first since it has no dependencies
+        # than mock3 since it only had mock4 as a dependency
+        # than mock2 since it only had mock3 as a dependency
+        # than mock1 since it only had mock2 as a dependency
+        self.assertEqual(['mock4', 'mock3', 'mock2', 'mock1'], [path for path, _ in sprojects])
