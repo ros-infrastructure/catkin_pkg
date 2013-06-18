@@ -162,7 +162,7 @@ def update_changelog_file(data, tag2log_entries, vcs_client=None):
             for next_tag in list(tags)[i:]:
                 match = get_version_section_match(data, next_tag.name)
                 if match:
-                    block = generate_version_block(tag.name, tag.timestamp, log_entries, vcs_client=vcs_client)
+                    block = generate_version_block(tag.name, tag.timestamp, [log_entry.msg for log_entry in log_entries], vcs_client=vcs_client)
                     data = data[:match.start()] + block + '\n' + data[match.start():]
                     break
             if not match:
