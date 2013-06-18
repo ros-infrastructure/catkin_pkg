@@ -74,6 +74,9 @@ class VcsClientBase(object):
     def get_tags(self):
         raise NotImplementedError()
 
+    def get_latest_tag_name(self):
+        raise NotImplementedError()
+
     def get_log_entries(self, from_tag, to_tag):
         raise NotImplementedError()
 
@@ -149,6 +152,14 @@ class GitClient(VcsClientBase):
             tags.append(Tag(tag_name, result['output']))
         self._truncate_timestamps(tags)
         return tags
+
+    def get_latest_tag_name(self):
+        cmd_describe = [self._executable, 'describe', '--abbrev=0', '--tags']
+        result_describe = self._run_command(cmd_describe)
+        if result_describe['returncode']:
+            raise RuntimeError('Could not fetch latest tag:\n%s' % result_describe['output'])
+        tag_name = result_describe['output']
+        return tag_name
 
     def get_log_entries(self, from_tag, to_tag):
         # query all hashes in the range
@@ -250,6 +261,14 @@ class HgClient(VcsClientBase):
             tags.append(Tag(tag_name, result['output']))
         self._truncate_timestamps(tags)
         return tags
+
+    def get_latest_tag_name(self):
+        cmd_log = [HgClient._executable, 'log', '--rev', '.', '--template', '{latesttagdistance}']
+        result_log = self._run_command(cmd_log)
+        if result_log['returncode']:
+            raise RuntimeError('Could not fetch latest tag:\n%s' % result_log['output'])
+        tag_name = result_log['output']
+        return tag_name
 
     def get_log_entries(self, from_tag, to_tag):
         # query all hashes in the range

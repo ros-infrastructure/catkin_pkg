@@ -66,11 +66,12 @@ def get_all_changes(vcs_client):
 
 def get_forthcoming_changes(vcs_client):
     tags = _get_version_tags(vcs_client)
+    latest_tag_name = _get_latest_version_tag_name(vcs_client)
 
     # query log entries since latest tag only
     tag2log_entries = {}
     from_tag = Tag(None)
-    to_tag = Tag(None)
+    to_tag = Tag(latest_tag_name)
     for tag in sorted_tags(tags):
         if to_tag.name is None:
             to_tag = tag
@@ -86,6 +87,13 @@ def _get_version_tags(vcs_client):
     tags = vcs_client.get_tags()
     version_tags = [t for t in tags if re.match(r'^\d+\.\d+.\d+$', t.name)]
     return version_tags
+
+
+def _get_latest_version_tag_name(vcs_client):
+    # get latest tag
+    tag_name = vcs_client.get_latest_tag_name()
+    version_tag_name = tag_name if re.match(r'^\d+\.\d+.\d+$', tag_name) else None
+    return version_tag_name
 
 
 def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None):
