@@ -1,3 +1,6 @@
 *.pyc
 build
 bin/catkin_create_pkgc
+deb_dist
+dist
+MANIFEST
