@@ -14,7 +14,7 @@ setup(
     version=__version__,
     packages=['catkin_pkg'],
     package_dir={'': 'src'},
-    package_data={'catkin_pkg': ['templates/*/*.in']},
+    package_data={'catkin_pkg': ['templates/*.in']},
     scripts=[
         'bin/catkin_create_pkg',
         'bin/catkin_generate_changelog',
