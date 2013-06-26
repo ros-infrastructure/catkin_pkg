@@ -56,7 +56,7 @@ class CreatePkgTest(unittest.TestCase):
     def test_main(self):
         try:
             root_dir = tempfile.mkdtemp()
-            main(['foo'], root_dir)
+            main(['--rosdistro', 'groovy', 'foo'], root_dir)
             self.assertTrue(os.path.isdir(os.path.join(root_dir, 'foo')))
             self.assertTrue(os.path.isfile(os.path.join(root_dir, 'foo', 'CMakeLists.txt')))
             self.assertTrue(os.path.isfile(os.path.join(root_dir, 'foo', 'package.xml')))

@@ -143,16 +143,19 @@ class PackageTemplate(Package):
 
 def read_template_file(filename, rosdistro):
     template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-    template = os.path.join(template_dir, rosdistro, '%s.in' % filename)
-    if not os.path.isfile(template):
-        raise IOError(
-            "Could not read template for ROS distro "
-            "'{}' at '{}': ".format(rosdistro, template) +
-            "no such file or directory"
-        )
-    with open(template, 'r') as fhand:
-        template_contents = fhand.read()
-    return template_contents
+    templates = []
+    templates.append(os.path.join(template_dir, rosdistro, '%s.in' % filename))
+    templates.append(os.path.join(template_dir, '%s.in' % filename))
+    for template in templates:
+        if os.path.isfile(template):
+            with open(template, 'r') as fhand:
+                template_contents = fhand.read()
+            return template_contents
+    raise IOError(
+        "Could not read template for ROS distro "
+        "'{}' at '{}': ".format(rosdistro, ', '.join(templates)) +
+        "no such file or directory"
+    )
 
 
 def _safe_write_files(newfiles, target_dir):
@@ -186,7 +189,7 @@ def _safe_write_files(newfiles, target_dir):
         print('Created file %s' % os.path.relpath(target_file, os.path.dirname(target_dir)))
 
 
-def create_package_files(target_path, package_template, rosdistro='groovy',
+def create_package_files(target_path, package_template, rosdistro,
                          newfiles=None):
     """
     creates several files from templates to start a new package.
