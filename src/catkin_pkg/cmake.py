@@ -43,7 +43,7 @@ def get_metapackage_cmake_template_path():
 
     :returns: ``str`` location of the metapackage CMakeLists.txt CMake template
     '''
-    rel_path = os.path.join('templates', 'groovy', 'metapackage.cmake.in')
+    rel_path = os.path.join('templates', 'metapackage.cmake.in')
     return os.path.join(os.path.dirname(__file__), rel_path)
 
 

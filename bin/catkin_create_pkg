@@ -9,6 +9,7 @@ import sys
 
 from catkin_pkg.package_templates import create_package_files, PackageTemplate
 
+
 def main(argv=sys.argv[1:], parent_path=os.getcwd()):
     parser = argparse.ArgumentParser(
         description='Creates a new catkin package')
@@ -39,6 +40,8 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
     parser.add_argument('-m', '--maintainer',
                         action='append',
                         help='A single maintainer, may be used multiple times')
+    rosdistro_name = os.environ['ROS_DISTRO'] if 'ROS_DISTRO' in os.environ else None
+    parser.add_argument('--rosdistro', required=rosdistro_name is None, default=rosdistro_name, help='The ROS distro (default: environment variable ROS_DISTRO if defined)')
 
     args = parser.parse_args(argv)
 
@@ -57,7 +60,7 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
             boost_comps=args.boost_comps)
         create_package_files(target_path=target_path,
                              package_template=package_template,
-                             rosdistro='groovy',
+                             rosdistro=args.rosdistro,
                              newfiles={})
         print('Successfully created files in %s. Please adjust the values in package.xml.' % target_path)
     except ValueError as vae:
