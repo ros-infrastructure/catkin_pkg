@@ -21,16 +21,19 @@ def get_forthcoming_label(rst):
     document = docutils.core.publish_doctree(rst)
     forthcoming_label = None
     for child in document.children:
-        if isinstance(child, docutils.nodes.section):
+        title = None
+        if isinstance(child, docutils.nodes.subtitle):
+            title = child
+        elif isinstance(child, docutils.nodes.section):
             section = child
             if len(section.children) > 0 and isinstance(section.children[0], docutils.nodes.title):
                 title = section.children[0]
-                if len(title.children) > 0 and isinstance(title.children[0], docutils.nodes.Text):
-                    title_text = title.children[0].rawsource
-                    if FORTHCOMING_LABEL.lower() in title_text.lower():
-                        if forthcoming_label:
-                            raise RuntimeError('Found multiple forthcoming sections')
-                        forthcoming_label = title_text
+        if title and len(title.children) > 0 and isinstance(title.children[0], docutils.nodes.Text):
+            title_text = title.children[0].rawsource
+            if FORTHCOMING_LABEL.lower() in title_text.lower():
+                if forthcoming_label:
+                    raise RuntimeError('Found multiple forthcoming sections')
+                forthcoming_label = title_text
     return forthcoming_label
 
 
