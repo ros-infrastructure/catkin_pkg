@@ -141,7 +141,7 @@ class GitClient(VcsClientBase):
         result_tag = self._run_command(cmd_tag)
         if result_tag['returncode']:
             raise RuntimeError('Could not fetch tags:\n%s' % result_tag['output'])
-        tag_names = result_tag['output'].split('\n')
+        tag_names = result_tag['output'].splitlines()
 
         tags = []
         for tag_name in tag_names:
@@ -163,7 +163,10 @@ class GitClient(VcsClientBase):
 
     def get_log_entries(self, from_tag, to_tag):
         # query all hashes in the range
-        cmd = [self._executable, 'log', '%s%s' % ('%s..' % to_tag if to_tag else '', from_tag if from_tag else ''), '--format=format:%H']
+        cmd = [self._executable, 'log']
+        if from_tag or to_tag:
+            cmd.append('%s%s' % ('%s..' % to_tag if to_tag else '', from_tag if from_tag else ''))
+        cmd.append('--format=format:%H')
         result = self._run_command(cmd)
         if result['returncode']:
             raise RuntimeError('Could not fetch commit hashes:\n%s' % result['output'])
@@ -171,7 +174,7 @@ class GitClient(VcsClientBase):
         log_entries = []
         if result['output']:
             # query further information for each changeset
-            hashes = result['output'].split('\n')
+            hashes = result['output'].splitlines()
             for hash_ in hashes:
                 # query commit message
                 cmd = [self._executable, 'log', hash_, '-n', '1', '--format=format:%B']
@@ -186,7 +189,7 @@ class GitClient(VcsClientBase):
                 result = self._run_command(cmd)
                 if result['returncode']:
                     raise RuntimeError('Could not fetch affected paths:\n%s' % result['output'])
-                affected_paths = result['output'].split('\n')
+                affected_paths = result['output'].splitlines()
                 log_entries.append(LogEntry(msg, affected_paths))
         return log_entries
 
@@ -250,7 +253,7 @@ class HgClient(VcsClientBase):
         result_tag = self._run_command(cmd_tag)
         if result_tag['returncode']:
             raise RuntimeError('Could not fetch tags:\n%s' % result_tag['output'])
-        tag_names = result_tag['output'].split('\n')
+        tag_names = result_tag['output'].splitlines()
 
         tags = []
         for tag_name in tag_names:
@@ -293,7 +296,7 @@ class HgClient(VcsClientBase):
             log_entries = []
             if result['output']:
                 # query further information for each changeset
-                revs = reversed(result['output'].split('\n'))
+                revs = reversed(result['output'].splitlines())
                 for rev in revs:
                     # query commit message
                     cmd = [self._executable, 'log', '-r', rev, '-l', '1', '--template', '{desc}']
@@ -308,7 +311,7 @@ class HgClient(VcsClientBase):
                     result = self._run_command(cmd)
                     if result['returncode']:
                         raise RuntimeError('Could not fetch affected paths:\n%s' % result['output'])
-                    affected_paths = result['output'].split('\n')
+                    affected_paths = result['output'].splitlines()
                     log_entries.append(LogEntry(msg, affected_paths))
         finally:
             shutil.rmtree(tmp_base)

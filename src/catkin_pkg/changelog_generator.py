@@ -253,7 +253,7 @@ def get_version_headline(version, timestamp):
 def generate_version_content(messages, vcs_client=None):
     data = ''
     for msg in messages:
-        lines = msg.split('\n')
+        lines = msg.splitlines()
         lines = [l.strip() for l in lines]
         lines = [l for l in lines if l]
         data += '* %s\n' % (replace_repository_references(lines[0], vcs_client=vcs_client) if lines else '')
