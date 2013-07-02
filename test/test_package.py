@@ -161,6 +161,11 @@ class PackageTest(unittest.TestCase):
         auth1 = Person('foo')
         auth1.email = 'foo@bar.com'
         auth1.validate()
+        auth1.email = 'foo-bar@bar.com'
+        auth1.validate()
+        auth1.email = 'foo+bar@bar.com'
+        auth1.validate()
+
         auth1.email = 'foo[at]bar.com'
         self.assertRaises(InvalidPackage, Person.validate, auth1)
         auth1.email = 'foo bar.com'
