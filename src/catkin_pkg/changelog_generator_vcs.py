@@ -329,4 +329,4 @@ def get_vcs_client(base_path):
     for vcs_client in vcs_clients:
         if os.path.exists(os.path.join(base_path, '.%s' % vcs_client.type)):
             return vcs_client(base_path)
-    raise RuntimeError('Could not detect repository type - currently supports: %s', ', '.join([c.type for c in vcs_clients]))
+    raise RuntimeError('Could not detect repository type - currently supports: %s' % ', '.join([c.type for c in vcs_clients]))
