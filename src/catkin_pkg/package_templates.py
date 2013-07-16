@@ -264,7 +264,6 @@ def create_cmakelists(package_template, rosdistro):
         message_depends = '#   std_msgs  # Or other packages containing msgs'
     temp_dict = {'name': package_template.name,
                  'components': components,
-                 'include_folder_comment': ' ' if has_include_folder else '#',
                  'include_directories': _create_include_macro(package_template),
                  'boost_find': boost_find_package,
                  'systems_find': system_find_package,
@@ -288,26 +287,22 @@ def _create_targetlib_args(package_template):
 
 
 def _create_include_macro(package_template):
-    if not  'roscpp' in package_template.catkin_deps:
-        return "# include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})"
-    result = 'include_directories(include'
+    result = '# include_directories(include)'
+    includes = []
     if package_template.catkin_deps:
-        result+= '\n  ${catkin_INCLUDE_DIRS}'
+        includes.append('${catkin_INCLUDE_DIRS}')
     if package_template.boost_comps:
-        result += '\n  ${Boost_INCLUDE_DIRS}'
+        includes.append('${Boost_INCLUDE_DIRS}')
     if package_template.system_deps:
-        deplist = ', '.join(package_template.system_deps)
-        deplist_libs = ''
+        deplist = []
         for sysdep in package_template.system_deps:
-            deplist_libs += '\n'
-            if sysdep.startswith('python-'):
-                deplist_libs += '# '
-            deplist_libs += '  ${%s_INCLUDE_DIRS}' % sysdep
-        result = ('# TODO: Check names of system library IDs (%s)\n%s%s' %
-                  (deplist,
-                   result,
-                   deplist_libs))
-    result += '\n)'
+            if not sysdep.startswith('python-'):
+                deplist.append(sysdep)
+                includes.append('${%s_INCLUDE_DIRS}' % sysdep)
+        if deplist:
+            result += '\n# TODO: Check names of system library include directories (%s)' % ', '.join(deplist)
+    if includes:
+        result += '\ninclude_directories(\n  %s\n)' % '\n  '.join(includes)
     return result
 
 
