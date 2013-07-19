@@ -72,3 +72,45 @@ def test_Changelog():
         if version in content_checks:
             content_checks[version](content)
     assert sorted(expected_versions) == sorted(versions)
+
+
+single_version_rst = """\
+0.0.1 (2012-01-31)
+------------------
+
+* Initial release
+* Initial bugs
+"""
+
+
+def test_single_version_Changelog():
+    changelog = Changelog('foo')
+    populate_changelog_from_rst(changelog, single_version_rst)
+    expected_versions = ['0.0.1']
+    versions = []
+    for version, date, content in changelog.foreach_version():
+        versions.append(version)
+    assert sorted(expected_versions) == sorted(versions)
+
+
+single_version_with_header_rst = """\
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package foo
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+0.0.1 (2012-01-31)
+------------------
+
+* Initial release
+* Initial bugs
+"""
+
+
+def test_single_version_with_header_Changelog():
+    changelog = Changelog('foo')
+    populate_changelog_from_rst(changelog, single_version_with_header_rst)
+    expected_versions = ['0.0.1']
+    versions = []
+    for version, date, content in changelog.foreach_version():
+        versions.append(version)
+    assert sorted(expected_versions) == sorted(versions)
