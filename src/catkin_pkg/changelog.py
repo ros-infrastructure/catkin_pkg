@@ -200,75 +200,66 @@ def populate_changelog_from_rst(changelog, rst):
     :returns: ``Changelog`` changelog that was populated
     '''
     document = docutils.core.publish_doctree(rst)
-    for child in document.children:
-        if isinstance(child, docutils.nodes.section):
-            changelog = processes_changelog_section(changelog, child)
+    processes_changelog_children(changelog, document.children)
     changelog.rst = rst
     return changelog
 
 
-def processes_changelog_section(changelog, section):
+def processes_changelog_children(changelog, children):
     '''
-    Processes a docutils section into a REP-0132 changelog instance
+    Processes docutils children into a REP-0132 changelog instance.
+    Recurse into sections, check (sub-)titles if they are valid versions.
 
     :param changelog: ``Changelog`` changelog to be populated
     :param section: ``docutils.nodes.section`` section to be processed
     :returns: ``Changelog`` changelog that was populated
     '''
-    version, date = None, None
-    title_text = None
-    # See if the section has a title as the first element
-    if len(section.children) > 0 and isinstance(section.children[0], docutils.nodes.title):
-        # See if the title has a text element in it
-        title = section.children[0]
-        if len(title.children) > 0 and isinstance(title.children[0], docutils.nodes.Text):
-            # Extract version and date from section title
-            title_text = title.children[0].rawsource
-            try:
-                version, date = version_and_date_from_title(title_text)
-            except InvalidSectionTitle:
-                # Catch invalid section titles
-                log.debug("Ignored section with title: '{0}'".format(title_text))
-    valid_section = None not in (version, date)
-    contents = []
-    # For each element in the section
-    for child in section.children:
-        # If it was a valid section
-        if valid_section:
-            # Skip sections (nesting of valid sections not allowed)
-            if isinstance(child, docutils.nodes.section):
-                log.debug("Ignored section child: '{0}'".format(child))
-                continue
-            # Skip title
-            if isinstance(child, docutils.nodes.title):
-                continue
-            # Skip comments
-            if isinstance(child, docutils.nodes.comment):
-                log.debug("Ignored section child: '{0}'".format(child))
-                continue
-            # Process other elements into the contents
-            if isinstance(child, docutils.nodes.bullet_list):
-                contents.append(bullet_list_class_from_docutils(child))
-            elif isinstance(child, docutils.nodes.enumerated_list):
-                contents.append(bullet_list_class_from_docutils(child, bullet_type='enumerated'))
-            elif isinstance(child, docutils.nodes.transition):
-                contents.append(Transition())
-            elif isinstance(child, docutils.nodes.paragraph):
-                contents.append(mixed_text_from_docutils(child))
+    for i, child in enumerate(children):
+        if isinstance(child, docutils.nodes.section):
+            processes_changelog_children(changelog, child.children)
+        elif isinstance(child, docutils.nodes.title) or isinstance(child, docutils.nodes.subtitle):
+            version, date = None, None
+            # See if the title has a text element in it
+            if len(child.children) > 0 and isinstance(child.children[0], docutils.nodes.Text):
+                # Extract version and date from (sub-)title
+                title_text = child.children[0].rawsource
+                try:
+                    version, date = version_and_date_from_title(title_text)
+                except InvalidSectionTitle:
+                    # Catch invalid section titles
+                    log.debug("Ignored non-compliant title: '{0}'".format(title_text))
+                    continue
+            valid_section = None not in (version, date)
+            if valid_section:
+                contents = []
+                # For each remaining sibling
+                for child in children[i + 1:]:
+                    # Skip sections (nesting of valid sections not allowed)
+                    if isinstance(child, docutils.nodes.section):
+                        log.debug("Ignored section child: '{0}'".format(child))
+                        continue
+                    # Skip title
+                    if isinstance(child, docutils.nodes.title):
+                        continue
+                    # Skip comments
+                    if isinstance(child, docutils.nodes.comment):
+                        log.debug("Ignored section child: '{0}'".format(child))
+                        continue
+                    # Process other elements into the contents
+                    if isinstance(child, docutils.nodes.bullet_list):
+                        contents.append(bullet_list_class_from_docutils(child))
+                    elif isinstance(child, docutils.nodes.enumerated_list):
+                        contents.append(bullet_list_class_from_docutils(child, bullet_type='enumerated'))
+                    elif isinstance(child, docutils.nodes.transition):
+                        contents.append(Transition())
+                    elif isinstance(child, docutils.nodes.paragraph):
+                        contents.append(mixed_text_from_docutils(child))
+                    else:
+                        log.debug("Skipped section child: '{0}'".format(child))
+                changelog.add_version_section(version, date, contents)
+                break
             else:
-                log.debug("Skipped section child: '{0}'".format(child))
-        else:
-            if title_text:
-                log.debug("Ignored section with non-compliant title: '{0}'".format(title_text))
-            else:
-                log.debug("Ignored section with non-compliant title: '{0}'".format(section))
-            # Recurse on sections (subsections might be valid)
-            if isinstance(child, docutils.nodes.section):
-                changelog = processes_changelog_section(changelog, child)
-    # Add section to changelog
-    if valid_section:
-        changelog.add_version_section(version, date, contents)
-    return changelog
+                log.debug("Ignored non-compliant title: '{0}'".format(child))
 
 
 def reference_from_docutils(reference):
