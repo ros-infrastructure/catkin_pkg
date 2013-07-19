@@ -44,7 +44,12 @@ class TemplateTest(unittest.TestCase):
         mock_pack.catkin_deps = ['bar', 'baz']
         result = create_cmakelists(mock_pack, 'groovy')
         self.assertTrue('project(foo)' in result, result)
-        self.assertTrue('find_package(catkin REQUIRED COMPONENTS bar baz)' in result, result)
+        expected = """find_package(catkin REQUIRED COMPONENTS
+  bar
+  baz
+  )"""
+        
+        self.assertTrue(expected in result, result)
 
     def test_create_package_xml(self):
         maint = self.get_maintainer()

@@ -237,7 +237,7 @@ def create_cmakelists(package_template, rosdistro):
     if package_template.catkin_deps == []:
         components = ''
     else:
-        components = ' COMPONENTS \n  %s\n  ' % '\n  '.join(package_template.catkin_deps)
+        components = ' COMPONENTS\n  %s\n  ' % '\n  '.join(package_template.catkin_deps)
     has_include_folder = 'roscpp' in package_template.catkin_deps
     boost_find_package = \
         ('' if not package_template.boost_comps
