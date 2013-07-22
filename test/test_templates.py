@@ -47,7 +47,7 @@ class TemplateTest(unittest.TestCase):
         expected = """find_package(catkin REQUIRED COMPONENTS
   bar
   baz
-  )"""
+)"""
         
         self.assertTrue(expected in result, result)
 
