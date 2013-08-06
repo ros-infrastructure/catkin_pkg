@@ -103,7 +103,7 @@ def generate_distutils_setup(package_xml_path=os.path.curdir, **kwargs):
     if len(package.description) <= 200:
         data['description'] = package.description
     else:
-        data['description'] = package.description[:200]
+        data['description'] = package.description[:197] + '...'
         data['long_description'] = package.description
 
     data['license'] = ', '.join(package.licenses)
