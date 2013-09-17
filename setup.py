@@ -23,8 +23,8 @@ setup(
     ],
     author='Dirk Thomas',
     author_email='dthomas@willowgarage.com',
-    url='http://www.ros.org/wiki/catkin_pkg',
-    download_url='http://pr.willowgarage.com/downloads/catkin_pkg/',
+    url='http://wiki.ros.org/catkin_pkg',
+    download_url='http://download.ros.org/downloads/catkin_pkg/',
     keywords=['catkin', 'ROS'],
     classifiers=[
         'Programming Language :: Python',
