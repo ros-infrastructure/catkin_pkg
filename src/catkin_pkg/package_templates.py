@@ -113,8 +113,8 @@ class PackageTemplate(Package):
                 continue
             pkg_catkin_deps.append(Dependency(dep))
         for dep in pkg_catkin_deps:
-            build_depends.append(Dependency(dep))
-            run_depends.append(Dependency(dep))
+            build_depends.append(dep)
+            run_depends.append(dep)
         if boost_comps:
             if not system_deps:
                 system_deps = ['boost']
