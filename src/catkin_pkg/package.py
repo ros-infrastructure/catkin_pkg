@@ -353,7 +353,7 @@ def parse_package_string(data, filename=None):
     pkg.version_abi = _get_node_attr(version_node, 'abi', default=None)
 
     # description
-    pkg.description = _get_node_value(_get_node(root, 'description'), allow_xml=True)
+    pkg.description = _get_node_value(_get_node(root, 'description'), allow_xml=True, apply_str=False)
 
     # at least one maintainer, all must have email
     maintainers = _get_nodes(root, 'maintainer')
