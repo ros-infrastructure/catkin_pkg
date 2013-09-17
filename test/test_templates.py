@@ -139,6 +139,14 @@ class TemplateTest(unittest.TestCase):
         finally:
             shutil.rmtree(rootdir)
 
+
+    def test_create_package_template(self):
+        template = PackageTemplate._create_package_template(
+            package_name='bar2',
+            catkin_deps=['dep1', 'dep2'])
+        self.assertEqual('dep1', template.build_depends[0].name)
+        self.assertEqual('dep2', template.build_depends[1].name)
+
     def test_parse_generated(self):
         maint = self.get_maintainer()
         pack = PackageTemplate(name='bar',
