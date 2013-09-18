@@ -22,7 +22,7 @@ setup(
         'bin/catkin_test_changelog'
     ],
     author='Dirk Thomas',
-    author_email='dthomas@willowgarage.com',
+    author_email='dthomas@osrfoundation.org',
     url='http://wiki.ros.org/catkin_pkg',
     download_url='http://download.ros.org/downloads/catkin_pkg/',
     keywords=['catkin', 'ROS'],
