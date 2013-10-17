@@ -17,6 +17,7 @@ setup(
     package_data={'catkin_pkg': ['templates/*.in']},
     scripts=[
         'bin/catkin_create_pkg',
+        'bin/catkin_find_pkg',
         'bin/catkin_generate_changelog',
         'bin/catkin_tag_changelog',
         'bin/catkin_test_changelog'
