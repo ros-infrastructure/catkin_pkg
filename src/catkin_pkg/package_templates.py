@@ -211,7 +211,7 @@ def create_package_files(target_path, package_template, rosdistro,
         newfiles[cmake_path] = create_cmakelists(package_template, rosdistro)
     _safe_write_files(newfiles, target_path)
     if 'roscpp' in package_template.catkin_deps:
-        fname = os.path.join(target_path, 'include')
+        fname = os.path.join(target_path, 'include/' + package_template.name)
         os.makedirs(fname)
         print('Created folder %s' % os.path.relpath(fname, os.path.dirname(target_path)))
     if 'roscpp' in package_template.catkin_deps or \
