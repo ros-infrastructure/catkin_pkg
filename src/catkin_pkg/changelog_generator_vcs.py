@@ -51,8 +51,9 @@ class Tag(object):
 
 class LogEntry(object):
 
-    def __init__(self, msg, affected_paths):
+    def __init__(self, msg, affected_paths, author):
         self.msg = msg
+        self.author = author
         self._affected_paths = [p for p in affected_paths if p]
 
     def affects_path(self, path):
@@ -136,6 +137,14 @@ class GitClient(VcsClientBase):
         self._github_base_url = 'https://github.com/'
         self._github_path = None
 
+    # query author
+    def _get_author(self, hash_):
+        cmd = [self._executable, 'log', hash_, '-n', '1', '--format=format:%an']
+        result = self._run_command(cmd)
+        if result['returncode']:
+            raise RuntimeError('Could not fetch author:\n%s' % result['output'])
+        return result['output']
+
     def get_tags(self):
         cmd_tag = [self._executable, 'tag']
         result_tag = self._run_command(cmd_tag)
@@ -190,7 +199,7 @@ class GitClient(VcsClientBase):
                 if result['returncode']:
                     raise RuntimeError('Could not fetch affected paths:\n%s' % result['output'])
                 affected_paths = result['output'].splitlines()
-                log_entries.append(LogEntry(msg, affected_paths))
+                log_entries.append(LogEntry(msg, affected_paths, self._get_author(hash_)))
         return log_entries
 
     def replace_repository_references(self, line):
@@ -247,6 +256,14 @@ class HgClient(VcsClientBase):
     def __init__(self, path):
         super(HgClient, self).__init__(path)
         self._executable = self._find_executable('hg')
+
+    # query author
+    def _get_author(self, hash_):
+        cmd = [self._executable, 'log', '-r', tag_name, '--template', '{author}']
+        result = self._run_command(cmd)
+        if result['returncode']:
+            raise RuntimeError('Could not fetch author:\n%s' % result['output'])
+        return result['output']
 
     def get_tags(self):
         cmd_tag = [self._executable, 'tags', '-q']
@@ -312,7 +329,7 @@ class HgClient(VcsClientBase):
                     if result['returncode']:
                         raise RuntimeError('Could not fetch affected paths:\n%s' % result['output'])
                     affected_paths = result['output'].splitlines()
-                    log_entries.append(LogEntry(msg, affected_paths))
+                    log_entries.append(LogEntry(msg, affected_paths, self._get_author(rev)))
         finally:
             shutil.rmtree(tmp_base)
         return log_entries
