@@ -97,7 +97,7 @@ def _get_latest_version_tag_name(vcs_client):
 
 
 def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None):
-    for pkg_path, package in packages.iteritems():
+    for pkg_path, package in packages.items():
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
         if os.path.exists(changelog_path):
             continue
