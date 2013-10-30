@@ -185,7 +185,7 @@ def _safe_write_files(newfiles, target_dir):
             os.makedirs(dirname)
         # print(target_file, content)
         with open(target_file, 'ab') as fhand:
-            fhand.write(content)
+            fhand.write(content.encode())
         print('Created file %s' % os.path.relpath(target_file, os.path.dirname(target_dir)))
 
 

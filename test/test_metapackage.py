@@ -3,7 +3,10 @@ from __future__ import print_function
 import contextlib
 import os
 import re
-import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 import sys
 import unittest
 
@@ -32,7 +35,7 @@ def assert_warning(warnreg):
     orig_stdout = sys.stdout
     orig_stderr = sys.stderr
     try:
-        out = StringIO.StringIO()
+        out = StringIO()
         sys.stdout = out
         sys.stderr = sys.stdout
         yield
@@ -58,7 +61,7 @@ class TestMetapackageValidation(unittest.TestCase):
     """Tests the metapackage validator"""
     def test_validate_metapackage(self):
         pkgs_dict = find_packages(test_data_dir)
-        for path, package in pkgs_dict.iteritems():
+        for path, package in pkgs_dict.items():
             path = os.path.join(test_data_dir, path)
             assert package.name in test_expectations, 'Unknown test %s' % package.name
             exc, excreg, warnreg = test_expectations[package.name]

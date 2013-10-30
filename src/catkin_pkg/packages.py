@@ -92,7 +92,7 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False):
             duplicates[package.name].append(path)
         packages[path] = package
     if duplicates:
-        duplicates = ['Multiple packages found with the same name "%s":%s' % (name, ''.join(['\n- %s' % path_ for path_ in paths])) for name, paths in duplicates.iteritems()]
+        duplicates = ['Multiple packages found with the same name "%s":%s' % (name, ''.join(['\n- %s' % path_ for path_ in paths])) for name, paths in duplicates.items()]
         raise RuntimeError('\n'.join(duplicates))
     return packages
 

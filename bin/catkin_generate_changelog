@@ -73,7 +73,7 @@ def main(sysargs=None):
 
     # check for missing changelogs
     missing_changelogs = []
-    for pkg_path, package in packages.iteritems():
+    for pkg_path, package in packages.items():
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
         if not os.path.exists(changelog_path):
             missing_changelogs.append(package.name)

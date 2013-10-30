@@ -50,6 +50,8 @@ class _PackageDecorator(object):
         self.depends_for_topological_order = None
 
     def __getattr__(self, name):
+        if name.startswith('__'):
+            raise AttributeError(name)
         return getattr(self.package, name)
 
     def calculate_depends_for_topological_order(self, packages):
@@ -149,7 +151,7 @@ def _reduce_cycle_set(packages_orig):
         for name, decorator in packages.items():
             if decorator.depends_for_topological_order:
                 depended = depended.union(decorator.depends_for_topological_order)
-        for name in packages.keys():
+        for name in list(packages.keys()):
             if not name in depended:
                 del packages[name]
         if last_depended:
