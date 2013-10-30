@@ -146,7 +146,7 @@ def generate_changelog_file(pkg_name, tag2log_entries, vcs_client=None):
     for tag in sorted_tags(tag2log_entries.keys()):
         log_entries = tag2log_entries[tag]
         if log_entries is not None:
-            blocks.append(generate_version_block(tag.name, tag.timestamp, [log_entry.msg for log_entry in log_entries], vcs_client=vcs_client))
+            blocks.append(generate_version_block(tag.name, tag.timestamp, log_entries, vcs_client=vcs_client))
 
     return '\n'.join(blocks)
 
@@ -157,7 +157,7 @@ def update_changelog_file(data, tag2log_entries, vcs_client=None):
         log_entries = tag2log_entries[tag]
         if log_entries is None:
             continue
-        content = generate_version_content([log_entry.msg for log_entry in log_entries], vcs_client=vcs_client)
+        content = generate_version_content(log_entries, vcs_client=vcs_client)
 
         # check if version section exists
         match = get_version_section_match(data, tag.name)
@@ -170,7 +170,7 @@ def update_changelog_file(data, tag2log_entries, vcs_client=None):
             for next_tag in list(tags)[i:]:
                 match = get_version_section_match(data, next_tag.name)
                 if match:
-                    block = generate_version_block(tag.name, tag.timestamp, [log_entry.msg for log_entry in log_entries], vcs_client=vcs_client)
+                    block = generate_version_block(tag.name, tag.timestamp, log_entries, vcs_client=vcs_client)
                     data = data[:match.start()] + block + '\n' + data[match.start():]
                     break
             if not match:
@@ -230,9 +230,9 @@ def generate_package_headline(pkg_name):
     return '%s\n%s\n%s\n' % (section_marker, headline, section_marker)
 
 
-def generate_version_block(version, timestamp, messages, vcs_client=None):
+def generate_version_block(version, timestamp, log_entries, vcs_client=None):
     data = generate_version_headline(version, timestamp)
-    data += generate_version_content(messages, vcs_client=vcs_client)
+    data += generate_version_content(log_entries, vcs_client=vcs_client)
     return data
 
 
@@ -250,15 +250,20 @@ def get_version_headline(version, timestamp):
     return headline
 
 
-def generate_version_content(messages, vcs_client=None):
+def generate_version_content(log_entries, vcs_client=None):
     data = ''
-    for msg in messages:
+    all_authors = set()
+    for entry in log_entries:
+        msg = entry.msg
         lines = msg.splitlines()
         lines = [l.strip() for l in lines]
         lines = [l for l in lines if l]
         data += '* %s\n' % (replace_repository_references(lines[0], vcs_client=vcs_client) if lines else '')
         for line in lines[1:]:
             data += '  %s\n' % replace_repository_references(line, vcs_client=vcs_client)
+        all_authors.add(entry.author)
+    if all_authors:
+        data += '* Contributors: %s\n' % ', '.join(sorted(all_authors))
     return data
 
 
