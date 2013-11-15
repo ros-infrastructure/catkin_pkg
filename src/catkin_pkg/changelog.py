@@ -292,7 +292,7 @@ def version_and_date_from_title(title):
     version, date_str = match.groups()
     try:
         date = dateutil.parser.parse(date_str)
-    except ValueError as e:
+    except (ValueError, TypeError) as e:
         # Catch invalid dates
         log.debug("Error parsing date ({0}): '{1}'".format(date_str, e))
         raise InvalidSectionTitle(title)
