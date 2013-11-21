@@ -242,10 +242,13 @@ class Person(object):
         self.email = email
 
     def __str__(self):
+        name = self.name
+        if not isinstance(name, str):
+            name = name.encode('utf-8')
         if self.email is not None:
-            return '%s <%s>' % (self.name.encode('utf-8'), self.email)
+            return '%s <%s>' % (name, self.email)
         else:
-            return '%s' % self.name.encode('utf-8')
+            return '%s' % name
 
     def validate(self):
         if self.email is None:
