@@ -40,6 +40,7 @@ http://ros.org/reps/rep-0132.html
 '''
 
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import dateutil.parser
 import docutils
@@ -332,7 +333,7 @@ class BulletList(object):
         b = self.bullet_generator(bullet)
         i = indent
         n = '\n' + i + '  '
-        lines = [i + b.next() + str(l).replace('\n', n) for l in self]
+        lines = [i + next(b) + l.__str__().replace('\n', n) for l in self]
         return '\n'.join(lines)
 
     def bullet_generator(self, bullet):
