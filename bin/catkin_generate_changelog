@@ -41,6 +41,8 @@ def main(sysargs=None):
         help='Generate changelog for all versions instead of only the forthcoming one (only supported when no changelog file exists yet)')
     parser.add_argument('--print-root', action='store_true', default=False,
         help='Output changelog content to the console as if there would be only one package in the root of the repository')
+    parser.add_argument('--skip-contributors', action='store_true', default=False,
+        help='Skip adding the list of contributors to the changelog')
     parser.add_argument('-y', '--non-interactive', action='store_true', default=False,
         help="Run without user interaction, confirming all questions with 'yes'")
     args = parser.parse_args(sysargs)
@@ -96,7 +98,7 @@ def main(sysargs=None):
         print('Querying all tags and commit information...')
         tag2log_entries = get_all_changes(vcs_client)
         print('Generating changelog files with all versions...')
-        generate_changelogs(base_path, packages, tag2log_entries, logger=logging, vcs_client=vcs_client)
+        generate_changelogs(base_path, packages, tag2log_entries, logger=logging, vcs_client=vcs_client, skip_contributors=args.skip_contributors)
     else:
         print('Querying commit information since latest tag...')
         tag2log_entries = get_forthcoming_changes(vcs_client)
@@ -104,11 +106,11 @@ def main(sysargs=None):
         packages_without = {pkg_path: package for pkg_path, package in packages.items() if package.name in missing_changelogs}
         if packages_without:
             print('Generating changelog files with forthcoming version...')
-            generate_changelogs(base_path, packages_without, tag2log_entries, logger=logging, vcs_client=vcs_client)
+            generate_changelogs(base_path, packages_without, tag2log_entries, logger=logging, vcs_client=vcs_client, skip_contributors=args.skip_contributors)
         packages_with = {pkg_path: package for pkg_path, package in packages.items() if package.name not in missing_changelogs}
         if packages_with:
             print('Updating forthcoming section of changelog files...')
-            update_changelogs(base_path, packages_with, tag2log_entries, logger=logging, vcs_client=vcs_client)
+            update_changelogs(base_path, packages_with, tag2log_entries, logger=logging, vcs_client=vcs_client, skip_contributors=args.skip_contributors)
     print('Done.')
     print('Please review the extracted commit messages and consolidate the changelog entries before committing the files!')
 
