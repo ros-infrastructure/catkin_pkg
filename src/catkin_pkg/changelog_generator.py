@@ -96,7 +96,7 @@ def _get_latest_version_tag_name(vcs_client):
     return version_tag_name
 
 
-def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None):
+def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None, skip_contributors=False):
     for pkg_path, package in packages.items():
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
         if os.path.exists(changelog_path):
@@ -105,12 +105,12 @@ def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_c
         if logger:
             logger.debug("- creating '%s'" % os.path.join(pkg_path, CHANGELOG_FILENAME))
         pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path)
-        data = generate_changelog_file(package.name, pkg_tag2log_entries, vcs_client=vcs_client)
+        data = generate_changelog_file(package.name, pkg_tag2log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
         with open(changelog_path, 'w') as f:
             f.write(data)
 
 
-def update_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None):
+def update_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None, skip_contributors=False):
     for pkg_path in packages.keys():
         # update package specific changelog file
         if logger:
@@ -119,7 +119,7 @@ def update_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_cli
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
         with open(changelog_path, 'r') as f:
             data = f.read()
-        data = update_changelog_file(data, pkg_tag2log_entries, vcs_client=vcs_client)
+        data = update_changelog_file(data, pkg_tag2log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
         with open(changelog_path, 'w') as f:
             f.write(data)
 
@@ -139,25 +139,25 @@ def filter_package_changes(tag2log_entries, pkg_path):
     return pkg_tag2log_entries
 
 
-def generate_changelog_file(pkg_name, tag2log_entries, vcs_client=None):
+def generate_changelog_file(pkg_name, tag2log_entries, vcs_client=None, skip_contributors=False):
     blocks = []
     blocks.append(generate_package_headline(pkg_name))
 
     for tag in sorted_tags(tag2log_entries.keys()):
         log_entries = tag2log_entries[tag]
         if log_entries is not None:
-            blocks.append(generate_version_block(tag.name, tag.timestamp, log_entries, vcs_client=vcs_client))
+            blocks.append(generate_version_block(tag.name, tag.timestamp, log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors))
 
     return '\n'.join(blocks)
 
 
-def update_changelog_file(data, tag2log_entries, vcs_client=None):
+def update_changelog_file(data, tag2log_entries, vcs_client=None, skip_contributors=False):
     tags = sorted_tags(tag2log_entries.keys())
     for i, tag in enumerate(tags):
         log_entries = tag2log_entries[tag]
         if log_entries is None:
             continue
-        content = generate_version_content(log_entries, vcs_client=vcs_client)
+        content = generate_version_content(log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
 
         # check if version section exists
         match = get_version_section_match(data, tag.name)
@@ -170,7 +170,7 @@ def update_changelog_file(data, tag2log_entries, vcs_client=None):
             for next_tag in list(tags)[i:]:
                 match = get_version_section_match(data, next_tag.name)
                 if match:
-                    block = generate_version_block(tag.name, tag.timestamp, log_entries, vcs_client=vcs_client)
+                    block = generate_version_block(tag.name, tag.timestamp, log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
                     data = data[:match.start()] + block + '\n' + data[match.start():]
                     break
             if not match:
@@ -230,9 +230,9 @@ def generate_package_headline(pkg_name):
     return '%s\n%s\n%s\n' % (section_marker, headline, section_marker)
 
 
-def generate_version_block(version, timestamp, log_entries, vcs_client=None):
+def generate_version_block(version, timestamp, log_entries, vcs_client=None, skip_contributors=False):
     data = generate_version_headline(version, timestamp)
-    data += generate_version_content(log_entries, vcs_client=vcs_client)
+    data += generate_version_content(log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
     return data
 
 
@@ -250,7 +250,7 @@ def get_version_headline(version, timestamp):
     return headline
 
 
-def generate_version_content(log_entries, vcs_client=None):
+def generate_version_content(log_entries, vcs_client=None, skip_contributors=False):
     data = ''
     all_authors = set()
     for entry in log_entries:
@@ -262,7 +262,7 @@ def generate_version_content(log_entries, vcs_client=None):
         for line in lines[1:]:
             data += '  %s\n' % replace_repository_references(line, vcs_client=vcs_client)
         all_authors.add(entry.author)
-    if all_authors:
+    if all_authors and not skip_contributors:
         data += '* Contributors: %s\n' % ', '.join(sorted(all_authors))
     return data
 
