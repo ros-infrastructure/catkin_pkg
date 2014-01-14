@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import unittest
 
 from catkin_pkg.changelog import BulletList
@@ -80,6 +82,7 @@ single_version_rst = """\
 
 * Initial release
 * Initial bugs
+* Contributors: Sömeöne with UTF-8 in their name
 """
 
 
@@ -91,6 +94,7 @@ def test_single_version_Changelog():
     for version, date, content in changelog.foreach_version():
         versions.append(version)
     assert sorted(expected_versions) == sorted(versions)
+    str(changelog)
 
 
 single_version_with_header_rst = """\
