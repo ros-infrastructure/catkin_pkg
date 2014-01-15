@@ -40,6 +40,10 @@ http://ros.org/reps/rep-0132.html
 '''
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
+import sys
+_py3 = sys.version_info >= (3, 0)
 
 import dateutil.parser
 import docutils
@@ -48,6 +52,11 @@ import logging
 import os
 import pkg_resources
 import re
+
+try:
+    _unicode = unicode
+except NameError:
+    _unicode = str
 
 __author__ = "William Woodall"
 __email__ = "william@osrfoundation.org"
@@ -317,7 +326,10 @@ class BulletList(object):
             yield bullet
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        value = self.__unicode__()
+        if not _py3:
+            value = value.encode('ascii', 'replace')
+        return value
 
     def __unicode__(self):
         return self.as_txt()
@@ -332,7 +344,7 @@ class BulletList(object):
         b = self.bullet_generator(bullet)
         i = indent
         n = '\n' + i + '  '
-        lines = [i + b.next() + str(l).replace('\n', n) for l in self]
+        lines = [i + next(b) + _unicode(l).replace('\n', n) for l in self]
         return '\n'.join(lines)
 
     def bullet_generator(self, bullet):
@@ -357,7 +369,10 @@ class Changelog(object):
         self.__rst = ''
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        value = self.__unicode__()
+        if not _py3:
+            value = value.encode('ascii', 'replace')
+        return value
 
     def __unicode__(self):
         msg = []
@@ -366,8 +381,8 @@ class Changelog(object):
         for version, date, content in self.foreach_version(reverse=True):
             msg.append('  ' + version + ' ({0}):'.format(date))
             for item in content:
-                msg.extend(['    ' + i for i in str(item).splitlines()])
-        return unicode('\n'.join(msg))
+                msg.extend(['    ' + i for i in _unicode(item).splitlines()])
+        return '\n'.join(msg)
 
     @property
     def package_name(self):
@@ -467,20 +482,23 @@ class MixedText(object):
             yield text
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        value = self.__unicode__()
+        if not _py3:
+            value = value.encode('ascii', 'replace')
+        return value
 
     def __unicode__(self):
-        return unicode(self.to_txt())
+        return self.to_txt()
 
     def to_txt(self, bullet_indent='  '):
         lines = []
         for t in self:
             if isinstance(t, BulletList):
-                bullets = [bullet_indent + x for x in str(t).splitlines()]
+                bullets = [bullet_indent + x for x in _unicode(t).splitlines()]
                 bullets = ['', ''] + bullets + ['']
                 lines.extend('\n'.join(bullets))
             else:
-                lines.append(str(t))
+                lines.append(_unicode(t))
         return ''.join(lines)
 
 
@@ -493,34 +511,40 @@ class Reference(object):
         self.link = link
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        value = self.__unicode__()
+        if not _py3:
+            value = value.encode('ascii', 'replace')
+        return value
 
     def __unicode__(self):
-        return unicode(self.as_txt())
+        return self.as_txt()
 
     def as_rst(self):
-        '''Self as rst'''
+        '''Self as rst (unicode)'''
         if self.text is None:
-            return self.link
+            return _unicode(self.link)
         return "`{0} <{1}>`_".format(self.text, self.link)
 
     def as_txt(self):
-        '''Self formatted for plain text'''
+        '''Self formatted for plain text (unicode)'''
         if self.text is None:
-            return self.link
+            return _unicode(self.link)
         return "{0} <{1}>".format(self.text, self.link)
 
 
 class Transition(object):
     '''Represents a trasition element from ReST'''
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        value = self.__unicode__()
+        if not _py3:
+            value = value.encode('ascii', 'replace')
+        return value
 
     def __unicode__(self):
-        return unicode('-' * 20)
+        return '-' * 20
 
     def __iter__(self):
-        yield unicode(self)
+        yield self.unicode()
 
 
 def __test():
