@@ -48,7 +48,7 @@ class TemplateTest(unittest.TestCase):
   bar
   baz
 )"""
-        
+
         self.assertTrue(expected in result, result)
 
     def test_create_package_xml(self):
@@ -139,7 +139,6 @@ class TemplateTest(unittest.TestCase):
         finally:
             shutil.rmtree(rootdir)
 
-
     def test_create_package_template(self):
         template = PackageTemplate._create_package_template(
             package_name='bar2',
@@ -211,14 +210,14 @@ class TemplateTest(unittest.TestCase):
                                urls=[Url('foo', 'bugtracker'), Url('bar')],
                                build_depends=[Dependency('dep1')],
                                buildtool_depends=[Dependency('dep2'),
-                                                      Dependency('dep3')],
+                                                  Dependency('dep3')],
                                run_depends=[Dependency('dep4', version_lt='4')],
                                test_depends=[Dependency('dep5',
-                                                               version_gt='4',
-                                                               version_lt='4')],
+                                                        version_gt='4',
+                                                        version_lt='4')],
                                conflicts=[Dependency('dep6')],
                                replaces=[Dependency('dep7'),
-                                             Dependency('dep8')],
+                                         Dependency('dep8')],
                                exports=[Export('architecture_independent'),
                                         Export('meta_package')])
 

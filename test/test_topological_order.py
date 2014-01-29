@@ -111,7 +111,7 @@ class TopologicalOrderTest(unittest.TestCase):
         sprojects = _sort_decorated_packages(projects)
 
         # mock3 first since it is a message generator
-        # mock1 before mock2 due to alphabetic order 
+        # mock1 before mock2 due to alphabetic order
         self.assertEqual(['mock3', 'mock1', 'mock2'], [path for path, _ in sprojects])
 
     def test_sort_decorated_packages_favoring_message_generators(self):
@@ -133,7 +133,7 @@ class TopologicalOrderTest(unittest.TestCase):
 
         # mock2 first since it is the dependency of a message generator
         # mock3 since it is a message generator
-        # mock1 last, although having no dependencies and being first in alphabetic order 
+        # mock1 last, although having no dependencies and being first in alphabetic order
         self.assertEqual(['mock2', 'mock3', 'mock1'], [path for path, _ in sprojects])
 
     def test_sort_decorated_packages_cycles(self):

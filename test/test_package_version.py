@@ -1,7 +1,4 @@
-import os
 import unittest
-import tempfile
-import shutil
 
 from catkin_pkg.package_version import bump_version
 

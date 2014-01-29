@@ -112,7 +112,6 @@ class Package(object):
         """
         return 'catkin' in [d.name for d in self.buildtool_depends]
 
-
     def has_invalid_metapackage_dependencies(self):
         """
         Returns True if this package has invalid dependencies for a metapackage
@@ -331,14 +330,14 @@ def parse_package_string(data, filename=None):
     :raises: :exc:`InvalidPackage`
     """
     try:
-        d = dom.parseString(data)
-    except Exception as e:
-        raise InvalidPackage('The manifest contains invalid XML:\n%s' % e)
+        root = dom.parseString(data)
+    except Exception as ex:
+        raise InvalidPackage('The manifest contains invalid XML:\n%s' % ex)
 
     pkg = Package(filename)
 
     # verify unique root node
-    nodes = _get_nodes(d, 'package')
+    nodes = _get_nodes(root, 'package')
     if len(nodes) != 1:
         raise InvalidPackage('The manifest must contain a single "package" root tag')
     root = nodes[0]

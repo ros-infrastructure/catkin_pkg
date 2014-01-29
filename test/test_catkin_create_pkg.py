@@ -1,13 +1,9 @@
 import os
-import sys
 import unittest
 import tempfile
 import shutil
 
-import mock
-
 try:
-    import catkin_pkg
     from catkin_pkg.package_templates import PackageTemplate
 except ImportError as impe:
     raise ImportError(

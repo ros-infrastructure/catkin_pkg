@@ -55,7 +55,7 @@ def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
     for dirpath, dirnames, filenames in os.walk(basepath, followlinks=True):
         if 'CATKIN_IGNORE' in filenames or \
             os.path.realpath(dirpath) in real_exclude_paths or \
-            (exclude_subspaces and '.catkin' in filenames):
+                (exclude_subspaces and '.catkin' in filenames):
             del dirnames[:]
             continue
         elif PACKAGE_MANIFEST_FILENAME in filenames:
@@ -82,8 +82,8 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False):
     """
     packages = {}
     duplicates = {}
-    paths = find_package_paths(basepath, exclude_paths, exclude_subspaces)
-    for path in paths:
+    package_paths = find_package_paths(basepath, exclude_paths, exclude_subspaces)
+    for path in package_paths:
         package = parse_package(os.path.join(basepath, path))
         paths_with_same_name = [path_ for path_, pkg in packages.items() if pkg.name == package.name]
         if paths_with_same_name:

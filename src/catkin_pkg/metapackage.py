@@ -40,7 +40,6 @@ http://ros.org/reps/rep-0127.html#metapackage
 from __future__ import print_function
 
 import os
-import sys
 
 from catkin_pkg.cmake import get_metapackage_cmake_template_path
 from catkin_pkg.cmake import configure_file
