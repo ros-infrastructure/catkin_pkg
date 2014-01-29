@@ -259,7 +259,7 @@ class HgClient(VcsClientBase):
 
     # query author
     def _get_author(self, hash_):
-        cmd = [self._executable, 'log', '-r', tag_name, '--template', '{author}']
+        cmd = [self._executable, 'log', '-r', hash_, '--template', '{author}']
         result = self._run_command(cmd)
         if result['returncode']:
             raise RuntimeError('Could not fetch author:\n%s' % result['output'])
