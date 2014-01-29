@@ -49,7 +49,7 @@ class PackageTemplate(Package):
         super(PackageTemplate, self).__init__(**kwargs)
         self.catkin_deps = catkin_deps or []
         self.system_deps = system_deps or []
-        self.boost_comps=boost_comps or []
+        self.boost_comps = boost_comps or []
         self.validate()
 
     @staticmethod
@@ -90,9 +90,9 @@ class PackageTemplate(Package):
         catkin_deps = list(catkin_deps or [])
         catkin_deps.sort()
         pkg_catkin_deps = []
-        build_depends=[]
-        run_depends=[]
-        buildtool_depends=[Dependency('catkin')]
+        build_depends = []
+        run_depends = []
+        buildtool_depends = [Dependency('catkin')]
         for dep in catkin_deps:
             if dep.lower() == 'catkin':
                 catkin_deps.remove(dep)
@@ -238,7 +238,6 @@ def create_cmakelists(package_template, rosdistro):
         components = ''
     else:
         components = ' COMPONENTS\n  %s\n' % '\n  '.join(package_template.catkin_deps)
-    has_include_folder = 'roscpp' in package_template.catkin_deps
     boost_find_package = \
         ('' if not package_template.boost_comps
          else ('find_package(Boost REQUIRED COMPONENTS %s)\n' %
@@ -280,9 +279,8 @@ def _create_targetlib_args(package_template):
     if package_template.boost_comps:
         result += '#   ${Boost_LIBRARIES}\n'
     if package_template.system_deps:
-        result += (''.join(
-                ['#   ${%s_LIBRARIES}\n' %
-                 sdep for sdep in package_template.system_deps]))
+        result += (''.join(['#   ${%s_LIBRARIES}\n' %
+                            sdep for sdep in package_template.system_deps]))
     return result
 
 
@@ -326,9 +324,9 @@ def _create_depend_tag(dep_type,
         if var is not None:
             version_string.append(' %s="%s"' % (key, var))
     result = '  <%s%s>%s</%s>\n' % (dep_type,
-                                  ''.join(version_string),
-                                  name,
-                                  dep_type)
+                                    ''.join(version_string),
+                                    name,
+                                    dep_type)
     return result
 
 

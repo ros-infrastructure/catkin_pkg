@@ -39,7 +39,6 @@ The Changelog format is described in REP-0132:
 http://ros.org/reps/rep-0132.html
 '''
 
-import logging
 import os
 import re
 
