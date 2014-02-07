@@ -163,3 +163,26 @@ class TopologicalOrderTest(unittest.TestCase):
         # than mock2 since it only had mock3 as a dependency
         # than mock1 since it only had mock2 as a dependency
         self.assertEqual(['mock4', 'mock3', 'mock2', 'mock1'], [path for path, _ in sprojects])
+
+    def test_topological_order_packages_with_underlay(self):
+        def create_mock(name, build_depends, path):
+            m = Mock()
+            m.name = name
+            m.build_depends = build_depends
+            m.buildtool_depends = []
+            m.run_depends = []
+            m.exports = []
+            m.path = path
+            return m
+
+        mc = create_mock('c', [], 'pc')
+        mb = create_mock('b', [mc], 'pb')
+        ma = create_mock('a', [mb], 'pa')
+
+        packages = {ma.path: ma,
+                    mc.path: mc}
+        underlay_packages = {mb.path: mb}
+
+        ordered_packages = topological_order_packages(packages, underlay_packages=underlay_packages)
+        # c before a because of the indirect dependency via b which is part of an underlay
+        self.assertEqual(['pc', 'pa'], [path for path, _ in ordered_packages])
