@@ -86,7 +86,7 @@ class _PackageDecorator(object):
             packages[name]._add_recursive_run_depends(packages, depends_for_topological_order)
 
 
-def topological_order(root_dir, whitelisted=None, blacklisted=None):
+def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_workspaces=None):
     '''
     Crawls the filesystem to find packages and uses their
     dependencies to return a topologically order list.
@@ -94,13 +94,22 @@ def topological_order(root_dir, whitelisted=None, blacklisted=None):
     :param root_dir: The path to search in, ``str``
     :param whitelisted: A list of whitelisted package names, ``list``
     :param blacklisted: A list of blacklisted package names, ``list``
+    :param underlay_workspaces: A list of underlay workspaces of packages which might provide dependencies in case of partial workspaces, ``list``
     :returns: A list of tuples containing the relative path and a ``Package`` object, ``list``
     '''
     packages = find_packages(root_dir)
-    return topological_order_packages(packages, whitelisted, blacklisted)
+
+    # find packages in underlayed workspaces
+    underlay_packages = {}
+    if underlay_workspaces:
+        for workspace in reversed(underlay_workspaces):
+            for path, package in find_packages(workspace).items():
+                underlay_packages[package.name] = (path, package)
+
+    return topological_order_packages(packages, whitelisted=whitelisted, blacklisted=blacklisted, underlay_packages=dict(underlay_packages.values()))
 
 
-def topological_order_packages(packages, whitelisted=None, blacklisted=None):
+def topological_order_packages(packages, whitelisted=None, blacklisted=None, underlay_packages=None):
     '''
     Topologically orders packages.
     First returning packages which have message generators and then
@@ -110,6 +119,7 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None):
     :param packages: A dict mapping relative paths to ``Package`` objects ``dict``
     :param whitelisted: A list of whitelisted package names, ``list``
     :param blacklisted: A list of blacklisted package names, ``list``
+    :param underlay_packages: A dict mapping relative paths to ``Package`` objects ``dict``
     :returns: A list of tuples containing the relative path and a ``Package`` object, ``list``
     '''
     decorators_by_name = {}
@@ -126,11 +136,22 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None):
             raise RuntimeError('Two packages with the same name "%s" in the workspace:\n- %s\n- %s' % (package.name, path_with_same_name[0], path))
         decorators_by_name[package.name] = _PackageDecorator(package, path)
 
+    underlay_decorators_by_name = {}
+    if underlay_packages:
+        for path, package in underlay_packages.items():
+            # skip overlayed packages
+            if package.name in decorators_by_name:
+                continue
+            underlay_decorators_by_name[package.name] = _PackageDecorator(package, path)
+        decorators_by_name.update(underlay_decorators_by_name)
+
     # calculate transitive dependencies
     for decorator in decorators_by_name.values():
         decorator.calculate_depends_for_topological_order(decorators_by_name)
 
-    return _sort_decorated_packages(decorators_by_name)
+    tuples = _sort_decorated_packages(decorators_by_name)
+    # remove underlay packages from result
+    return [(path, package) for path, package in tuples if package.name not in underlay_decorators_by_name]
 
 
 def _reduce_cycle_set(packages_orig):
