@@ -12,6 +12,13 @@ from catkin_pkg.package import parse_package, Dependency, Export, Url, PACKAGE_M
 from catkin_pkg.python_setup import generate_distutils_setup
 
 
+def u(str):
+    try:
+        return unicode(str)
+    except NameError:
+        return str
+
+
 class TemplateTest(unittest.TestCase):
 
     def get_maintainer(self):
@@ -186,7 +193,7 @@ class TemplateTest(unittest.TestCase):
 
             rdict = generate_distutils_setup(package_xml_path=file2)
             self.assertEqual({'name': 'bar',
-                              'maintainer': u'John Foo',
+                              'maintainer': u('John Foo'),
                               'maintainer_email': 'foo@bar.com',
                               'description': 'pdesc',
                               'license': 'BSD',
@@ -270,11 +277,11 @@ class TemplateTest(unittest.TestCase):
 
             rdict = generate_distutils_setup(package_xml_path=file2)
             self.assertEqual({'name': 'bar',
-                              'maintainer': u'John Foo <foo@bar.com>, John Foo <foo@bar.com>',
+                              'maintainer': u('John Foo <foo@bar.com>, John Foo <foo@bar.com>'),
                               'description': 'pdesc',
                               'license': 'BSD, MIT',
                               'version': '0.0.0',
-                              'author': u'John Foo <foo@bar.com>, John Foo <foo@bar.com>',
+                              'author': u('John Foo <foo@bar.com>, John Foo <foo@bar.com>'),
                               'url': 'bar'}, rdict)
         finally:
             shutil.rmtree(rootdir)
