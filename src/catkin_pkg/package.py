@@ -37,6 +37,7 @@ representation.
 
 from __future__ import print_function
 
+from copy import deepcopy
 import os
 import re
 import sys
@@ -61,8 +62,11 @@ class Package(object):
         'authors',
         'build_depends',
         'buildtool_depends',
-        'run_depends',
+        'build_export_depends',
+        'buildtool_export_depends',
+        'exec_depends',
         'test_depends',
+        'doc_depends',
         'conflicts',
         'replaces',
         'exports',
@@ -82,14 +86,35 @@ class Package(object):
             else:
                 value = kwargs[attr] if attr in kwargs else None
                 setattr(self, attr, value)
+        if 'depends' in kwargs:
+            for d in kwargs['depends']:
+                for slot in [self.build_depends, self.build_export_depends, self.exec_depends]:
+                    if d not in slot:
+                        slot.append(deepcopy(d))
+            del kwargs['depends']
+        if 'run_depends' in kwargs:
+            for d in kwargs['run_depends']:
+                for slot in [self.build_export_depends, self.exec_depends]:
+                    if d not in slot:
+                        slot.append(deepcopy(d))
+            del kwargs['run_depends']
         self.filename = filename
         # verify that no unknown keywords are passed
         unknown = set(kwargs.keys()).difference(self.__slots__)
         if unknown:
             raise TypeError('Unknown properties: %s' % ', '.join(unknown))
 
+    def __getattr__(self, name):
+        if name == 'run_depends':
+            # merge different dependencies if they are not exactly equal
+            # potentially having the same dependency name multiple times with different attributes
+            run_depends = []
+            [run_depends.append(deepcopy(d)) for d in self.exec_depends + self.build_export_depends if d not in run_depends]
+            return run_depends
+        raise AttributeError(name)
+
     def __getitem__(self, key):
-        if key in self.__slots__:
+        if key in self.__slots__ + ['run_depends']:
             return getattr(self, key)
         raise KeyError('Unknown key "%s"' % key)
 
@@ -180,7 +205,16 @@ class Package(object):
                 except InvalidPackage as e:
                     errors.append(str(e))
 
-        for dep_type, depends in {'build': self.build_depends, 'buildtool': self.buildtool_depends, 'run': self.run_depends, 'test': self.test_depends}.items():
+        dep_types = {
+            'build': self.build_depends,
+            'buildtool': self.buildtool_depends,
+            'build_export': self.build_export_depends,
+            'buildtool_export': self.buildtool_export_depends,
+            'exec': self.exec_depends,
+            'test': self.test_depends,
+            'doc': self.doc_depends
+        }
+        for dep_type, depends in dep_types.items():
             for depend in depends:
                 if depend.name == self.name:
                     errors.append('The package must not "%s_depend" on a package with the same name as this package' % dep_type)
@@ -209,6 +243,11 @@ class Dependency(object):
         unknown = set(kwargs.keys()).difference(self.__slots__)
         if unknown:
             raise TypeError('Unknown properties: %s' % ', '.join(unknown))
+
+    def __eq__(self, other):
+        if not isinstance(other, Dependency):
+            return False
+        return all([getattr(self, attr) == getattr(other, attr) for attr in self.__slots__])
 
     def __str__(self):
         return self.name
@@ -345,6 +384,7 @@ def parse_package_string(data, filename=None):
     # format attribute
     value = _get_node_attr(root, 'format', default=1)
     pkg.package_format = int(value)
+    assert pkg.package_format in [1, 2], "Unable to handle package.xml format version '%d', please update catkin_pkg (e.g. on Ubuntu/Debian use: sudo apt-get update && sudo apt-get install --only-upgrade python-catkin-pkg)" % pkg.package_format
 
     # name
     pkg.name = _get_node_value(_get_node(root, 'name'))
@@ -386,20 +426,45 @@ def parse_package_string(data, filename=None):
     for node in licenses:
         pkg.licenses.append(_get_node_value(node))
 
+    errors = []
     # dependencies and relationships
     pkg.build_depends = _get_dependencies(root, 'build_depend')
     pkg.buildtool_depends = _get_dependencies(root, 'buildtool_depend')
-    pkg.run_depends = _get_dependencies(root, 'run_depend')
+    if pkg.package_format == 1:
+        run_depends = _get_dependencies(root, 'run_depend')
+        for d in run_depends:
+            pkg.build_export_depends.append(deepcopy(d))
+            pkg.exec_depends.append(deepcopy(d))
+    if pkg.package_format == 2:
+        pkg.build_export_depends = _get_dependencies(root, 'build_export_depend')
+        pkg.buildtool_export_depends = _get_dependencies(root, 'buildtool_export_depend')
+        pkg.exec_depends = _get_dependencies(root, 'exec_depend')
+        depends = _get_dependencies(root, 'depend')
+        for dep in depends:
+            # check for collisions with specific dependencies
+            same_build_depends = ['build_depend' for d in pkg.build_depends if d.name == dep.name]
+            same_build_export_depends = ['build_export_depend' for d in pkg.build_export_depends if d.name == dep.name]
+            same_exec_depends = ['exec_depend' for d in pkg.exec_depends if d.name == dep.name]
+            if same_build_depends or same_build_export_depends or same_exec_depends:
+                errors.append("The generic dependency on '%s' is redundant with: %s" % (dep.name, ', '.join(same_build_depends + same_build_export_depends + same_exec_depends)))
+            # only append non-duplicates
+            if not same_build_depends:
+                pkg.build_depends.append(deepcopy(dep))
+            if not same_build_export_depends:
+                pkg.build_export_depends.append(deepcopy(dep))
+            if not same_exec_depends:
+                pkg.exec_depends.append(deepcopy(dep))
+        pkg.doc_depends = _get_dependencies(root, 'doc_depend')
     pkg.test_depends = _get_dependencies(root, 'test_depend')
     pkg.conflicts = _get_dependencies(root, 'conflict')
     pkg.replaces = _get_dependencies(root, 'replace')
 
-    errors = []
-    for test_depend in pkg.test_depends:
-        same_build_depends = ['build_depend' for d in pkg.build_depends if d.name == test_depend.name]
-        same_run_depends = ['run_depend' for d in pkg.run_depends if d.name == test_depend.name]
-        if same_build_depends or same_run_depends:
-            errors.append('The test dependency on "%s" is redundant with: %s' % (test_depend.name, ', '.join(same_build_depends + same_run_depends)))
+    if pkg.package_format == 1:
+        for test_depend in pkg.test_depends:
+            same_build_depends = ['build_depend' for d in pkg.build_depends if d.name == test_depend.name]
+            same_run_depends = ['run_depend' for d in pkg.run_depends if d.name == test_depend.name]
+            if same_build_depends or same_run_depends:
+                errors.append('The test dependency on "%s" is redundant with: %s' % (test_depend.name, ', '.join(same_build_depends + same_run_depends)))
 
     # exports
     export_node = _get_optional_node(root, 'export')
@@ -427,16 +492,26 @@ def parse_package_string(data, filename=None):
         'author': ['email'],
         'build_depend': depend_attributes,
         'buildtool_depend': depend_attributes,
-        'run_depend': depend_attributes,
         'test_depend': depend_attributes,
         'conflict': depend_attributes,
         'replace': depend_attributes,
         'export': [],
     }
+    if pkg.package_format == 1:
+        known.update({
+            'run_depend': depend_attributes,
+        })
+    if pkg.package_format == 2:
+        known.update({
+            'build_export_depend': depend_attributes,
+            'buildtool_export_depend': depend_attributes,
+            'exec_depend': depend_attributes,
+            'doc_depend': depend_attributes,
+        })
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
     unknown_tags = set([n.tagName for n in nodes if n.tagName not in known.keys()])
     if unknown_tags:
-        errors.append('The manifest must not contain the following tags: %s' % ', '.join(unknown_tags))
+        errors.append('The manifest (with format version %d) must not contain the following tags: %s' % (pkg.package_format, ', '.join(unknown_tags)))
     for node in [n for n in nodes if n.tagName in known.keys()]:
         unknown_attrs = [str(attr) for attr in node.attributes.keys() if str(attr) not in known[node.tagName]]
         if unknown_attrs:
