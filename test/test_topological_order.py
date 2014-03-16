@@ -151,8 +151,19 @@ class TopologicalOrderTest(unittest.TestCase):
         mock4 = create_mock('mock4', 'mock2')
 
         projects = {'mock3': mock3, 'mock2': mock2, 'mock1': mock1, 'mock4': mock4}
-        sprojects = _sort_decorated_packages(projects)
-        self.assertEqual([[None, 'mock2, mock3, mock4']], sprojects)
+        try:
+            _sort_decorated_packages(projects)
+        except RuntimeError as error:
+            error_msg = str(error)
+            if 'set' in error_msg:
+                expected_msg = ('Circular dependency detected: '
+                                "[('mock2', set(['mock3'])), ('mock3', set(['mock4'])), ('mock4', set(['mock2']))]")
+            else:
+                expected_msg = ('Circular dependency detected: '
+                                "[('mock2', {'mock3'}), ('mock3', {'mock4'}), ('mock4', {'mock2'})]")
+            self.assertEqual(expected_msg, error_msg)
+        else:
+            self.fail('Expected RuntimeError')
 
         # remove cycle
         mock4.depends_for_topological_order = set()
