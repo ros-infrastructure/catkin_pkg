@@ -164,6 +164,22 @@ class TopologicalOrderTest(unittest.TestCase):
         # than mock1 since it only had mock2 as a dependency
         self.assertEqual(['mock4', 'mock3', 'mock2', 'mock1'], [path for path, _ in sprojects])
 
+    def test_sort_decorated_packages_self_dependency(self):
+        def create_mock(path, depend):
+            m = Mock()
+            m.path = path
+            m.depends_for_topological_order = set([depend])
+            m.message_generator = False
+            return m
+
+        # creating self-dependent cycle
+        mock1 = create_mock('mock1', 'mock1')
+
+        projects = {'mock1': mock1}
+        sprojects = _sort_decorated_packages(projects)
+
+        self.assertEqual(['mock1'], [path for path, _ in sprojects])
+
     def test_topological_order_packages_with_underlay(self):
         def create_mock(name, build_depends, path):
             m = Mock()
