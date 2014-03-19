@@ -151,7 +151,7 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None, und
 
     tuples = _sort_decorated_packages(decorators_by_name)
     # remove underlay packages from result
-    return [(path, package) for path, package in tuples if package.name not in underlay_decorators_by_name]
+    return [(path, package) for path, package in tuples if path is None or package.name not in underlay_decorators_by_name]
 
 
 def _reduce_cycle_set(packages_orig):
