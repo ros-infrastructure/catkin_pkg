@@ -80,20 +80,33 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False):
     :raises: :exc:RuntimeError` If multiple packages have the same
     name
     """
-    packages = {}
-    duplicates = {}
-    package_paths = find_package_paths(basepath, exclude_paths, exclude_subspaces)
-    for path in package_paths:
-        package = parse_package(os.path.join(basepath, path))
-        paths_with_same_name = [path_ for path_, pkg in packages.items() if pkg.name == package.name]
-        if paths_with_same_name:
-            if package.name not in duplicates:
-                duplicates[package.name] = paths_with_same_name
-            duplicates[package.name].append(path)
-        packages[path] = package
+    packages = find_packages_allowing_duplicates(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces)
+    package_paths_by_name = {}
+    for path, package in packages.items():
+        if package.name not in package_paths_by_name:
+            package_paths_by_name[package.name] = set([])
+        package_paths_by_name[package.name].add(path)
+    duplicates = dict([(name, paths) for name, paths in package_paths_by_name.items() if len(paths) > 1])
     if duplicates:
-        duplicates = ['Multiple packages found with the same name "%s":%s' % (name, ''.join(['\n- %s' % path_ for path_ in paths])) for name, paths in duplicates.items()]
+        duplicates = ['Multiple packages found with the same name "%s":%s' % (name, ''.join(['\n- %s' % path_ for path_ in sorted(duplicates[name])])) for name in sorted(duplicates.keys())]
         raise RuntimeError('\n'.join(duplicates))
+    return packages
+
+
+def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subspaces=False):
+    """
+    Crawls the filesystem to find package manifest files and parses them.
+
+    :param basepath: The path to search in, ``str``
+    :param exclude_paths: A list of paths which should not be searched, ``list``
+    :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be searched, ``bool``
+    :returns: A dict mapping relative paths to ``Package`` objects
+    ``dict``
+    """
+    packages = {}
+    package_paths = find_package_paths(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces)
+    for path in package_paths:
+        packages[path] = parse_package(os.path.join(basepath, path))
     return packages
 
 
