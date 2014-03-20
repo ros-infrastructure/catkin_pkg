@@ -186,3 +186,26 @@ class TopologicalOrderTest(unittest.TestCase):
         ordered_packages = topological_order_packages(packages, underlay_packages=underlay_packages)
         # c before a because of the indirect dependency via b which is part of an underlay
         self.assertEqual(['pc', 'pa'], [path for path, _ in ordered_packages])
+
+    def test_topological_order_packages_cycles(self):
+        def create_mock(name, build_depends, path):
+            m = Mock()
+            m.name = name
+            m.build_depends = build_depends
+            m.buildtool_depends = []
+            m.run_depends = []
+            m.exports = []
+            m.path = path
+            return m
+
+        mc = create_mock('c', [], 'pc')
+        mb = create_mock('b', [mc], 'pb')
+        ma = create_mock('a', [mb], 'pa')
+        mc.build_depends = [ma]
+
+        packages = {ma.path: ma,
+                    mb.math: mb,
+                    mc.path: mc}
+
+        ordered_packages = topological_order_packages(packages)
+        self.assertEqual([(None, 'a, b, c')], ordered_packages)
