@@ -66,7 +66,7 @@ class _PackageDecorator(object):
         """
         self.depends_for_topological_order = set([])
         # skip external dependencies, meaning names that are not known packages
-        for name in [d.name for d in (self.package.build_depends + self.package.buildtool_depends) if d.name in packages.keys()]:
+        for name in [d.name for d in (self.package.build_depends + self.package.buildtool_depends + self.package.test_depends) if d.name in packages.keys()]:
             if not self.is_metapackage and packages[name].is_metapackage:
                 print('WARNING: package "%s" should not depend on metapackage "%s" but on its packages instead' % (self.name, name), file=sys.stderr)
             packages[name]._add_recursive_run_depends(packages, self.depends_for_topological_order)
