@@ -106,7 +106,9 @@ class PackageTest(unittest.TestCase):
         self.assertEqual(mauth, pack.authors)
         self.assertEqual(mbuilddep, pack.build_depends)
         self.assertEqual(mbuildtooldep, pack.buildtool_depends)
-        self.assertEqual(mrundep, pack.run_depends)
+        # since run_depends are getting stores as build_export_depends as well as exec_depends
+        # and the dependency objects are being cloned only the double count can be checked for
+        self.assertEqual(2 * len(mrundep), len(pack.run_depends))
         self.assertEqual(mtestdep, pack.test_depends)
         self.assertEqual(mconf, pack.conflicts)
         self.assertEqual(mrepl, pack.replaces)
@@ -150,7 +152,7 @@ class PackageTest(unittest.TestCase):
         self.assertRaises(InvalidPackage, Package.validate, pack)
         maint.email = 'foo@bar.com'
 
-        for dep_type in [pack.build_depends, pack.buildtool_depends, pack.run_depends, pack.test_depends]:
+        for dep_type in [pack.build_depends, pack.buildtool_depends, pack.build_export_depends, pack.buildtool_export_depends, pack.exec_depends, pack.test_depends, pack.doc_depends]:
             pack.validate()
             depend = Dependency(pack.name)
             dep_type.append(depend)
