@@ -505,6 +505,7 @@ def parse_package_string(data, filename=None):
         known.update({
             'build_export_depend': depend_attributes,
             'buildtool_export_depend': depend_attributes,
+            'depend': depend_attributes,
             'exec_depend': depend_attributes,
             'doc_depend': depend_attributes,
         })
