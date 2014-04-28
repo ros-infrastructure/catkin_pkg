@@ -24,3 +24,20 @@ class WorkspacesTest(unittest.TestCase):
         finally:
             shutil.rmtree(root_dir)
 
+    def test_get_spaces(self):
+        self.assertEqual([], get_spaces([]))
+        try:
+            root_dir = tempfile.mkdtemp()
+            self.assertEqual([], get_spaces([root_dir]))
+            with open(os.path.join(root_dir, '.catkin'), 'a') as fhand:
+                fhand.write('')
+            self.assertEqual([root_dir], get_spaces([root_dir]))
+        finally:
+            shutil.rmtree(root_dir)
+
+    def test_order_paths(self):
+        self.assertEqual([], order_paths([], []))
+        self.assertEqual(['bar', 'baz'], order_paths(['bar', 'baz'], ['foo']))
+        self.assertEqual(['foo', 'bar'], order_paths(['bar', 'foo'], ['foo']))
+        self.assertEqual(['baz', 'foo', 'bar'], order_paths(['bar', 'foo', 'baz'], ['baz', 'foo']))
+        self.assertEqual(['foo' + os.sep + 'bim', 'bar'], order_paths(['bar', 'foo' + os.sep + 'bim'], ['foo']))
