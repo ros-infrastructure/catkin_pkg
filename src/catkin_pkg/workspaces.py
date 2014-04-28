@@ -38,6 +38,7 @@ from __future__ import print_function
 
 import os
 
+CATKIN_WORKSPACE_MARKER_FILE = '.catkin_workspace'
 
 def get_spaces(paths=None):
     """
@@ -87,3 +88,14 @@ def order_paths(paths_to_order, prefix_paths):
 
     # flatten list of lists
     return [j for i in ordered_paths for j in i]
+
+
+def ensure_workspace_marker(base_path):
+    """
+    creates workspace marker file at path if not existing
+
+    :param path: target folder
+    """
+    if not os.path.exists(os.path.join(base_path, CATKIN_WORKSPACE_MARKER_FILE)):
+        with open(os.path.join(base_path, CATKIN_WORKSPACE_MARKER_FILE), 'a') as fhand:
+            fhand.write('# This file currently only serves to mark the location of a catkin workspace for tool integration\n')
