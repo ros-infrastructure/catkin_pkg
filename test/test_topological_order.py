@@ -196,6 +196,7 @@ class TopologicalOrderTest(unittest.TestCase):
             m.name = name
             m.build_depends = build_depends
             m.buildtool_depends = []
+            m.test_depends = []
             m.run_depends = []
             m.exports = []
             m.path = path
