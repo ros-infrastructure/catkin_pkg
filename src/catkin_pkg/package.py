@@ -181,6 +181,8 @@ class Package(object):
             errors.append('Package version must not be empty')
         elif not re.match('^[0-9]+\.[0-9]+\.[0-9]+$', self.version):
             errors.append('Package version "%s" does not follow version conventions' % self.version)
+        elif not re.match('^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$', self.version):
+            print('WARNING: Package "%s" does not follow the version conventions. It should not contain leading zeros (unless the number is 0).' % self.name, file=sys.stderr)
 
         if not self.description:
             errors.append('Package description must not be empty')
