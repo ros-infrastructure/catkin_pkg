@@ -293,7 +293,7 @@ class Person(object):
     def validate(self):
         if self.email is None:
             return
-        if not re.match('^[a-zA-Z0-9._%\+-]+@[a-zA-Z0-9._%-]+\.[a-zA-Z]{2,6}$', self.email):
+        if not re.match('^[-a-zA-Z0-9_%+]+(\.[-a-zA-Z0-9_%+]+)*@[-a-zA-Z0-9%]+(\.[-a-zA-Z0-9%]+)*\.[a-zA-Z]{2,6}$', self.email):
             raise InvalidPackage('Invalid email "%s" for person "%s"' % (self.email, self.name))
 
 
