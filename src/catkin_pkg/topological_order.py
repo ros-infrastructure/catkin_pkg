@@ -36,6 +36,7 @@ import copy
 import sys
 
 from .packages import find_packages
+from .workspaces import get_spaces
 
 
 class _PackageDecorator(object):
@@ -103,8 +104,12 @@ def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_wor
     underlay_packages = {}
     if underlay_workspaces:
         for workspace in reversed(underlay_workspaces):
-            for path, package in find_packages(workspace).items():
-                underlay_packages[package.name] = (path, package)
+            # since underlay workspace might be a devel space
+            # consider spaces stored in the .catkin file
+            spaces = get_spaces([workspace])
+            for space in spaces:
+                for path, package in find_packages(space).items():
+                    underlay_packages[package.name] = (path, package)
 
     return topological_order_packages(packages, whitelisted=whitelisted, blacklisted=blacklisted, underlay_packages=dict(underlay_packages.values()))
 
