@@ -179,7 +179,7 @@ class Package(object):
 
         if not self.version:
             errors.append('Package version must not be empty')
-        elif not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', self.version):
+        elif not re.match('^[0-9]+\.[0-9]+\.[0-9]+$', self.version):
             errors.append('Package version "%s" does not follow version conventions' % self.version)
 
         if not self.description:
