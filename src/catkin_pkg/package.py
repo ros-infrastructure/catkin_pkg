@@ -199,6 +199,8 @@ class Package(object):
 
         if not self.licenses:
             errors.append('The package node must contain at least one "license" tag')
+        if [l for l in self.licenses if not l.strip()]:
+            errors.append('The license tag must neither be empty nor only contain whitespaces')
 
         if self.authors is not None:
             for author in self.authors:
