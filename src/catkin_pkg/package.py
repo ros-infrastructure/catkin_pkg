@@ -179,8 +179,10 @@ class Package(object):
 
         if not self.version:
             errors.append('Package version must not be empty')
-        elif not re.match('^[0-9]+\.[0-9_]+\.[0-9_]+$', self.version):
+        elif not re.match('^[0-9]+\.[0-9]+\.[0-9]+$', self.version):
             errors.append('Package version "%s" does not follow version conventions' % self.version)
+        elif not re.match('^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$', self.version):
+            print('WARNING: Package "%s" does not follow the version conventions. It should not contain leading zeros (unless the number is 0).' % self.name, file=sys.stderr)
 
         if not self.description:
             errors.append('Package description must not be empty')
@@ -197,6 +199,8 @@ class Package(object):
 
         if not self.licenses:
             errors.append('The package node must contain at least one "license" tag')
+        if [l for l in self.licenses if not l.strip()]:
+            errors.append('The license tag must neither be empty nor only contain whitespaces')
 
         if self.authors is not None:
             for author in self.authors:
@@ -291,7 +295,7 @@ class Person(object):
     def validate(self):
         if self.email is None:
             return
-        if not re.match('^[a-zA-Z0-9._%\+-]+@[a-zA-Z0-9._%-]+\.[a-zA-Z]{2,6}$', self.email):
+        if not re.match('^[-a-zA-Z0-9_%+]+(\.[-a-zA-Z0-9_%+]+)*@[-a-zA-Z0-9%]+(\.[-a-zA-Z0-9%]+)*\.[a-zA-Z]{2,6}$', self.email):
             raise InvalidPackage('Invalid email "%s" for person "%s"' % (self.email, self.name))
 
 
