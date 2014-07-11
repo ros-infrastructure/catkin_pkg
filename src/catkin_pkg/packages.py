@@ -38,7 +38,10 @@ import os
 from .package import parse_package, PACKAGE_MANIFEST_FILENAME
 
 
-def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
+IGNORE_MARKER_NAME = 'CATKIN_IGNORE'
+
+
+def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False, ignored_only=False):
     """
     Crawls the filesystem to find package manifest files.
 
@@ -47,15 +50,17 @@ def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
     :param basepath: The path to search in, ``str``
     :param exclude_paths: A list of paths which should not be searched, ``list``
     :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be searched, ``bool``
+    :param ignored_only: Only return the ignored paths
     :returns: A list of relative paths containing package manifest files
     ``list``
     """
     paths = []
     real_exclude_paths = [os.path.realpath(p) for p in exclude_paths] if exclude_paths is not None else []
     for dirpath, dirnames, filenames in os.walk(basepath, followlinks=True):
-        if 'CATKIN_IGNORE' in filenames or \
-            os.path.realpath(dirpath) in real_exclude_paths or \
-                (exclude_subspaces and '.catkin' in filenames):
+        if (ignored_only and IGNORE_MARKER_NAME not in filenames) or \
+           (not ignored_only and IGNORE_MARKER_NAME in filenames) or \
+           os.path.realpath(dirpath) in real_exclude_paths or \
+           (exclude_subspaces and '.catkin' in filenames):
             del dirnames[:]
             continue
         elif PACKAGE_MANIFEST_FILENAME in filenames:
@@ -108,6 +113,19 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     for path in package_paths:
         packages[path] = parse_package(os.path.join(basepath, path))
     return packages
+
+def find_ignored_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
+    """
+    Crawls the filesystem to find ignored package manifests
+
+    :param basepath: The path to search in, ``str``
+    :param exclude_paths: A list of paths which should not be searched, ``list``
+    :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be searched, ``bool``
+    :returns: A dict mapping relative paths to ``Package`` objects
+    ``dict``
+    """
+    ignored_package_paths = find_package_paths(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces, ignored_only=True)
+    return ignored_package_paths
 
 
 def verify_equal_package_versions(packages):
