@@ -130,10 +130,9 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None, und
         # skip blacklisted packages
         if blacklisted and package.name in blacklisted:
             continue
-        packages_with_same_name = [p for p in decorators_by_name.values() if p.name == package.name]
-        if packages_with_same_name:
-            path_with_same_name = [p for p, v in packages.items() if v == packages_with_same_name[0]]
-            raise RuntimeError('Two packages with the same name "%s" in the workspace:\n- %s\n- %s' % (package.name, path_with_same_name[0], path))
+        if package.name in decorators_by_name:
+            path_with_same_name = decorators_by_name[package.name].path
+            raise RuntimeError('Two packages with the same name "%s" in the workspace:\n- %s\n- %s' % (package.name, path_with_same_name, path))
         decorators_by_name[package.name] = _PackageDecorator(package, path)
 
     underlay_decorators_by_name = {}
