@@ -46,11 +46,12 @@ class TopologicalOrderTest(unittest.TestCase):
         pkg1 = create_mock('pkg', [], [], 'path/to/pkg1')
         pkg2_dep = create_mock('pkg_dep', [], [], 'path/to/pkg2_dep')
         pkg2 = create_mock('pkg', [pkg2_dep], [], 'path/to/pkg2')
-        topological_order_packages({
-            pkg1.path: pkg1,
-            pkg2_dep.path: pkg2_dep,
-            pkg2.path: pkg2,
-        })
+        with self.assertRaisesRegexp(RuntimeError, 'Two packages with the same name "pkg" in the workspace'):
+            topological_order_packages({
+                pkg1.path: pkg1,
+                pkg2_dep.path: pkg2_dep,
+                pkg2.path: pkg2,
+            })
 
     def test_package_decorator_init(self):
 
