@@ -8,20 +8,21 @@ except ImportError as e:
     raise ImportError('Please adjust your PYTHONPATH before running this test: %s' % str(e))
 
 
+def create_mock(name, build_depends, run_depends, path):
+    m = Mock()
+    m.name = name
+    m.build_depends = build_depends
+    m.buildtool_depends = []
+    m.run_depends = run_depends
+    m.test_depends = []
+    m.exports = []
+    m.path = path
+    return m
+
+
 class TopologicalOrderTest(unittest.TestCase):
 
     def test_topological_order_packages(self):
-        def create_mock(name, build_depends, run_depends, path):
-            m = Mock()
-            m.name = name
-            m.build_depends = build_depends
-            m.buildtool_depends = []
-            m.run_depends = run_depends
-            m.test_depends = []
-            m.exports = []
-            m.path = path
-            return m
-
         mc = create_mock('c', [], [], 'pc')
         md = create_mock('d', [], [], 'pd')
         ma = create_mock('a', [mc], [md], 'pa')
@@ -40,6 +41,17 @@ class TopologicalOrderTest(unittest.TestCase):
         ordered_packages = topological_order_packages(packages, whitelisted=['a', 'b', 'c'])
         # c before a because of the run dependency from a to c
         self.assertEqual(['pc', 'pa', 'pb'], [path for path, _ in ordered_packages])
+
+    def test_topological_order_packages_with_duplicates(self):
+        pkg1 = create_mock('pkg', [], [], 'path/to/pkg1')
+        pkg2_dep = create_mock('pkg_dep', [], [], 'path/to/pkg2_dep')
+        pkg2 = create_mock('pkg', [pkg2_dep], [], 'path/to/pkg2')
+        with self.assertRaisesRegexp(RuntimeError, 'Two packages with the same name "pkg" in the workspace'):
+            topological_order_packages({
+                pkg1.path: pkg1,
+                pkg2_dep.path: pkg2_dep,
+                pkg2.path: pkg2,
+            })
 
     def test_package_decorator_init(self):
 
@@ -90,7 +102,8 @@ class TopologicalOrderTest(unittest.TestCase):
                     mockproject6.name: mockproject6}
 
         pd.calculate_depends_for_topological_order(packages)
-        self.assertEqual(set([mockproject1.name, mockproject4.name, mockproject5.name, mockproject6.name]), pd.depends_for_topological_order)
+        self.assertEqual(set([mockproject1.name, mockproject4.name, mockproject5.name, mockproject6.name]),
+                         pd.depends_for_topological_order)
 
     def test_sort_decorated_packages(self):
         projects = {}
