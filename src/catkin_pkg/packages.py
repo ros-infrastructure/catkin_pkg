@@ -92,7 +92,7 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False):
         raise RuntimeError('\n'.join(duplicates))
     return packages
 
-
+find_packages_allowing_duplicates_cache = dict()
 def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subspaces=False):
     """
     Crawls the filesystem to find package manifest files and parses them.
@@ -103,10 +103,15 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     :returns: A dict mapping relative paths to ``Package`` objects
     ``dict``
     """
+    global find_packages_allowing_duplicates_cache
+    cache_key = (basepath, exclude_paths, exclude_subspaces)
+    if cache_key in find_packages_allowing_duplicates_cache:
+        return find_packages_allowing_duplicates_cache[cache_key]
     packages = {}
     package_paths = find_package_paths(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces)
     for path in package_paths:
         packages[path] = parse_package(os.path.join(basepath, path))
+    find_packages_allowing_duplicates_cache[cache_key] = packages
     return packages
 
 
