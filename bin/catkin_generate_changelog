@@ -119,5 +119,5 @@ if __name__ == '__main__':
     try:
         main()
     except RuntimeError as e:
-        print(e, file=sys.stderr)
+        print('ERROR: ' + str(e), file=sys.stderr)
         sys.exit(1)

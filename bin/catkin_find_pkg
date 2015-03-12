@@ -26,7 +26,8 @@ def main(argv=sys.argv[1:]):
             print("Could not find package '%s'." % args.pkg, file=sys.stderr)
             sys.exit(2)
     except RuntimeError as e:
-        sys.exit(str(e))
+        print('ERROR: ' + str(e), file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
