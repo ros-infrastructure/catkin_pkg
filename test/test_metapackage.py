@@ -26,8 +26,18 @@ test_expectations = {
     'no_buildtool_depend_catkin': [InvalidMetapackage, 'No buildtool dependency on catkin', None],
     'no_cmake': [InvalidMetapackage, 'No CMakeLists.txt', None],
     'no_metapackage_tag': [InvalidMetapackage, 'No <metapackage/> tag in <export>', None],
+    'NonConformingName': [None, None, None],
     'valid_metapackage': [None, None, None]
 }
+
+test_expected_warnings = [
+    'Metapackage "invalid_depends" should not have other dependencies besides '
+    'a buildtool_depend on catkin and run_depends.',
+    'Metapackage "no_buildtool_depend_catkin" must buildtool_depend on '
+    'catkin.',
+    'Package name "NonConformingName" does not follow the naming conventions. '
+    'It should start with a lower case letter and only contain lower case '
+    'letters, digits and underscores.']
 
 
 @contextlib.contextmanager
@@ -75,6 +85,13 @@ class TestMetapackageValidation(unittest.TestCase):
                             _validate_metapackage(path, package)
                 else:
                     _validate_metapackage(path, package)
+
+    def test_collect_warnings(self):
+        """Tests warnings collection"""
+        warnings = []
+        pkgs_dict = find_packages(test_data_dir, warnings=warnings)
+
+        self.assertEqual(warnings.sort(), test_expected_warnings.sort())
 
 
 def test_get_expected_cmakelists_txt():

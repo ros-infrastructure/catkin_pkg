@@ -158,13 +158,16 @@ class Package(object):
         """
         return 'metapackage' in [e.tagname for e in self.exports]
 
-    def validate(self):
+    def validate(self, warnings=None):
         """
         makes sure all standards for packages are met
         :param package: Package to check
+        :param warnings: Print warnings if None or return them in the given list
         :raises InvalidPackage: in case validation fails
         """
         errors = []
+        new_warnings = []
+
         if self.package_format:
             if not re.match('^[1-9][0-9]*$', str(self.package_format)):
                 errors.append('The "format" attribute of the package must contain a positive integer if present')
@@ -175,14 +178,14 @@ class Package(object):
         if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_-]*$', self.name):
             errors.append('Package name "%s" does not follow naming conventions' % self.name)
         elif not re.match('^[a-z][a-z0-9_]*$', self.name):
-            print('WARNING: Package name "%s" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.' % self.name, file=sys.stderr)
+            new_warnings.append('Package name "%s" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.' % self.name)
 
         if not self.version:
             errors.append('Package version must not be empty')
         elif not re.match('^[0-9]+\.[0-9]+\.[0-9]+$', self.version):
             errors.append('Package version "%s" does not follow version conventions' % self.version)
         elif not re.match('^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$', self.version):
-            print('WARNING: Package "%s" does not follow the version conventions. It should not contain leading zeros (unless the number is 0).' % self.name, file=sys.stderr)
+            new_warnings.append('Package "%s" does not follow the version conventions. It should not contain leading zeros (unless the number is 0).' % self.name)
 
         if not self.description:
             errors.append('Package description must not be empty')
@@ -226,10 +229,16 @@ class Package(object):
         if self.is_metapackage():
             if not self.has_buildtool_depend_on_catkin():
                 # TODO escalate to error in the future, or use metapackage.validate_metapackage
-                print('WARNING: Metapackage "%s" must buildtool_depend on catkin.' % self.name, file=sys.stderr)
+                new_warnings.append('Metapackage "%s" must buildtool_depend on catkin.' % self.name)
             if self.has_invalid_metapackage_dependencies():
-                print(('WARNING: Metapackage "%s" should not have other dependencies besides a ' +
-                       'buildtool_depend on catkin and run_depends.') % self.name, file=sys.stderr)
+                new_warnings.append('Metapackage "%s" should not have other dependencies besides a '
+                                    'buildtool_depend on catkin and run_depends.' % self.name)
+
+        for warning in new_warnings:
+            if warnings is None:
+                print('WARNING: ' + warning, file=sys.stderr)
+            elif warning not in warnings:
+                warnings.append(warning)
 
         if errors:
             raise InvalidPackage('\n'.join(errors))
@@ -335,12 +344,13 @@ def package_exists_at(path):
     return os.path.isdir(path) and os.path.isfile(os.path.join(path, PACKAGE_MANIFEST_FILENAME))
 
 
-def parse_package(path):
+def parse_package(path, warnings=None):
     """
     Parse package manifest.
 
     :param path: The path of the package.xml file, it may or may not
     include the filename
+    :param warnings: Print warnings if None or return them in the given list
 
     :returns: return :class:`Package` instance, populated with parsed fields
     :raises: :exc:`InvalidPackage`
@@ -357,18 +367,19 @@ def parse_package(path):
 
     with open(filename, 'r') as f:
         try:
-            return parse_package_string(f.read(), filename)
+            return parse_package_string(f.read(), filename, warnings=warnings)
         except InvalidPackage as e:
             e.args = ['Invalid package manifest "%s": %s' % (filename, e.message)]
             raise
 
 
-def parse_package_string(data, filename=None):
+def parse_package_string(data, filename=None, warnings=None):
     """
     Parse package.xml string contents.
 
     :param data: package.xml contents, ``str``
     :param filename: full file path for debugging, ``str``
+    :param warnings: Print warnings if None or return them in the given list
     :returns: return parsed :class:`Package`
     :raises: :exc:`InvalidPackage`
     """
@@ -529,7 +540,7 @@ def parse_package_string(data, filename=None):
     if errors:
         raise InvalidPackage('Error(s) in %s:%s' % (filename, ''.join(['\n- %s' % e for e in errors])))
 
-    pkg.validate()
+    pkg.validate(warnings=warnings)
 
     return pkg
 

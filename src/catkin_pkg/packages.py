@@ -68,19 +68,20 @@ def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
     return paths
 
 
-def find_packages(basepath, exclude_paths=None, exclude_subspaces=False):
+def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warnings=None):
     """
     Crawls the filesystem to find package manifest files and parses them.
 
     :param basepath: The path to search in, ``str``
     :param exclude_paths: A list of paths which should not be searched, ``list``
     :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be searched, ``bool``
+    :param warnings: Print warnings if None or return them in the given list
     :returns: A dict mapping relative paths to ``Package`` objects
     ``dict``
     :raises: :exc:RuntimeError` If multiple packages have the same
     name
     """
-    packages = find_packages_allowing_duplicates(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces)
+    packages = find_packages_allowing_duplicates(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces, warnings=warnings)
     package_paths_by_name = {}
     for path, package in packages.items():
         if package.name not in package_paths_by_name:
@@ -93,20 +94,21 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False):
     return packages
 
 
-def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subspaces=False):
+def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subspaces=False, warnings=None):
     """
     Crawls the filesystem to find package manifest files and parses them.
 
     :param basepath: The path to search in, ``str``
     :param exclude_paths: A list of paths which should not be searched, ``list``
     :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be searched, ``bool``
+    :param warnings: Print warnings if None or return them in the given list
     :returns: A dict mapping relative paths to ``Package`` objects
     ``dict``
     """
     packages = {}
     package_paths = find_package_paths(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces)
     for path in package_paths:
-        packages[path] = parse_package(os.path.join(basepath, path))
+        packages[path] = parse_package(os.path.join(basepath, path), warnings=warnings)
     return packages
 
 
