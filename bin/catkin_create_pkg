@@ -16,6 +16,9 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
     parser.add_argument('name',
                         nargs=1,
                         help='The name for the package')
+    parser.add_argument('--meta',
+                        action='store_true',
+                        help='Creates meta-package files')
     parser.add_argument('dependencies',
                         nargs='*',
                         help='Catkin package Dependencies')
@@ -61,7 +64,8 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
         create_package_files(target_path=target_path,
                              package_template=package_template,
                              rosdistro=args.rosdistro,
-                             newfiles={})
+                             newfiles={},
+                             meta=args.meta)
         print('Successfully created files in %s. Please adjust the values in package.xml.' % target_path)
     except ValueError as vae:
         parser.error(str(vae))

@@ -37,6 +37,8 @@ import os
 import string
 import sys
 
+from catkin_pkg.cmake import configure_file
+from catkin_pkg.cmake import get_metapackage_cmake_template_path
 from catkin_pkg.package import Dependency
 from catkin_pkg.package import Package
 from catkin_pkg.package import PACKAGE_MANIFEST_FILENAME
@@ -190,7 +192,7 @@ def _safe_write_files(newfiles, target_dir):
 
 
 def create_package_files(target_path, package_template, rosdistro,
-                         newfiles=None):
+                         newfiles=None, meta=False):
     """
     creates several files from templates to start a new package.
 
@@ -205,10 +207,10 @@ def create_package_files(target_path, package_template, rosdistro,
     manifest_path = os.path.join(target_path, PACKAGE_MANIFEST_FILENAME)
     if manifest_path not in newfiles:
         newfiles[manifest_path] = \
-            create_package_xml(package_template, rosdistro)
+            create_package_xml(package_template, rosdistro, meta=meta)
     cmake_path = os.path.join(target_path, 'CMakeLists.txt')
     if not cmake_path in newfiles:
-        newfiles[cmake_path] = create_cmakelists(package_template, rosdistro)
+        newfiles[cmake_path] = create_cmakelists(package_template, rosdistro, meta=meta)
     _safe_write_files(newfiles, target_path)
     if 'roscpp' in package_template.catkin_deps:
         fname = os.path.join(target_path, 'include', package_template.name)
@@ -227,51 +229,58 @@ class CatkinTemplate(string.Template):
     escape = '@'
 
 
-def create_cmakelists(package_template, rosdistro):
+def create_cmakelists(package_template, rosdistro, meta=False):
     """
     :param package_template: contains the required information
     :returns: file contents as string
     """
-    cmakelists_txt_template = read_template_file('CMakeLists.txt', rosdistro)
-    ctemp = CatkinTemplate(cmakelists_txt_template)
-    if package_template.catkin_deps == []:
-        components = ''
+    if meta:
+        template_path = get_metapackage_cmake_template_path()
+        temp_dict = {'name': package_template.name,
+                      'metapackage_arguments': ''
+                      }
+        return configure_file(template_path, temp_dict)
     else:
-        components = ' COMPONENTS\n  %s\n' % '\n  '.join(package_template.catkin_deps)
-    boost_find_package = \
-        ('' if not package_template.boost_comps
-         else ('find_package(Boost REQUIRED COMPONENTS %s)\n' %
-               ' '.join(package_template.boost_comps)))
-    system_find_package = ''
-    for sysdep in package_template.system_deps:
-        if sysdep == 'boost':
-            continue
-        if sysdep.startswith('python-'):
-            system_find_package += '# '
-        system_find_package += 'find_package(%s REQUIRED)\n' % sysdep
-    # provide dummy values
-    catkin_depends = (' '.join(package_template.catkin_deps)
-                      if package_template.catkin_deps
-                      else 'other_catkin_pkg')
-    system_depends = (' '.join(package_template.system_deps)
-                      if package_template.system_deps
-                      else 'system_lib')
-    message_pkgs = [pkg for pkg in package_template.catkin_deps if pkg.endswith('_msgs')]
-    if message_pkgs:
-        message_depends = '#   %s' % '#   '.join(message_pkgs)
-    else:
-        message_depends = '#   std_msgs  # Or other packages containing msgs'
-    temp_dict = {'name': package_template.name,
-                 'components': components,
-                 'include_directories': _create_include_macro(package_template),
-                 'boost_find': boost_find_package,
-                 'systems_find': system_find_package,
-                 'catkin_depends': catkin_depends,
-                 'system_depends': system_depends,
-                 'target_libraries': _create_targetlib_args(package_template),
-                 'message_dependencies': message_depends
-                 }
-    return ctemp.substitute(temp_dict)
+        cmakelists_txt_template = read_template_file('CMakeLists.txt', rosdistro)
+        ctemp = CatkinTemplate(cmakelists_txt_template)
+        if package_template.catkin_deps == []:
+            components = ''
+        else:
+            components = ' COMPONENTS\n  %s\n' % '\n  '.join(package_template.catkin_deps)
+        boost_find_package = \
+            ('' if not package_template.boost_comps
+             else ('find_package(Boost REQUIRED COMPONENTS %s)\n' %
+                   ' '.join(package_template.boost_comps)))
+        system_find_package = ''
+        for sysdep in package_template.system_deps:
+            if sysdep == 'boost':
+                continue
+            if sysdep.startswith('python-'):
+                system_find_package += '# '
+            system_find_package += 'find_package(%s REQUIRED)\n' % sysdep
+        # provide dummy values
+        catkin_depends = (' '.join(package_template.catkin_deps)
+                          if package_template.catkin_deps
+                          else 'other_catkin_pkg')
+        system_depends = (' '.join(package_template.system_deps)
+                          if package_template.system_deps
+                          else 'system_lib')
+        message_pkgs = [pkg for pkg in package_template.catkin_deps if pkg.endswith('_msgs')]
+        if message_pkgs:
+            message_depends = '#   %s' % '#   '.join(message_pkgs)
+        else:
+            message_depends = '#   std_msgs  # Or other packages containing msgs'
+        temp_dict = {'name': package_template.name,
+                     'components': components,
+                     'include_directories': _create_include_macro(package_template),
+                     'boost_find': boost_find_package,
+                     'systems_find': system_find_package,
+                     'catkin_depends': catkin_depends,
+                     'system_depends': system_depends,
+                     'target_libraries': _create_targetlib_args(package_template),
+                     'message_dependencies': message_depends
+                     }
+        return ctemp.substitute(temp_dict)
 
 
 def _create_targetlib_args(package_template):
@@ -330,7 +339,7 @@ def _create_depend_tag(dep_type,
     return result
 
 
-def create_package_xml(package_template, rosdistro):
+def create_package_xml(package_template, rosdistro, meta=False):
     """
     :param package_template: contains the required information
     :returns: file contents as string
@@ -420,6 +429,9 @@ def create_package_xml(package_template, rosdistro):
                 attribs = [' %s="%s"' % (k, v) for (k, v) in export.attributes.items()]
                 line = '    <%s%s/>\n' % (export.tagname, ''.join(attribs))
                 exports.append(line)
+
+    if meta:
+        exports.append('    <metapackage/>')
     temp_dict['exports'] = ''.join(exports)
 
     temp_dict['components'] = package_template.catkin_deps
