@@ -37,7 +37,7 @@ representation.
 
 from __future__ import print_function
 
-from copy import deepcopy
+from copy import copy
 import os
 import re
 import sys
@@ -90,13 +90,13 @@ class Package(object):
             for d in kwargs['depends']:
                 for slot in [self.build_depends, self.build_export_depends, self.exec_depends]:
                     if d not in slot:
-                        slot.append(deepcopy(d))
+                        slot.append(copy(d))
             del kwargs['depends']
         if 'run_depends' in kwargs:
             for d in kwargs['run_depends']:
                 for slot in [self.build_export_depends, self.exec_depends]:
                     if d not in slot:
-                        slot.append(deepcopy(d))
+                        slot.append(copy(d))
             del kwargs['run_depends']
         self.filename = filename
         # verify that no unknown keywords are passed
@@ -109,7 +109,7 @@ class Package(object):
             # merge different dependencies if they are not exactly equal
             # potentially having the same dependency name multiple times with different attributes
             run_depends = []
-            [run_depends.append(deepcopy(d)) for d in self.exec_depends + self.build_export_depends if d not in run_depends]
+            [run_depends.append(copy(d)) for d in self.exec_depends + self.build_export_depends if d not in run_depends]
             return run_depends
         raise AttributeError(name)
 
@@ -448,8 +448,8 @@ def parse_package_string(data, filename=None, warnings=None):
     if pkg.package_format == 1:
         run_depends = _get_dependencies(root, 'run_depend')
         for d in run_depends:
-            pkg.build_export_depends.append(deepcopy(d))
-            pkg.exec_depends.append(deepcopy(d))
+            pkg.build_export_depends.append(copy(d))
+            pkg.exec_depends.append(copy(d))
     if pkg.package_format == 2:
         pkg.build_export_depends = _get_dependencies(root, 'build_export_depend')
         pkg.buildtool_export_depends = _get_dependencies(root, 'buildtool_export_depend')
@@ -464,11 +464,11 @@ def parse_package_string(data, filename=None, warnings=None):
                 errors.append("The generic dependency on '%s' is redundant with: %s" % (dep.name, ', '.join(same_build_depends + same_build_export_depends + same_exec_depends)))
             # only append non-duplicates
             if not same_build_depends:
-                pkg.build_depends.append(deepcopy(dep))
+                pkg.build_depends.append(copy(dep))
             if not same_build_export_depends:
-                pkg.build_export_depends.append(deepcopy(dep))
+                pkg.build_export_depends.append(copy(dep))
             if not same_exec_depends:
-                pkg.exec_depends.append(deepcopy(dep))
+                pkg.exec_depends.append(copy(dep))
         pkg.doc_depends = _get_dependencies(root, 'doc_depend')
     pkg.test_depends = _get_dependencies(root, 'test_depend')
     pkg.conflicts = _get_dependencies(root, 'conflict')
