@@ -46,9 +46,9 @@ def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
 
     :param basepath: The path to search in, ``str``
     :param exclude_paths: A list of paths which should not be searched, ``list``
-    :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be searched, ``bool``
-    :returns: A list of relative paths containing package manifest files
-    ``list``
+    :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be
+        searched, ``bool``
+    :returns: A list of relative paths containing package manifest files ``list``
     """
     paths = []
     real_exclude_paths = [os.path.realpath(p) for p in exclude_paths] if exclude_paths is not None else []
@@ -74,12 +74,11 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warning
 
     :param basepath: The path to search in, ``str``
     :param exclude_paths: A list of paths which should not be searched, ``list``
-    :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be searched, ``bool``
+    :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be
+        searched, ``bool``
     :param warnings: Print warnings if None or return them in the given list
-    :returns: A dict mapping relative paths to ``Package`` objects
-    ``dict``
-    :raises: :exc:RuntimeError` If multiple packages have the same
-    name
+    :returns: A dict mapping relative paths to ``Package`` objects ``dict``
+    :raises: :exc:RuntimeError` If multiple packages have the same name
     """
     packages = find_packages_allowing_duplicates(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces, warnings=warnings)
     package_paths_by_name = {}
@@ -100,10 +99,10 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
 
     :param basepath: The path to search in, ``str``
     :param exclude_paths: A list of paths which should not be searched, ``list``
-    :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be searched, ``bool``
+    :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be
+        searched, ``bool``
     :param warnings: Print warnings if None or return them in the given list
-    :returns: A dict mapping relative paths to ``Package`` objects
-    ``dict``
+    :returns: A dict mapping relative paths to ``Package`` objects ``dict``
     """
     packages = {}
     package_paths = find_package_paths(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces)
@@ -118,8 +117,7 @@ def verify_equal_package_versions(packages):
 
     :param packages: The list of ``Package`` objects, ``list``
     :returns: The version number
-    :raises: :exc:RuntimeError` If the version is not equal in all
-    packages
+    :raises: :exc:RuntimeError` If the version is not equal in all packages
     """
     version = None
     for package in packages:

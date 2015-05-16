@@ -349,7 +349,7 @@ def parse_package(path, warnings=None):
     Parse package manifest.
 
     :param path: The path of the package.xml file, it may or may not
-    include the filename
+        include the filename
     :param warnings: Print warnings if None or return them in the given list
 
     :returns: return :class:`Package` instance, populated with parsed fields

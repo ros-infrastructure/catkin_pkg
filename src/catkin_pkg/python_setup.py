@@ -64,12 +64,12 @@ def generate_distutils_setup(package_xml_path=os.path.curdir, **kwargs):
 
     All licenses are merged into the "license" field.
 
-    :param kwargs: All keyword arguments are passed through. The
-    above mentioned keys are verified to be identical if passed as
-    a keyword argument
+    :param kwargs: All keyword arguments are passed through. The above
+        mentioned keys are verified to be identical if passed as a
+        keyword argument
 
     :returns: return dict populated with parsed fields and passed
-    keyword arguments
+        keyword arguments
     :raises: :exc:`InvalidPackage`
     :raises: :exc:`IOError`
     """
