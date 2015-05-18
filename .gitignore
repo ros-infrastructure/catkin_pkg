@@ -2,6 +2,6 @@
 build
 bin/catkin_create_pkgc
 deb_dist
-doc/generated
+doc/_build
 dist
 MANIFEST
