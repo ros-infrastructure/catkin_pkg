@@ -149,9 +149,9 @@ def validate_metapackage(path, package):
         raise InvalidMetapackage("""\
 Invalid CMakeLists.txt
 Expected:
-%s
+<<<%s>>>
 Got:
-%s""" % (get_cmakelists_txt(path), get_expected_cmakelists_txt(package.name)), path, package
+<<<%s>>>""" % (get_cmakelists_txt(path), get_expected_cmakelists_txt(package.name)), path, package
         )
     # Does it buildtool depend on catkin, else raise
     if not package.has_buildtool_depend_on_catkin():
