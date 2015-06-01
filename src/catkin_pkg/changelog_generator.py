@@ -257,6 +257,7 @@ def generate_version_content(log_entries, vcs_client=None, skip_contributors=Fal
         lines = msg.splitlines()
         lines = [l.strip() for l in lines]
         lines = [l for l in lines if l]
+        lines = [escape_trailing_underscores(l) for l in lines]
         data += '* %s\n' % (replace_repository_references(lines[0], vcs_client=vcs_client) if lines else '')
         for line in lines[1:]:
             data += '  %s\n' % replace_repository_references(line, vcs_client=vcs_client)
@@ -264,6 +265,15 @@ def generate_version_content(log_entries, vcs_client=None, skip_contributors=Fal
     if all_authors and not skip_contributors:
         data += '* Contributors: %s\n' % ', '.join(sorted(all_authors))
     return data
+
+
+def escape_trailing_underscores(line):
+    if line.endswith('_'):
+        line = line[:-1] + '\_'
+    # match words ending with an underscore which are not followed by another word
+    # and insert a backslash before the underscore to escape it
+    line = re.sub(r'(\w+)_([^\w])', '\\1\\_\\2', line)
+    return line
 
 
 def replace_repository_references(line, vcs_client=None):
