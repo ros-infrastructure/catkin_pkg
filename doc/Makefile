@@ -1,10 +1,12 @@
 .PHONY: html apidoc clean upload
 
+SPHINXAPIDOC=sphinx-apidoc
+
 html: apidoc
-	make -C _build html
+	$(MAKE) -C _build html
 
 apidoc:
-	sphinx-apidoc -F -o _build ../src/catkin_pkg
+	$(SPHINXAPIDOC) -F -o _build ../src/catkin_pkg
 	sed -i "s/_build/./g" _build/Makefile
 
 clean:
