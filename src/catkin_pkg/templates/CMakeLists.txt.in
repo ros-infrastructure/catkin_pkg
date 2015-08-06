@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(@name)
+project(@(name))
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -97,7 +97,7 @@ find_package(catkin REQUIRED@components)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES @{name}
+#  LIBRARIES @(name)
 #  CATKIN_DEPENDS @catkin_depends
 #  DEPENDS @system_depends
 )
@@ -111,24 +111,24 @@ catkin_package(
 @include_directories
 
 ## Declare a C++ library
-# add_library(@{name}
-#   src/${PROJECT_NAME}/@name.cpp
+# add_library(@(name)
+#   src/${PROJECT_NAME}/@(name).cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(@{name} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(@(name) ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(@{name}_node src/@{name}_node.cpp)
+# add_executable(@(name)_node src/@(name)_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(@{name}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(@(name)_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(@{name}_node
+# target_link_libraries(@(name)_node
 @target_libraries# )
 
 #############
@@ -146,7 +146,7 @@ catkin_package(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS @{name} @{name}_node
+# install(TARGETS @(name) @(name)_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -171,7 +171,7 @@ catkin_package(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_@name.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_@(name).cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
