@@ -148,8 +148,8 @@ class PackageTemplate(Package):
 def read_template_file(filename, rosdistro):
     template_dir = os.path.join(os.path.dirname(__file__), 'templates')
     templates = []
-    templates.append(os.path.join(template_dir, rosdistro, '%s.in' % filename))
-    templates.append(os.path.join(template_dir, '%s.in' % filename))
+    templates.append(os.path.join(template_dir, rosdistro, '%s.em' % filename))
+    templates.append(os.path.join(template_dir, '%s.em' % filename))
     for template in templates:
         if os.path.isfile(template):
             with open(template, 'r') as fhand:
