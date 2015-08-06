@@ -37,6 +37,8 @@ import os
 import string
 import sys
 
+import em
+
 from catkin_pkg.cmake import configure_file
 from catkin_pkg.cmake import get_metapackage_cmake_template_path
 from catkin_pkg.package import Dependency
@@ -146,8 +148,8 @@ class PackageTemplate(Package):
 def read_template_file(filename, rosdistro):
     template_dir = os.path.join(os.path.dirname(__file__), 'templates')
     templates = []
-    templates.append(os.path.join(template_dir, rosdistro, '%s.in' % filename))
-    templates.append(os.path.join(template_dir, '%s.in' % filename))
+    templates.append(os.path.join(template_dir, rosdistro, '%s.em' % filename))
+    templates.append(os.path.join(template_dir, '%s.em' % filename))
     for template in templates:
         if os.path.isfile(template):
             with open(template, 'r') as fhand:
@@ -223,10 +225,11 @@ def create_package_files(target_path, package_template, rosdistro,
         print('Created folder %s' % os.path.relpath(fname, os.path.dirname(target_path)))
 
 
-class CatkinTemplate(string.Template):
-    """subclass to use @ instead of $ as markers"""
-    delimiter = '@'
-    escape = '@'
+class CatkinTemplate(object):
+    def __init__(self, template_string):
+        self.template_string = template_string
+    def substitute(self, locals_dict):
+        return em.expand(self.template_string, locals_dict)
 
 
 def create_cmakelists(package_template, rosdistro, meta=False):
