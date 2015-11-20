@@ -146,11 +146,11 @@ class GitClient(VcsClientBase):
         return result['output']
 
     def get_tags(self):
-        cmd_tag = [self._executable, 'tag']
+        cmd_tag = [self._executable, 'log', '--simplify-by-decoration', '--pretty="%d"']
         result_tag = self._run_command(cmd_tag)
         if result_tag['returncode']:
             raise RuntimeError('Could not fetch tags:\n%s' % result_tag['output'])
-        tag_names = result_tag['output'].splitlines()
+        tag_names = re.findall("(?<=tag: )([^)]+)", result_tag['output'])
 
         tags = []
         for tag_name in tag_names:
