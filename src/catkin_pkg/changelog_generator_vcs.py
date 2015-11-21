@@ -146,11 +146,15 @@ class GitClient(VcsClientBase):
         return result['output']
 
     def get_tags(self):
-        cmd_tag = [self._executable, 'log', '--simplify-by-decoration', '--pretty="%d"']
+        # Get a decorated log, use the refnames to find the ancestor tags
+        cmd_tag = [self._executable, 'log', '--simplify-by-decoration', '--decorate', '--pretty=oneline']
         result_tag = self._run_command(cmd_tag)
         if result_tag['returncode']:
             raise RuntimeError('Could not fetch tags:\n%s' % result_tag['output'])
-        tag_names = re.findall('tag: ([^),]+)[),]', result_tag['output'])
+        # Parse a comma-separated list of refname decorators out of the log
+        decorations = ', '.join(re.findall('^[a-f0-9]+ \(([^)]*)\) .', result_tag['output'], re.MULTILINE)) + ','
+        # Extract only refnames that are tags
+        tag_names = re.findall('tag: ([^,]+)[,]', decorations)
 
         tags = []
         for tag_name in tag_names:
