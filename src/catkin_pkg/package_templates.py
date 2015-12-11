@@ -366,10 +366,10 @@ def create_package_xml(package_template, rosdistro, meta=False):
 
     def get_person_tag(tagname, person):
         email_string = (
-            "" if person.email is None else 'email="%s"' % person.email
+            "" if person.email is None else ' email="%s"' % person.email
         )
-        return '  <%s %s>%s</%s>\n' % (tagname, email_string,
-                                       person.name, tagname)
+        return '  <%s%s>%s</%s>\n' % (tagname, email_string,
+                                      person.name, tagname)
 
     maintainers = []
     for maintainer in package_template.maintainers:
