@@ -351,7 +351,8 @@ def create_package_xml(package_template, rosdistro, meta=False):
     ctemp = CatkinTemplate(package_xml_template)
     temp_dict = {}
     for key in package_template.__slots__:
-        temp_dict[key] = getattr(package_template, key)
+        temp_dict[key] = getattr(package_template, key) if \
+        (getattr(package_template, key) != [] and getattr(package_template, key) != None) else ''
 
     if package_template.version_abi:
         temp_dict['version_abi'] = ' abi="%s"' % package_template.version_abi
