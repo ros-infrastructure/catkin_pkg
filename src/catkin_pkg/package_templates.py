@@ -497,4 +497,4 @@ def create_package_xml(package_template, rosdistro, meta=False):
 
     temp_dict['components'] = package_template.catkin_deps
 
-    return ctemp.substitute(temp_dict)
+    return ctemp.safe_substitute(temp_dict)
