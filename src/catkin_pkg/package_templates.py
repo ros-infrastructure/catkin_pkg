@@ -497,4 +497,8 @@ def create_package_xml(package_template, rosdistro, meta=False):
 
     temp_dict['components'] = package_template.catkin_deps
 
+    temp_dict['build_type'] = ''.join([])
+    temp_dict['architecture_independent'] = ''.join([])
+    temp_dict['deprecated'] = ''.join([])
+
     return ctemp.safe_substitute(temp_dict)
