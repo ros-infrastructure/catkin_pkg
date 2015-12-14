@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>@name</name>
   <version@version_abi>@version</version>
   <description>@description</description>
@@ -26,22 +26,128 @@
   <!-- <author email="jane.doe@@example.com">Jane Doe</author> -->
 @authors
 
-  <!-- The *_depend tags are used to specify dependencies -->
+  <!-- Packages can have seven types of dependencies -->
   <!-- Dependencies can be catkin packages or system dependencies -->
-  <!-- Examples: -->
-  <!-- Use build_depend for packages you need at compile time: -->
-  <!--   <build_depend>message_generation</build_depend> -->
-  <!-- Use buildtool_depend for build tool packages: -->
-  <!--   <buildtool_depend>catkin</buildtool_depend> -->
-  <!-- Use run_depend for packages you need at runtime: -->
-  <!--   <run_depend>message_runtime</run_depend> -->
-  <!-- Use test_depend for packages you need only for testing: -->
-  <!--   <test_depend>gtest</test_depend> -->
-@dependencies
+
+<!-- Build: -->
+
+  <!-- <buildtool_depend> -->
+  <!-- Specify build system tools which this package needs to build itself.
+       Typically the only build tool needed is catkin.
+	   In a cross-compilation scenario build tool dependencies are for the 
+	   architecture on which the compilation is performed. -->
+  <!-- <buildtool_depend>catkin</buildtool_depend> -->
+@buildtool_depends
+
+  <!-- <depend> -->
+  <!-- Specifies that a dependency is a build, export, and execution dependency.
+       This is the most commonly used dependency tag -->
+  <!-- <depend>roscpp</depend> -->
+@depends
+
+  <!-- <build_depend> -->
+  <!-- Specify which packages are needed to build this package.
+    This is the case when any file from these packages is required at build time.
+    This can be including headers from these packages at compilation time,
+    linking against libraries from these packages or requiring any other resource
+    at build time (especially when these packages are find_package()-ed in CMake). 
+    In a cross-compilation scenario build dependencies are for the targeted architecture. -->
+  <!-- <build_depend>message_generation</build_depend> -->
+@build_depends
+
+  <!-- <build_export_depend> -->
+  <!-- Specify which packages are needed to build libraries against this package.
+       This is the case when you transitively include their headers in public headers
+       in this package (especially when these packages are declared as
+       (CATKIN_)DEPENDS in catkin_package() in CMake) -->
+  <!-- <build_export_depend>??</build_export_depend> -->
+@build_export_depends
+
+  <!-- <buildtool_export_depend> -->
+  <!-- Declares a rosdep key or ROS package name that this package exports
+       which must be compiled run on the build system, not the target system.
+       For cross-compilation, one must distinguish these from target build dependencies,
+       which may be linked with your package and must be compiled for the target architecture. -->
+  <!-- <buildtool_export_depend>??</buildtool_export_depend> -->
+@buildtool_export_depends
+
+<!-- Execution: -->
+
+  <!-- <exec_depend> -->
+  <!-- Specify which packages are needed to run code in this package.
+       This is the case when you depend on shared libraries in this package
+       (especially when these packages are declared as
+       (CATKIN_)DEPENDS in catkin_package() in CMake) -->
+  <!-- <exec_depend>rospy</exec_depend> -->
+@exec_depends
+
+<!-- Test: -->
+
+  <!-- <test_depend> -->
+  <!-- Specify only additional dependencies for unit tests.
+       They should never duplicate any dependencies already
+       mentioned as build or run dependencies -->
+  <!-- <test_depend>python-mock</test_depend> -->
+  <!-- <test_depend>gtest</test_depend> -->
+@test_depends
+
+<!-- Doc: -->
+
+  <!-- <doc_depend> -->
+  <!-- Specify documentation tools which this package needs to generate documentation -->
+  <!-- <doc_depend>doxygen</doc_depend> -->
+@doc_depends
+
+<!-- Replace: -->
+
+  <!-- <replace> -->
+  <!-- Declares a rosdep key or ROS package name that your package replaces.
+       This has no effect on source builds, but maps to Replaces
+       when creating Debian packages and Obsoletes for RPM packages  -->
+  <!-- <replace>package_to_replace</replace> -->
+@replaces
+
+<!-- Conflict: -->
+  
+  <!-- <conflict> -->
+  <!-- Declares a rosdep key or ROS package name with which your package conflicts.
+       This package and the conflicting package should not be installed at the same time.
+       This has no effect on source builds, but maps to Conflicts when creating Debian or RPM packages. -->
+  <!-- <conflict>alternative_implementation</conflict> -->
+@conflicts
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
 @exports
+
+    <!-- <metapackage /> -->
+
+    <!-- <rviz plugin="${prefix}/plugin_description.xml"/> -->
+
+    <!-- <build_type> -->
+    <!-- Various tools use this tag to determine how to handle a package.
+         When the build type is cmake, the package is handled as a non-catkin CMake project.
+         It cannot be included in a normal catkin workspace, but can instead use catkin_make_isolated.
+         If no <build_type> is provided, catkin is assumed. -->
+    <!-- <build_type>catkin</build_type> -->
+    <!-- <build_type>cmake</build_type> -->
+@build_type
+
+    <!-- <architecture_independent/> -->
+    <!-- This empty tag indicates that your package produces no architecture-specific files once built.
+         That information is intended for allowing optimization of packaging.
+         It is recommended for metapackages and for packages defining only ROS messages and services.
+         Python-only packages are reasonable candidates, too.
+         It is not appropriate for any package which compiles C or C++ code. -->
+    <!-- <architecture_independent/> -->
+@architecture_independent
+
+    <!-- <deprecated>
+           This package will be removed in ROS Hydro. Instead, use package
+           FOO, which provides similar features with a different API.
+         </deprecated> -->
+@deprecated
+
   </export>
 </package>
