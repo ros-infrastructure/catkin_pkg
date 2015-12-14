@@ -436,6 +436,47 @@ def create_package_xml(package_template, rosdistro, meta=False):
                                                        dep.name))
     temp_dict['dependencies'] = ''.join(dependencies)
 
+    depends_dep_type = []
+    for dep in sorted(dep_map['run_depend'], key=lambda x: x.name):
+        if dep in sorted(dep_map['build_depend'], key=lambda x: x.name):
+			dep_tag = _create_depend_tag('depend', dep.name)
+			depends_dep_type.append(dep_tag)
+			dep_map['build_depend'].remove(dep)
+			dep_map['run_depend'].remove(dep)
+    temp_dict['depends'] = ''.join(depends_dep_type)
+
+    for dep_type in ['buildtool_depend', 'build_depend', 'run_depend',
+                     'doc_depend', 'test_depend', 'conflict', 'replace']:
+        dep_of_type = []
+        for dep in sorted(dep_map[dep_type], key=lambda x: x.name):
+            if 'depend' in dep_type:
+                dep_tag = _create_depend_tag(
+                    dep_type,
+                    dep.name,
+                    dep.version_eq,
+                    dep.version_lt,
+                    dep.version_lte,
+                    dep.version_gt,
+                    dep.version_gte
+                    )
+                dep_of_type.append(dep_tag)
+            else:
+                dep_tag = _create_depend_tag(dep_type, dep.name)
+                dep_of_type.append(dep_tag)
+        deps_key = dep_type+'s'
+        temp_dict[deps_key] = ''.join(dep_of_type)
+
+    temp_dict['exec_depends'] = temp_dict['run_depends'].replace('run_depend','exec_depend')
+    temp_dict['build_export_depends'] = ''.join([ _create_depend_tag(
+                    'build_export_depend',
+                    dep.name,
+                    dep.version_eq,
+                    dep.version_lt,
+                    dep.version_lte,
+                    dep.version_gt,
+                    dep.version_gte
+                    ) for dep in package_template.build_export_depends ])
+
     exports = []
     if package_template.exports is not None:
         for export in package_template.exports:
