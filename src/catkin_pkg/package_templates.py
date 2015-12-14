@@ -89,12 +89,18 @@ class PackageTemplate(Package):
         authors = []
         for author_name in author_names:
             authors.append(Person(author_name))
+
+        test_depends_opt = {'gtest', 'rostest'}
+        doc_depends_opt = {'doxygen', 'sphinx'}
+
         catkin_deps = list(catkin_deps or [])
         catkin_deps.sort()
         pkg_catkin_deps = []
         build_depends = []
         run_depends = []
         buildtool_depends = [Dependency('catkin')]
+        test_depends = []
+        doc_depends = []
         for dep in catkin_deps:
             if dep.lower() == 'catkin':
                 catkin_deps.remove(dep)
@@ -114,6 +120,14 @@ class PackageTemplate(Package):
                     sys.stderr.write('WARNING: Packages with messages or services should depend on both message_generation and message_runtime\n')
                     catkin_deps.append('message_generation')
                 run_depends.append(Dependency('message_runtime'))
+                continue
+            if dep.lower() in test_depends_opt:
+                if not dep.lower() in test_depends:
+                    test_depends.append(Dependency(dep.lower()))
+                continue
+            if dep.lower() in doc_depends_opt:
+                if not dep.lower() in doc_depends:
+                    doc_depends.append(Dependency(dep.lower()))
                 continue
             pkg_catkin_deps.append(Dependency(dep))
         for dep in pkg_catkin_deps:
@@ -138,6 +152,8 @@ class PackageTemplate(Package):
             catkin_deps=catkin_deps,
             system_deps=system_deps,
             boost_comps=boost_comps,
+            test_depends=test_depends,
+            doc_depends=doc_depends,
             licenses=licenses,
             authors=authors,
             maintainers=maintainers,
@@ -396,12 +412,13 @@ def create_package_xml(package_template, rosdistro, meta=False):
         'build_depend': package_template.build_depends,
         'buildtool_depend': package_template.buildtool_depends,
         'run_depend': package_template.run_depends,
+        'doc_depend': package_template.doc_depends,
         'test_depend': package_template.test_depends,
         'conflict': package_template.conflicts,
         'replace': package_template.replaces
     }
     for dep_type in ['buildtool_depend', 'build_depend', 'run_depend',
-                     'test_depend', 'conflict', 'replace']:
+                     'doc_depend', 'test_depend', 'conflict', 'replace']:
         for dep in sorted(dep_map[dep_type], key=lambda x: x.name):
             if 'depend' in dep_type:
                 dep_tag = _create_depend_tag(
