@@ -439,10 +439,10 @@ def create_package_xml(package_template, rosdistro, meta=False):
     depends_dep_type = []
     for dep in sorted(dep_map['run_depend'], key=lambda x: x.name):
         if dep in sorted(dep_map['build_depend'], key=lambda x: x.name):
-			dep_tag = _create_depend_tag('depend', dep.name)
-			depends_dep_type.append(dep_tag)
-			dep_map['build_depend'].remove(dep)
-			dep_map['run_depend'].remove(dep)
+            dep_tag = _create_depend_tag('depend', dep.name)
+            depends_dep_type.append(dep_tag)
+            dep_map['build_depend'].remove(dep)
+            dep_map['run_depend'].remove(dep)
     temp_dict['depends'] = ''.join(depends_dep_type)
 
     for dep_type in ['buildtool_depend', 'build_depend', 'run_depend',
