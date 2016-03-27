@@ -14,13 +14,13 @@
   <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
 @licenses
 
-  <!-- Url tags are optional, but mutiple are allowed, one per tag -->
+  <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
   <!-- <url type="website">http://wiki.ros.org/@name</url> -->
 @urls
 
-  <!-- Author tags are optional, mutiple are allowed, one per tag -->
+  <!-- Author tags are optional, multiple are allowed, one per tag -->
   <!-- Authors do not have to be maintainers, but could be -->
   <!-- Example: -->
   <!-- <author email="jane.doe@@example.com">Jane Doe</author> -->
