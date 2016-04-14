@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup
 
 import os
 import sys
-source = os.path.join(os.path.dirname(__file__), 'src')
+source = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src')
 sys.path.insert(0, source)
 
 from catkin_pkg import __version__
