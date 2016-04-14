@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>python-catkin-pkg</name>
+  <version>1.0.0</version>
+  <description>.</description>
+  <maintainer email="dthomas@osrfoundation.org">Dirk Thomas</maintainer>
+  <license>BSD</license>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
