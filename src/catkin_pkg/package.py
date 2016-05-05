@@ -365,7 +365,13 @@ def parse_package(path, warnings=None):
     else:
         raise IOError('Path "%s" is neither a directory containing a "%s" file nor a file' % (path, PACKAGE_MANIFEST_FILENAME))
 
-    with open(filename, 'r') as f:
+    # Force utf8 encoding for python3.
+    # This way unicode files can still be processed on non-unicode locales.
+    kwargs = {}
+    if sys.version_info.major >= 3:
+        kwargs['encoding'] = 'utf8'
+
+    with open(filename, 'r', **kwargs) as f:
         try:
             return parse_package_string(f.read(), filename, warnings=warnings)
         except InvalidPackage as e:
