@@ -295,7 +295,7 @@ def version_and_date_from_title(title):
     :returns: ``(str, datetime.datetime)``
     :raises: ``InvalidSectionTitle`` for non REP-0132 section titles
     '''
-    match = re.search(r'^([0-9]+\.[0-9]+\.[0-9]+)[ ]\((.+)\)$', title)
+    match = re.search(r'^([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9]+[a-z]+)?)[ ]\((.+)\)$', title)
     if match is None:
         raise InvalidSectionTitle(title)
     version, date_str = match.groups()

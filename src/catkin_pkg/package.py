@@ -182,9 +182,9 @@ class Package(object):
 
         if not self.version:
             errors.append('Package version must not be empty')
-        elif not re.match('^[0-9]+\.[0-9]+\.[0-9]+$', self.version):
+        elif not re.match('^[0-9]+\.[0-9]+\.[0-9]+(-[0-9]+[a-z]+)?$', self.version):
             errors.append('Package version "%s" does not follow version conventions' % self.version)
-        elif not re.match('^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$', self.version):
+        elif not re.match('^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9]+[a-z]+)?$', self.version):
             new_warnings.append('Package "%s" does not follow the version conventions. It should not contain leading zeros (unless the number is 0).' % self.name)
 
         if not self.description:
