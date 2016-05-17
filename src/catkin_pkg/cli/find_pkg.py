@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """This script finds a catkin packages"""
 
 from __future__ import print_function
@@ -28,7 +26,3 @@ def main(argv=sys.argv[1:]):
     except RuntimeError as e:
         print('ERROR: ' + str(e), file=sys.stderr)
         sys.exit(1)
-
-
-if __name__ == '__main__':
-    main()

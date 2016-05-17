@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """This script generates REP-0132 CHANGELOG.rst files for git or hg repositories"""
 
 from __future__ import print_function
@@ -117,9 +115,9 @@ def main(sysargs=None):
     print('Please review the extracted commit messages and consolidate the changelog entries before committing the files!')
 
 
-if __name__ == '__main__':
+def main_catching_runtime_error(*args, **kwargs):
     try:
-        main()
+        main(*args, **kwargs)
     except RuntimeError as e:
         print('ERROR: ' + str(e), file=sys.stderr)
         sys.exit(1)

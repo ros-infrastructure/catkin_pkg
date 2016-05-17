@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """This script tests REP-0132 changelog files"""
 
 from __future__ import print_function
@@ -46,6 +44,3 @@ def main(sysargs=None):
     changelog = Changelog()
     with open(changelog_file, 'r') as f:
         print(populate_changelog_from_rst(changelog, f.read()))
-
-if __name__ == '__main__':
-    sys.exit(main())

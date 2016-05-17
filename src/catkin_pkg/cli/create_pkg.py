@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """This script creates the skeletton of a catkin package"""
 
 from __future__ import print_function
@@ -69,7 +67,3 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
         print('Successfully created files in %s. Please adjust the values in package.xml.' % target_path)
     except ValueError as vae:
         parser.error(str(vae))
-
-
-if __name__ == '__main__':
-    main()

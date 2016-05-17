@@ -15,13 +15,15 @@ setup(
     packages=['catkin_pkg'],
     package_dir={'': 'src'},
     package_data={'catkin_pkg': ['templates/*.in']},
-    scripts=[
-        'bin/catkin_create_pkg',
-        'bin/catkin_find_pkg',
-        'bin/catkin_generate_changelog',
-        'bin/catkin_tag_changelog',
-        'bin/catkin_test_changelog'
-    ],
+    entry_points={
+        'console_scripts' : [
+            'catkin_create_pkg = catkin_pkg.cli.create_pkg:main',
+            'catkin_find_pkg = catkin_pkg.cli.find_pkg:main',
+            'catkin_generate_changelog = catkin_pkg.cli.generate_changelog:main_catching_runtime_error',
+            'catkin_tag_changelog = catkin_pkg.cli.tag_changelog:main',
+            'catkin_test_changelog = catkin_pkg.cli.test_changelog:main',
+        ]
+    },
     author='Dirk Thomas',
     author_email='dthomas@osrfoundation.org',
     url='http://wiki.ros.org/catkin_pkg',
