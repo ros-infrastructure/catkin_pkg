@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """This script renames the forthcoming section in changelog files with the upcoming version and the current date"""
 
 from __future__ import print_function
