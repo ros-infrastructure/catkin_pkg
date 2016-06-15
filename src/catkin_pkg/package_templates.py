@@ -112,13 +112,11 @@ class PackageTemplate(Package):
             if dep.lower() == 'message_generation':
                 if not 'message_runtime' in catkin_deps:
                     sys.stderr.write('WARNING: Packages with messages or services should depend on both message_generation and message_runtime\n')
-                    catkin_deps.append('message_runtime')
                 build_depends.append(Dependency('message_generation'))
                 continue
             if dep.lower() == 'message_runtime':
                 if not 'message_generation' in catkin_deps:
                     sys.stderr.write('WARNING: Packages with messages or services should depend on both message_generation and message_runtime\n')
-                    catkin_deps.append('message_generation')
                 run_depends.append(Dependency('message_runtime'))
                 continue
             if dep.lower() in test_depends_opt:
