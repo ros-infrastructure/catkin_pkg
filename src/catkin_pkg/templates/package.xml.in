@@ -41,7 +41,9 @@
 
   <!-- <depend> -->
   <!-- Specifies that a dependency is a build, export, and execution dependency.
-       This is the most commonly used dependency tag -->
+       Use <depend> whenever you have both <build_depend> and <run_depend> dependencies,
+       or if you really do not care about the dependencies of your generated
+       package binary. -->
   <!-- <depend>roscpp</depend> -->
 @depends
 
@@ -65,7 +67,7 @@
 
   <!-- <buildtool_export_depend> -->
   <!-- Declares a rosdep key or ROS package name that this package exports
-       which must be compiled run on the build system, not the target system.
+       which must be compiled and run on the build system, not the target system.
        For cross-compilation, one must distinguish these from target build dependencies,
        which may be linked with your package and must be compiled for the target architecture. -->
   <!-- <buildtool_export_depend>??</buildtool_export_depend> -->
