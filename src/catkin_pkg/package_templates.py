@@ -427,7 +427,7 @@ def create_package_xml(package_template, rosdistro, meta=False):
                     dep.version_lte,
                     dep.version_gt,
                     dep.version_gte
-                    )
+                )
                 dependencies.append(dep_tag)
             else:
                 dependencies.append(_create_depend_tag(dep_type,
@@ -456,24 +456,24 @@ def create_package_xml(package_template, rosdistro, meta=False):
                     dep.version_lte,
                     dep.version_gt,
                     dep.version_gte
-                    )
+                )
                 dep_of_type.append(dep_tag)
             else:
                 dep_tag = _create_depend_tag(dep_type, dep.name)
                 dep_of_type.append(dep_tag)
-        deps_key = dep_type+'s'
+        deps_key = dep_type + 's'
         temp_dict[deps_key] = ''.join(dep_of_type)
 
-    temp_dict['exec_depends'] = temp_dict['run_depends'].replace('run_depend','exec_depend')
-    temp_dict['build_export_depends'] = ''.join([ _create_depend_tag(
-                    'build_export_depend',
-                    dep.name,
-                    dep.version_eq,
-                    dep.version_lt,
-                    dep.version_lte,
-                    dep.version_gt,
-                    dep.version_gte
-                    ) for dep in package_template.build_export_depends ])
+    temp_dict['exec_depends'] = temp_dict['run_depends'].replace('run_depend', 'exec_depend')
+    temp_dict['build_export_depends'] = ''.join([_create_depend_tag(
+        'build_export_depend',
+        dep.name,
+        dep.version_eq,
+        dep.version_lt,
+        dep.version_lte,
+        dep.version_gt,
+        dep.version_gte
+    ) for dep in package_template.build_export_depends])
 
     exports = []
     if package_template.exports is not None:
