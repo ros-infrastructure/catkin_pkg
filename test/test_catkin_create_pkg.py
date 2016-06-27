@@ -9,12 +9,8 @@ except ImportError as impe:
     raise ImportError(
         'Please adjust your pythonpath before running this test: %s' % str(impe))
 
-import imp
-imp.load_source('catkin_create_pkg',
-                os.path.join(os.path.dirname(__file__),
-                             '..', 'bin', 'catkin_create_pkg'))
 
-from catkin_create_pkg import main
+from catkin_pkg.cli.create_pkg import main
 
 
 class CreatePkgTest(unittest.TestCase):

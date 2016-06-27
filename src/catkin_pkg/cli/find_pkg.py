@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """This script finds a catkin packages"""
 
 from __future__ import print_function
