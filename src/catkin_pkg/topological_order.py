@@ -92,6 +92,9 @@ def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_wor
     Crawls the filesystem to find packages and uses their
     dependencies to return a topologically order list.
 
+    When a circular dependency is detected, the last item in the returned list
+    is a tuple with None and a string giving a superset of the guilty packages.
+
     :param root_dir: The path to search in, ``str``
     :param whitelisted: A list of whitelisted package names, ``list``
     :param blacklisted: A list of blacklisted package names, ``list``
@@ -120,6 +123,9 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None, und
     First returning packages which have message generators and then
     the rest based on direct build-/buildtool_depends and indirect
     recursive run_depends.
+
+    When a circular dependency is detected, the last item in the returned list
+    is a tuple with None and a string giving a superset of the guilty packages.
 
     :param packages: A dict mapping relative paths to ``Package`` objects ``dict``
     :param whitelisted: A list of whitelisted package names, ``list``
