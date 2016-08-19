@@ -151,7 +151,7 @@ Invalid CMakeLists.txt
 Expected:
 <<<%s>>>
 Got:
-<<<%s>>>""" % (get_cmakelists_txt(path), get_expected_cmakelists_txt(package.name)), path, package
+<<<%s>>>""" % (get_expected_cmakelists_txt(package.name), get_cmakelists_txt(path)), path, package
         )
     # Does it buildtool depend on catkin, else raise
     if not package.has_buildtool_depend_on_catkin():
