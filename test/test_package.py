@@ -59,6 +59,26 @@ class PackageTest(unittest.TestCase):
         self.assertEquals(5, dep.version_gt)
         self.assertRaises(TypeError, Dependency, 'foo', unknownattribute=42)
 
+        d = {}
+        d[dep] = None
+        dep2 = Dependency('foo',
+                          version_lt=1,
+                          version_lte=2,
+                          version_eq=3,
+                          version_gte=4,
+                          version_gt=5)
+        d[dep2] = None
+        self.assertEquals(len(d), 1)
+        dep3 = Dependency('foo',
+                          version_lt=1,
+                          version_lte=2,
+                          version_eq=3,
+                          version_gte=4,
+                          version_gt=6)
+        d[dep3] = None
+        self.assertEquals(len(d), 2)
+
+
     def test_init_kwargs_string(self):
         pack = Package('foo',
                        name='bar',
