@@ -12,7 +12,7 @@ from catkin_pkg import __version__
 setup(
     name='catkin_pkg',
     version=__version__,
-    packages=['catkin_pkg'],
+    packages=['catkin_pkg', 'catkin_pkg.cli'],
     package_dir={'': 'src'},
     package_data={'catkin_pkg': ['templates/*.in']},
     entry_points={
