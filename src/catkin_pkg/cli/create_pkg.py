@@ -43,6 +43,9 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
                         help='A single maintainer, may be used multiple times')
     rosdistro_name = os.environ['ROS_DISTRO'] if 'ROS_DISTRO' in os.environ else None
     parser.add_argument('--rosdistro', required=rosdistro_name is None, default=rosdistro_name, help='The ROS distro (default: environment variable ROS_DISTRO if defined)')
+    parser.add_argument('-p', '--python-modules',
+                        nargs='*',
+                        help='Python modules this package declares')
 
     args = parser.parse_args(argv)
 
@@ -63,7 +66,8 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
                              package_template=package_template,
                              rosdistro=args.rosdistro,
                              newfiles={},
-                             meta=args.meta)
+                             meta=args.meta,
+                             python_modules=args.python_modules)
         print('Successfully created files in %s. Please adjust the values in package.xml.' % target_path)
     except ValueError as vae:
         parser.error(str(vae))
