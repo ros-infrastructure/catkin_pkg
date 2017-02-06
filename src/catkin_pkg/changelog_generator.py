@@ -176,7 +176,10 @@ def update_changelog_file(data, tag2log_entries, vcs_client=None, skip_contribut
                     data = data[:match.start()] + block + '\n' + data[match.start():]
                     break
             if not match:
-                raise RuntimeError('Could neither find section "%s" nor any other section' % tag.name)
+                if tag.name is None:
+                    raise RuntimeError('Could not find section "%s"' % next_tag.name)
+                else:
+                    raise RuntimeError('Could neither find section "%s" nor any other section' % tag.name)
         return data
 
 
