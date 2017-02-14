@@ -1,18 +1,12 @@
 #!/usr/bin/env python
 
 import os
-import sys
 
 from setuptools import setup
 
-source = os.path.join(os.path.dirname(__file__), 'src')
-sys.path.insert(0, source)
-
-from catkin_pkg import __version__  # noqa
-
 kwargs = {
     'name': 'catkin_pkg',
-    'version': __version__,
+    'version': '0.3.0',  # same version as in src/catkin_pkg/__init__.py
     'packages': ['catkin_pkg', 'catkin_pkg.cli'],
     'package_dir': {'': 'src'},
     'package_data': {'catkin_pkg': ['templates/*.in']},
