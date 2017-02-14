@@ -34,4 +34,4 @@
 Library for retrieving information about catkin packages.
 """
 
-__version__ = '0.3.0'  # same version as in setup.py
+__version__ = '0.3.1'  # same version as in setup.py
