@@ -143,18 +143,39 @@ class PackageTest(unittest.TestCase):
                        version_abi='pabi',
                        description='pdesc',
                        licenses=['BSD'],
-                       maintainers=[maint])
+                       maintainers=[maint],
+                       buildtool_depends=[Dependency('catkin')])
         pack.validate()
-        # check invalid names
-        pack.name = '2bar'
-        pack.validate()
+
+        # names that should error
         pack.name = 'bar bza'
         self.assertRaises(InvalidPackage, Package.validate, pack)
+        pack.name = 'foo%'
+        self.assertRaises(InvalidPackage, Package.validate, pack)
+
+        # names that should throw warnings
+        pack.name = '2bar'
+        warnings = []
+        pack.validate(warnings=warnings)
+        self.assertIn('naming conventions', warnings[0])
+
         pack.name = 'bar-bza'
-        # valid for now because for backward compatibility only
-        #self.assertRaises(InvalidPackage, Package.validate, pack)
+        warnings = []
+        pack.validate(warnings=warnings)
+        self.assertIn('naming conventions', warnings[0])
+
         pack.name = 'BAR'
-        pack.validate()
+        warnings = []
+        pack.validate(warnings=warnings)
+        self.assertIn('naming conventions', warnings[0])
+
+        # dashes are permitted for a non-catkin package
+        pack.buildtool_depends[0].name = 'other'
+        pack.name = 'bar-bza'
+        warnings = []
+        pack.validate(warnings=warnings)
+        self.assertEquals(warnings, [])
+
         # check authors emails
         pack.name = 'bar'
         auth1 = Mock()
@@ -164,6 +185,7 @@ class PackageTest(unittest.TestCase):
         self.assertRaises(InvalidPackage, Package.validate, pack)
         pack.authors = []
         pack.validate()
+
         # check maintainer required with email
         pack.maintainers = []
         self.assertRaises(InvalidPackage, Package.validate, pack)
