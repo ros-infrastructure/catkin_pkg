@@ -4,7 +4,7 @@ import unittest
 import sys
 sys.stderr = sys.stdout
 
-from catkin_pkg.package import Dependency, InvalidPackage, Package, Person
+from catkin_pkg.package import Dependency, Export, InvalidPackage, Package, Person
 
 from mock import Mock
 
@@ -143,8 +143,7 @@ class PackageTest(unittest.TestCase):
                        version_abi='pabi',
                        description='pdesc',
                        licenses=['BSD'],
-                       maintainers=[maint],
-                       buildtool_depends=[Dependency('catkin')])
+                       maintainers=[maint])
         pack.validate()
 
         # names that should error
@@ -170,11 +169,12 @@ class PackageTest(unittest.TestCase):
         self.assertIn('naming conventions', warnings[0])
 
         # dashes are permitted for a non-catkin package
-        pack.buildtool_depends[0].name = 'other'
+        pack.exports.append(Export('build_type', 'other'))
         pack.name = 'bar-bza'
         warnings = []
         pack.validate(warnings=warnings)
         self.assertEquals(warnings, [])
+        pack.exports.pop()
 
         # check authors emails
         pack.name = 'bar'
