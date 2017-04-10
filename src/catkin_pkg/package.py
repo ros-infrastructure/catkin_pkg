@@ -137,17 +137,21 @@ class Package(object):
         """
         return 'catkin' in [d.name for d in self.buildtool_depends]
 
-    def build_type(self):
+    def get_build_type(self):
         """
         Returns value of export/build_type element, or 'catkin' if unspecified.
 
         :returns: package build type
         :rtype: str
+        :raises: :exc:`InvalidPackage`
         """
-        for e in self.exports:
-            if e.tagname == 'build_type':
-                return e.content
-        return 'catkin'
+        build_type_exports = [e.content for e in self.exports if e.tagname == 'build_type']
+        if not build_type_exports:
+            return 'catkin'
+        elif len(build_type_exports) == 1:
+            return build_type_exports[0]
+        else:
+            raise InvalidPackage('Only one <build_type> element is permitted.')
 
     def has_invalid_metapackage_dependencies(self):
         """
@@ -190,7 +194,7 @@ class Package(object):
         if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_-]*$', self.name):
             errors.append('Package name "%s" does not follow naming conventions' % self.name)
         else:
-            if self.build_type() == 'catkin':
+            if self.get_build_type() == 'catkin':
                 if not re.match('^[a-z][a-z0-9_]*$', self.name):
                     new_warnings.append(
                             'Catkin package name "%s" does not follow the naming conventions. It should start with '
