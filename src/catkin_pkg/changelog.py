@@ -43,7 +43,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import sys
-_py3 = sys.version_info >= (3, 0)
+_py3 = sys.version_info[0] >= 3
 
 import dateutil.parser
 import docutils
