@@ -371,7 +371,7 @@ def parse_package(path, warnings=None):
     # Force utf8 encoding for python3.
     # This way unicode files can still be processed on non-unicode locales.
     kwargs = {}
-    if sys.version_info.major >= 3:
+    if sys.version_info[0] >= 3:
         kwargs['encoding'] = 'utf8'
 
     with open(filename, 'r', **kwargs) as f:
