@@ -147,7 +147,7 @@ def validate_metapackage(path, package):
     # Is the CMakeLists.txt correct, else raise
     if not has_valid_cmakelists_txt(path, package.name):
         raise InvalidMetapackage("""\
-Invalid CMakeLists.txt
+Invalid CMakeLists.txt. Check if the file ends with a line break.
 Expected:
 <<<%s>>>
 Got:
