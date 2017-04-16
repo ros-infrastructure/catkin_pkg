@@ -197,8 +197,7 @@ def _sort_decorated_packages(packages_orig):
     first considering the message generators and their recursive dependencies
     and then the rest of the packages.
 
-    When a circle is detected, a tuple with None and a string giving a
-    superset of the guilty packages.
+    When a circle is detected, a RuntimeError with relevant information is raised.
 
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
     :returns: A List of tuples containing the relative path and a ``Package`` object ``list``
@@ -235,11 +234,10 @@ def _sort_decorated_packages(packages_orig):
         elif non_message_generators:
             names = non_message_generators
         else:
-            # in case of a circular dependency pass a string with
-            # the names list of remaining package names, with path
-            # None to indicate cycle
-            ordered_packages.append([None, ', '.join(sorted(_reduce_cycle_set(packages)))])
-            break
+            # in case of a circular dependency, raise RuntimeError with relevant information
+            circular_package_names = sorted(_reduce_cycle_set(packages))
+            circular_error_info = [(name, packages[name].depends_for_topological_order) for name in circular_package_names]
+            raise RuntimeError('Circular dependency detected: %s' % circular_error_info)
 
         # alphabetic order only for convenience
         names.sort()
