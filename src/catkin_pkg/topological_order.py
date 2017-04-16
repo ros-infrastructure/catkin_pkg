@@ -224,6 +224,9 @@ def _sort_decorated_packages(packages_orig):
         message_generators = []
         non_message_generators = []
         for name, decorator in packages.items():
+            # avoid self-dependencies
+            if name in decorator.depends_for_topological_order:
+                decorator.depends_for_topological_order.remove(name)
             if not decorator.depends_for_topological_order:
                 if decorator.message_generator:
                     message_generators.append(name)
