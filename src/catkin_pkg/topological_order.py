@@ -203,7 +203,7 @@ def _sort_decorated_packages(packages_orig):
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
     :returns: A List of tuples containing the relative path and a ``Package`` object ``list``
     '''
-    packages = copy.deepcopy(packages_orig)
+    packages = copy.copy(packages_orig)
 
     # mark all packages which are (recursively) dependent on by message generators
     dependency_names_to_follow = set([name for name, decorator in packages.items() if decorator.message_generator])
