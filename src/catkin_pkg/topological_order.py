@@ -66,10 +66,16 @@ class _PackageDecorator(object):
         :param packages: dict of name to ``_PackageDecorator``
         """
         self.depends_for_topological_order = set([])
+        all_depends = self.package.build_depends + self.package.buildtool_depends + self.package.test_depends
         # skip external dependencies, meaning names that are not known packages
-        for name in [d.name for d in (self.package.build_depends + self.package.buildtool_depends + self.package.test_depends) if d.name in packages.keys()]:
+        unique_depend_names = set([d.name for d in all_depends if d.name in packages.keys()])
+        for name in unique_depend_names:
             if not self.is_metapackage and packages[name].is_metapackage:
                 print('WARNING: package "%s" should not depend on metapackage "%s" but on its packages instead' % (self.name, name), file=sys.stderr)
+            if name in self.depends_for_topological_order:
+                # avoid function call to improve performance
+                # check within the loop since the set changes every cycle
+                continue
             packages[name]._add_recursive_run_depends(packages, self.depends_for_topological_order)
 
     def _add_recursive_run_depends(self, packages, depends_for_topological_order):
@@ -83,7 +89,11 @@ class _PackageDecorator(object):
         """
         depends_for_topological_order.add(self.package.name)
         package_names = packages.keys()
-        for name in [d.name for d in self.package.run_depends if d.name in package_names and d.name not in depends_for_topological_order]:
+        for name in [d.name for d in self.package.run_depends if d.name in package_names]:
+            if name in depends_for_topological_order:
+                # avoid function call to improve performance
+                # check within the loop since the set changes every cycle
+                continue
             packages[name]._add_recursive_run_depends(packages, depends_for_topological_order)
 
 
