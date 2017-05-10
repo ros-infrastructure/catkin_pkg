@@ -34,6 +34,7 @@
 Library to find packages in the filesystem.
 """
 
+import multiprocessing
 import os
 from .package import parse_package, PACKAGE_MANIFEST_FILENAME
 
@@ -93,6 +94,17 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warning
     return packages
 
 
+class _PackageParser(object):
+    def __init__(self, basepath, capture_warnings):
+        self.basepath = basepath
+        self.capture_warnings = capture_warnings
+
+    def __call__(self, path):
+        warnings = [] if self.capture_warnings else None
+        parsed_package = parse_package(os.path.join(self.basepath, path), warnings=warnings)
+        return path, parsed_package, warnings
+
+
 def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subspaces=False, warnings=None):
     """
     Crawls the filesystem to find package manifest files and parses them.
@@ -104,11 +116,12 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     :param warnings: Print warnings if None or return them in the given list
     :returns: A dict mapping relative paths to ``Package`` objects ``dict``
     """
-    packages = {}
     package_paths = find_package_paths(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces)
-    for path in package_paths:
-        packages[path] = parse_package(os.path.join(basepath, path), warnings=warnings)
-    return packages
+    parser = _PackageParser(basepath, isinstance(warnings, list))
+    results = multiprocessing.Pool(4).map(parser, package_paths)
+    if parser.capture_warnings:
+        map(warnings.extend, [package_warnings for _, _, package_warnings in results])
+    return dict([(path, parsed_package) for path, parsed_package, _ in results])
 
 
 def verify_equal_package_versions(packages):
