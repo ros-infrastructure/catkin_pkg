@@ -102,7 +102,7 @@ class _PackageParser(object):
     def __call__(self, path):
         warnings = [] if self.capture_warnings else None
         parsed_package = parse_package(os.path.join(self.basepath, path), warnings=warnings)
-        return path, parsed_package, warnings
+        return (path, parsed_package), warnings
 
 
 def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subspaces=False, warnings=None):
@@ -117,11 +117,11 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     :returns: A dict mapping relative paths to ``Package`` objects ``dict``
     """
     package_paths = find_package_paths(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces)
-    parser = _PackageParser(basepath, isinstance(warnings, list))
-    results = multiprocessing.Pool(4).map(parser, package_paths)
+    parser = _PackageParser(basepath, warnings is not None)
+    path_parsed_packages, warnings_lists = zip(*multiprocessing.Pool().map(parser, package_paths))
     if parser.capture_warnings:
-        map(warnings.extend, [package_warnings for _, _, package_warnings in results])
-    return dict([(path, parsed_package) for path, parsed_package, _ in results])
+        map(warnings.extend, warnings_lists)
+    return dict(path_parsed_packages)
 
 
 def verify_equal_package_versions(packages):
