@@ -50,7 +50,7 @@ def get_spaces(paths=None):
     if paths is None:
         if 'CMAKE_PREFIX_PATH' not in os.environ:
             raise RuntimeError('Neither the environment variable CMAKE_PREFIX_PATH is set nor was a list of paths passed.')
-        paths = os.environ['CMAKE_PREFIX_PATH'].split(os.pathsep) if os.environ['CMAKE_PREFIX_PATH'] else []
+        paths = os.environ['CMAKE_PREFIX_PATH'].split(os.pathsep) if 'CMAKE_PREFIX_PATH' in os.environ else []
 
     spaces = []
     for path in paths:
