@@ -305,7 +305,8 @@ def _create_include_macro(package_template):
             if not sysdep.startswith('python-'):
                 deplist.append(sysdep)
         if deplist:
-            includes.append('# TODO: Check names of system library include directories (%s)' % ', '.join(deplist))
+            todo_incl = '# TODO: Check names of system library include directories'
+            includes.append(todo_incl + (' (%s)' % ', '.join(deplist)))
             includes.extend(['  ${%s_INCLUDE_DIRS}' % sysdep for sysdep in deplist])
     if includes:
         result += '%s' % '\n'.join(includes)
