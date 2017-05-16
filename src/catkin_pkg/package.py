@@ -371,16 +371,14 @@ def package_exists_at(path):
     return os.path.isdir(path) and os.path.isfile(os.path.join(path, PACKAGE_MANIFEST_FILENAME))
 
 
-def parse_package(path, warnings=None):
+def _get_package_xml(path):
     """
-    Parse package manifest.
+    Get xml of package manifest.
 
     :param path: The path of the package.xml file, it may or may not
         include the filename
-    :param warnings: Print warnings if None or return them in the given list
 
-    :returns: return :class:`Package` instance, populated with parsed fields
-    :raises: :exc:`InvalidPackage`
+    :returns: a tuple with the xml as well as the path of the read file
     :raises: :exc:`IOError`
     """
     if os.path.isfile(path):
@@ -399,11 +397,26 @@ def parse_package(path, warnings=None):
         kwargs['encoding'] = 'utf8'
 
     with open(filename, 'r', **kwargs) as f:
-        try:
-            return parse_package_string(f.read(), filename, warnings=warnings)
-        except InvalidPackage as e:
-            e.args = ['Invalid package manifest "%s": %s' % (filename, e.message)]
-            raise
+        return f.read(), filename
+
+def parse_package(path, warnings=None):
+    """
+    Parse package manifest.
+
+    :param path: The path of the package.xml file, it may or may not
+        include the filename
+    :param warnings: Print warnings if None or return them in the given list
+
+    :returns: return :class:`Package` instance, populated with parsed fields
+    :raises: :exc:`InvalidPackage`
+    :raises: :exc:`IOError`
+    """
+    xml, filename = _get_package_xml(path)
+    try:
+        return parse_package_string(xml, filename, warnings=warnings)
+    except InvalidPackage as e:
+        e.args = ['Invalid package manifest "%s": %s' % (filename, e.message)]
+        raise
 
 
 def parse_package_string(data, filename=None, warnings=None):
