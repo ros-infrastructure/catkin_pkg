@@ -294,7 +294,6 @@ def _create_targetlib_args(package_template):
 
 
 def _create_include_macro(package_template):
-    result = ''
     includes = ['# include']
     includes.append(('  ' if package_template.catkin_deps else '# ') + '${catkin_INCLUDE_DIRS}')
     if package_template.boost_comps:
@@ -308,6 +307,7 @@ def _create_include_macro(package_template):
             todo_incl = '# TODO: Check names of system library include directories'
             includes.append(todo_incl + (' (%s)' % ', '.join(deplist)))
             includes.extend(['  ${%s_INCLUDE_DIRS}' % sysdep for sysdep in deplist])
+    result = ''
     if includes:
         result += '%s' % '\n'.join(includes)
     return result
