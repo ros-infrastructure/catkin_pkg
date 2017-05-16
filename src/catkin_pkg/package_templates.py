@@ -309,7 +309,7 @@ def _create_include_macro(package_template):
             includes.extend(['  ${%s_INCLUDE_DIRS}' % sysdep for sysdep in deplist])
     result = ''
     if includes:
-        result += '%s' % '\n'.join(includes)
+        result += '\n'.join(includes)
     return result
 
 def _create_depend_tag(dep_type,
