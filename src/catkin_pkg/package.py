@@ -137,6 +137,21 @@ class Package(object):
         """
         return 'catkin' in [d.name for d in self.buildtool_depends]
 
+    def get_build_type(self):
+        """
+        Return value of export/build_type element, or 'catkin' if unspecified.
+
+        :returns: package build type
+        :rtype: str
+        :raises: :exc:`InvalidPackage`
+        """
+        build_type_exports = [e.content for e in self.exports if e.tagname == 'build_type']
+        if not build_type_exports:
+            return 'catkin'
+        if len(build_type_exports) == 1:
+            return build_type_exports[0]
+        raise InvalidPackage('Only one <build_type> element is permitted.')
+
     def has_invalid_metapackage_dependencies(self):
         """
         Returns True if this package has invalid dependencies for a metapackage
@@ -177,8 +192,17 @@ class Package(object):
         # accepting upper case letters and hyphens only for backward compatibility
         if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_-]*$', self.name):
             errors.append('Package name "%s" does not follow naming conventions' % self.name)
-        elif not re.match('^[a-z][a-z0-9_]*$', self.name):
-            new_warnings.append('Package name "%s" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.' % self.name)
+        else:
+            if self.get_build_type() == 'catkin':
+                if not re.match('^[a-z][a-z0-9_]*$', self.name):
+                    new_warnings.append(
+                        'Catkin package name "%s" does not follow the naming conventions. It should start with '
+                        'a lower case letter and only contain lower case letters, digits, and underscores.' % self.name)
+            else:
+                if not re.match('^[a-z][a-z0-9_-]*$', self.name):
+                    new_warnings.append(
+                        'Non-catkin package name "%s" does not follow the naming conventions. It should start with'
+                        'a lower case letter and only contain lower case letters, digits, underscores, and dashes.' % self.name)
 
         if not self.version:
             errors.append('Package version must not be empty')

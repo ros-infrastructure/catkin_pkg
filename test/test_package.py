@@ -4,7 +4,7 @@ import unittest
 import sys
 sys.stderr = sys.stdout
 
-from catkin_pkg.package import Dependency, InvalidPackage, Package, Person
+from catkin_pkg.package import Dependency, Export, InvalidPackage, Package, Person
 
 from mock import Mock
 
@@ -145,16 +145,37 @@ class PackageTest(unittest.TestCase):
                        licenses=['BSD'],
                        maintainers=[maint])
         pack.validate()
-        # check invalid names
-        pack.name = '2bar'
-        pack.validate()
+
+        # names that should error
         pack.name = 'bar bza'
         self.assertRaises(InvalidPackage, Package.validate, pack)
+        pack.name = 'foo%'
+        self.assertRaises(InvalidPackage, Package.validate, pack)
+
+        # names that should throw warnings
+        pack.name = '2bar'
+        warnings = []
+        pack.validate(warnings=warnings)
+        self.assertIn('naming conventions', warnings[0])
+
         pack.name = 'bar-bza'
-        # valid for now because for backward compatibility only
-        #self.assertRaises(InvalidPackage, Package.validate, pack)
+        warnings = []
+        pack.validate(warnings=warnings)
+        self.assertIn('naming conventions', warnings[0])
+
         pack.name = 'BAR'
-        pack.validate()
+        warnings = []
+        pack.validate(warnings=warnings)
+        self.assertIn('naming conventions', warnings[0])
+
+        # dashes are permitted for a non-catkin package
+        pack.exports.append(Export('build_type', 'other'))
+        pack.name = 'bar-bza'
+        warnings = []
+        pack.validate(warnings=warnings)
+        self.assertEquals(warnings, [])
+        pack.exports.pop()
+
         # check authors emails
         pack.name = 'bar'
         auth1 = Mock()
@@ -164,6 +185,7 @@ class PackageTest(unittest.TestCase):
         self.assertRaises(InvalidPackage, Package.validate, pack)
         pack.authors = []
         pack.validate()
+
         # check maintainer required with email
         pack.maintainers = []
         self.assertRaises(InvalidPackage, Package.validate, pack)
