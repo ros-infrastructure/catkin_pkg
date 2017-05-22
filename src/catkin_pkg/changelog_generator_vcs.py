@@ -97,7 +97,7 @@ class VcsClientBase(object):
         try:
             proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
             output, _ = proc.communicate()
-            result['output'] = output.rstrip()
+            result['output'] = output.rstrip().decode()
             result['returncode'] = proc.returncode
         except subprocess.CalledProcessError as e:
             result['output'] = e.output

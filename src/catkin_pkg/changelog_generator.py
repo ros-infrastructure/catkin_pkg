@@ -223,7 +223,7 @@ def sorted_tags(tags):
             yield tag
     # then return the tags in descending order
     name_and_tag = [(t.name, t) for t in tags if t.name]
-    name_and_tag.sort(key=lambda x: map(int, x[0].split('.')))
+    name_and_tag.sort(key=lambda x: [int(y) for y in x[0].split('.')])
     name_and_tag.reverse()
     for (_, tag) in name_and_tag:
         yield tag
