@@ -127,6 +127,9 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
 
     data = [(v[0], k, v[1]) for k, v in xmls.items()]
 
+    if not data:
+        return {}
+
     parser = _PackageParser(warnings is not None)
     path_parsed_packages, warnings_lists = zip(*multiprocessing.Pool().map(parser, data))
     if parser.capture_warnings:
