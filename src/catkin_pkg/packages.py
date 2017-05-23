@@ -34,8 +34,12 @@
 Library to find packages in the filesystem.
 """
 
+import multiprocessing
 import os
-from .package import parse_package, PACKAGE_MANIFEST_FILENAME
+
+from .package import _get_package_xml
+from .package import PACKAGE_MANIFEST_FILENAME
+from .package import parse_package_string
 
 
 def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
@@ -93,6 +97,17 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warning
     return packages
 
 
+class _PackageParser(object):
+    def __init__(self, capture_warnings):
+        self.capture_warnings = capture_warnings
+
+    def __call__(self, xml_and_path_and_filename):
+        xml, path, filename = xml_and_path_and_filename
+        warnings = [] if self.capture_warnings else None
+        parsed_package = parse_package_string(xml, filename=filename, warnings=warnings)
+        return (path, parsed_package), warnings
+
+
 def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subspaces=False, warnings=None):
     """
     Crawls the filesystem to find package manifest files and parses them.
@@ -104,11 +119,19 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     :param warnings: Print warnings if None or return them in the given list
     :returns: A dict mapping relative paths to ``Package`` objects ``dict``
     """
-    packages = {}
     package_paths = find_package_paths(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces)
+
+    xmls = {}
     for path in package_paths:
-        packages[path] = parse_package(os.path.join(basepath, path), warnings=warnings)
-    return packages
+        xmls[path] = _get_package_xml(os.path.join(basepath, path))
+
+    data = [(v[0], k, v[1]) for k, v in xmls.items()]
+
+    parser = _PackageParser(warnings is not None)
+    path_parsed_packages, warnings_lists = zip(*multiprocessing.Pool().map(parser, data))
+    if parser.capture_warnings:
+        map(warnings.extend, warnings_lists)
+    return dict(path_parsed_packages)
 
 
 def verify_equal_package_versions(packages):
