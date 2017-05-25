@@ -130,6 +130,14 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     if not data:
         return {}
 
+    if len(data) < 100:
+        parsed_packages = {}
+        for xml, path, filename in data:
+            parsed_package = parse_package_string(
+                xml, filename=filename, warnings=warnings)
+            parsed_packages[path] = parsed_package
+        return parsed_packages
+
     parser = _PackageParser(warnings is not None)
     pool = multiprocessing.Pool()
     try:
