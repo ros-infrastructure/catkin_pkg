@@ -109,5 +109,5 @@ def main(sysargs=None):
 
     print('Writing updated changelog files...')
     for (changelog_path, data) in new_changelog_data:
-        with open(changelog_path, 'w') as f:
-            f.write(data)
+        with open(changelog_path, 'wb') as f:
+            f.write(data.encode('utf-8'))

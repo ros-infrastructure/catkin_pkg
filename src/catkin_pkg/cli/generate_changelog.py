@@ -12,6 +12,11 @@ from catkin_pkg.changelog_generator import generate_changelog_file, generate_cha
 from catkin_pkg.changelog_generator_vcs import get_vcs_client
 from catkin_pkg.packages import find_packages
 
+try:
+    raw_input
+except NameError:
+    raw_input = input
+
 
 def prompt_continue(msg, default):
     """Prompt the user for continuation."""
