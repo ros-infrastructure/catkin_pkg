@@ -108,8 +108,8 @@ def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_c
             logger.debug("- creating '%s'" % os.path.join(pkg_path, CHANGELOG_FILENAME))
         pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path)
         data = generate_changelog_file(package.name, pkg_tag2log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
-        with open(changelog_path, 'w') as f:
-            f.write(data)
+        with open(changelog_path, 'wb') as f:
+            f.write(data.encode('utf-8'))
 
 
 def update_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None, skip_contributors=False):
@@ -119,11 +119,11 @@ def update_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_cli
             logger.debug("- updating '%s'" % os.path.join(pkg_path, CHANGELOG_FILENAME))
         pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path)
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
-        with open(changelog_path, 'r') as f:
-            data = f.read()
+        with open(changelog_path, 'rb') as f:
+            data = f.read().decode('utf-8')
         data = update_changelog_file(data, pkg_tag2log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
-        with open(changelog_path, 'w') as f:
-            f.write(data)
+        with open(changelog_path, 'wb') as f:
+            f.write(data.encode('utf-8'))
 
 
 def filter_package_changes(tag2log_entries, pkg_path):
