@@ -6,6 +6,7 @@ import argparse
 import logging
 import os
 import sys
+from builtins import input
 
 from catkin_pkg.changelog import CHANGELOG_FILENAME
 from catkin_pkg.changelog_generator import generate_changelog_file, generate_changelogs, get_all_changes, get_forthcoming_changes, update_changelogs
@@ -21,7 +22,7 @@ def prompt_continue(msg, default):
         msg += ' [y/N]?'
 
     while True:
-        response = raw_input(msg)
+        response = input(msg)
         if not response:
             response = 'y' if default else 'n'
         else:
