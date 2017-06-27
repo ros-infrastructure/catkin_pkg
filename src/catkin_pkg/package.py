@@ -194,10 +194,10 @@ class Package(object):
             errors.append('Package name "%s" does not follow naming conventions' % self.name)
         else:
             if self.get_build_type() == 'catkin':
-                if not re.match('^[a-z][a-z0-9_]*$', self.name):
+                if not re.match('^[a-z][a-z0-9_-]*$', self.name):
                     new_warnings.append(
                         'Catkin package name "%s" does not follow the naming conventions. It should start with '
-                        'a lower case letter and only contain lower case letters, digits, and underscores.' % self.name)
+                        'a lower case letter and only contain lower case letters, digits, underscores, and dashes.' % self.name)
             else:
                 if not re.match('^[a-z][a-z0-9_-]*$', self.name):
                     new_warnings.append(
