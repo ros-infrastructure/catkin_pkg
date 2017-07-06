@@ -66,7 +66,8 @@ def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
             paths.append(os.path.relpath(dirpath, basepath))
             del dirnames[:]
             continue
-        dirnames[:] = [d for d in dirnames if not d.startswith('.')] # filter out hidden directories in-place
+        # filter out hidden directories in-place
+        dirnames[:] = [d for d in dirnames if not d.startswith('.')]
     return paths
 
 
