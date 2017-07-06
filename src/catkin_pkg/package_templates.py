@@ -89,12 +89,18 @@ class PackageTemplate(Package):
         authors = []
         for author_name in author_names:
             authors.append(Person(author_name))
+
+        test_depends_opt = {'gtest', 'rostest'}
+        doc_depends_opt = {'doxygen', 'sphinx'}
+
         catkin_deps = list(catkin_deps or [])
         catkin_deps.sort()
         pkg_catkin_deps = []
         build_depends = []
         run_depends = []
         buildtool_depends = [Dependency('catkin')]
+        test_depends = []
+        doc_depends = []
         for dep in catkin_deps:
             if dep.lower() == 'catkin':
                 catkin_deps.remove(dep)
@@ -112,6 +118,14 @@ class PackageTemplate(Package):
                 if not 'message_generation' in catkin_deps:
                     sys.stderr.write('WARNING: Packages with messages or services should depend on both message_generation and message_runtime\n')
                 run_depends.append(Dependency('message_runtime'))
+                continue
+            if dep.lower() in test_depends_opt:
+                if not dep.lower() in test_depends:
+                    test_depends.append(Dependency(dep.lower()))
+                continue
+            if dep.lower() in doc_depends_opt:
+                if not dep.lower() in doc_depends:
+                    doc_depends.append(Dependency(dep.lower()))
                 continue
             pkg_catkin_deps.append(Dependency(dep))
         for dep in pkg_catkin_deps:
@@ -136,6 +150,8 @@ class PackageTemplate(Package):
             catkin_deps=catkin_deps,
             system_deps=system_deps,
             boost_comps=boost_comps,
+            test_depends=test_depends,
+            doc_depends=doc_depends,
             licenses=licenses,
             authors=authors,
             maintainers=maintainers,
@@ -348,7 +364,8 @@ def create_package_xml(package_template, rosdistro, meta=False):
     ctemp = CatkinTemplate(package_xml_template)
     temp_dict = {}
     for key in package_template.__slots__:
-        temp_dict[key] = getattr(package_template, key)
+        temp_dict[key] = getattr(package_template, key) if \
+        (getattr(package_template, key) != [] and getattr(package_template, key) != None) else ''
 
     if package_template.version_abi:
         temp_dict['version_abi'] = ' abi="%s"' % package_template.version_abi
@@ -365,10 +382,10 @@ def create_package_xml(package_template, rosdistro, meta=False):
 
     def get_person_tag(tagname, person):
         email_string = (
-            "" if person.email is None else 'email="%s"' % person.email
+            "" if person.email is None else ' email="%s"' % person.email
         )
-        return '  <%s %s>%s</%s>\n' % (tagname, email_string,
-                                       person.name, tagname)
+        return '  <%s%s>%s</%s>\n' % (tagname, email_string,
+                                      person.name, tagname)
 
     maintainers = []
     for maintainer in package_template.maintainers:
@@ -392,12 +409,13 @@ def create_package_xml(package_template, rosdistro, meta=False):
         'build_depend': package_template.build_depends,
         'buildtool_depend': package_template.buildtool_depends,
         'run_depend': package_template.run_depends,
+        'doc_depend': package_template.doc_depends,
         'test_depend': package_template.test_depends,
         'conflict': package_template.conflicts,
         'replace': package_template.replaces
     }
     for dep_type in ['buildtool_depend', 'build_depend', 'run_depend',
-                     'test_depend', 'conflict', 'replace']:
+                     'doc_depend', 'test_depend', 'conflict', 'replace']:
         for dep in sorted(dep_map[dep_type], key=lambda x: x.name):
             if 'depend' in dep_type:
                 dep_tag = _create_depend_tag(
@@ -408,12 +426,53 @@ def create_package_xml(package_template, rosdistro, meta=False):
                     dep.version_lte,
                     dep.version_gt,
                     dep.version_gte
-                    )
+                )
                 dependencies.append(dep_tag)
             else:
                 dependencies.append(_create_depend_tag(dep_type,
                                                        dep.name))
     temp_dict['dependencies'] = ''.join(dependencies)
+
+    depends_dep_type = []
+    for dep in sorted(dep_map['run_depend'], key=lambda x: x.name):
+        if dep in sorted(dep_map['build_depend'], key=lambda x: x.name):
+            dep_tag = _create_depend_tag('depend', dep.name)
+            depends_dep_type.append(dep_tag)
+            dep_map['build_depend'].remove(dep)
+            dep_map['run_depend'].remove(dep)
+    temp_dict['depends'] = ''.join(depends_dep_type)
+
+    for dep_type in ['buildtool_depend', 'build_depend', 'run_depend',
+                     'doc_depend', 'test_depend', 'conflict', 'replace']:
+        dep_of_type = []
+        for dep in sorted(dep_map[dep_type], key=lambda x: x.name):
+            if 'depend' in dep_type:
+                dep_tag = _create_depend_tag(
+                    dep_type,
+                    dep.name,
+                    dep.version_eq,
+                    dep.version_lt,
+                    dep.version_lte,
+                    dep.version_gt,
+                    dep.version_gte
+                )
+                dep_of_type.append(dep_tag)
+            else:
+                dep_tag = _create_depend_tag(dep_type, dep.name)
+                dep_of_type.append(dep_tag)
+        deps_key = dep_type + 's'
+        temp_dict[deps_key] = ''.join(dep_of_type)
+
+    temp_dict['exec_depends'] = temp_dict['run_depends'].replace('run_depend', 'exec_depend')
+    temp_dict['build_export_depends'] = ''.join([_create_depend_tag(
+        'build_export_depend',
+        dep.name,
+        dep.version_eq,
+        dep.version_lt,
+        dep.version_lte,
+        dep.version_gt,
+        dep.version_gte
+    ) for dep in package_template.build_export_depends])
 
     exports = []
     if package_template.exports is not None:
@@ -435,4 +494,8 @@ def create_package_xml(package_template, rosdistro, meta=False):
 
     temp_dict['components'] = package_template.catkin_deps
 
-    return ctemp.substitute(temp_dict)
+    temp_dict['build_type'] = ''.join([])
+    temp_dict['architecture_independent'] = ''.join([])
+    temp_dict['deprecated'] = ''.join([])
+
+    return ctemp.safe_substitute(temp_dict)
