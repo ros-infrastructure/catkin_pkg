@@ -158,11 +158,6 @@ class PackageTest(unittest.TestCase):
         pack.validate(warnings=warnings)
         self.assertIn('naming conventions', warnings[0])
 
-        pack.name = 'bar-bza'
-        warnings = []
-        pack.validate(warnings=warnings)
-        self.assertIn('naming conventions', warnings[0])
-
         pack.name = 'BAR'
         warnings = []
         pack.validate(warnings=warnings)
