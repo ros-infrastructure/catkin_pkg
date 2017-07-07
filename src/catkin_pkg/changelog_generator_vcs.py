@@ -200,7 +200,7 @@ class GitClient(VcsClientBase):
                     continue
                 msg = result['output']
                 # query affected paths
-                cmd = [self._executable, 'show', hash_, '--name-only', '--format=format:""']
+                cmd = [self._executable, 'show', '-m', hash_, '--name-only', '--format=format:""']
                 result = self._run_command(cmd)
                 if result['returncode']:
                     raise RuntimeError('Could not fetch affected paths:\n%s' % result['output'])
