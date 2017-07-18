@@ -53,6 +53,8 @@ import os
 import pkg_resources
 import re
 
+from io import open
+
 try:
     _unicode = unicode
 except NameError:
@@ -193,7 +195,7 @@ def get_changelog_from_path(path, package_name=None):
     if os.path.isdir(path):
         path = os.path.join(path, CHANGELOG_FILENAME)
     try:
-        with open(path, 'r') as f:
+        with open(path, 'r', encoding="utf-8") as f:
             populate_changelog_from_rst(changelog, f.read())
     except IOError:
         return None
