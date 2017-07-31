@@ -86,6 +86,8 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warning
     packages = find_packages_allowing_duplicates(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces, warnings=warnings)
     package_paths_by_name = {}
     for path, package in packages.items():
+        if isinstance(package, str):
+            print('DEBUG) 219 isinstance(package, str) YES with: {}'.format(package.name))
         if package.name not in package_paths_by_name:
             package_paths_by_name[package.name] = set([])
         package_paths_by_name[package.name].add(path)

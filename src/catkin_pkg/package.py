@@ -173,6 +173,35 @@ class Package(object):
         """
         return 'metapackage' in [e.tagname for e in self.exports]
 
+    def get_depends(self):
+        '''
+        Returning all packages this package depends on.
+        @rtype: [catkin_pkg.package.Dependency]
+        @raises: InvalidPackage
+        '''
+        if self.package_format == 1:
+            return self.run_depends
+        elif self.package_format == 2:
+            return self.build_export_depends + self.exec_depends
+        else:
+            raise InvalidPackage('Manifest of package {} is in format = {} is not (yet) supported.'.format(self.name, self.package_format))
+
+    def includes_subpackage(self, file_path):
+        '''
+        @summary: Returns exception if this package is not a metapackage.
+                  Examine if the given file path is in a package that is
+                  included in this metapackage.
+        @param file_path: Relative path of the file to be examined.
+        @rtype: bool
+        '''
+        for pkg_dep in self.get_depends():
+            print('DEBUG)\tIs {} included in metapackage {}? Does {} start with {}?'.format(
+                pkg_dep, self.name, file_path, pkg_dep.name))
+            # if file_path.startswith(pkg_dep.name): # NG
+            if file_path.startswith(self.name): # NG. Only metapkgs get listed in logentry
+                return True
+        return False
+
     def validate(self, warnings=None):
         """
         makes sure all standards for packages are met

@@ -112,32 +112,78 @@ def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_c
             f.write(data.encode('utf-8'))
 
 
-def update_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None, skip_contributors=False):
-    for pkg_path in packages.keys():
+def update_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None, skip_contributors=False, include_packagename=False):
+    for pkg_path, pkg in packages.items():
+        print('DEBUG) 430 pkg_path={} pkg={}'.format(pkg_path, pkg))
+
         # update package specific changelog file
         if logger:
             logger.debug("- updating '%s'" % os.path.join(pkg_path, CHANGELOG_FILENAME))
-        pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path)
+
+        if include_packagename:
+            print('DEBUG) 434 isinstance(package, str): {} with: {}'.format(isinstance(pkg, str), pkg))
+            pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path, pkg, include_packagename)
+        else:
+            pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path)
+
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
         with open(changelog_path, 'rb') as f:
             data = f.read().decode('utf-8')
-        data = update_changelog_file(data, pkg_tag2log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
+        data = update_changelog_file(data, pkg_tag2log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors, include_packagename=include_packagename)
         with open(changelog_path, 'wb') as f:
             f.write(data.encode('utf-8'))
 
 
-def filter_package_changes(tag2log_entries, pkg_path):
+def filter_package_changes(tag2log_entries, pkg_path, pkg=None, include_packagename=False):
+    '''
+    @type pkg: catkin_pkg.package.Package
+    @param include_packagename: If True, include the package name as a prefix
+                                in the log entry line.
+    '''
     pkg_tag2log_entries = {}
     # collect all log entries relevant for this package
+    i = 0
     for tag, log_entries in tag2log_entries.items():
+        print('DEBUG) 440 i: {}'.format(i))
+        pkg_names_included = []
         if log_entries is None:
             pkg_log_entries = None
         else:
             pkg_log_entries = []
             for log_entry in log_entries:
-                if log_entry.affects_path(pkg_path):
+                if 'Chomp use PlanningScene' in log_entry.msg:
+                    print('DEBUG) 441 log_entry: {}'.format(log_entry.msg.encode('utf-8')))
+                if include_packagename and pkg.is_metapackage():
+                    # Trim the first portion of file path to get its highest
+                    # level package name.
+                    # E.g. From moveit_planners/moveit_planners/CHANGELOG.rst
+                    #      we want to cut out moveit_planners.
+                    try:  # https://stackoverflow.com/a/19142167/577001
+                        index = pkg_path.index('/')
+                    except ValueError:
+                        index = len(pkg_path)
+                    pkg_path = pkg_path[0:index]
+                    # Get the pkg name of the packages this metapackage
+                    # depends on.
+                    depends = [pkg_dep.name for pkg_dep in pkg.get_depends()]
+                    # 
+                    depends.append(pkg_path)
+                    for pkg_dep_name in depends:
+                        if log_entry.affects_path(pkg_dep_name) and pkg_dep_name not in pkg_names_included:
+                            pkg_names_included.append(pkg_dep_name)
+                    pkg_names_included_str = ''
+                    for pkg_name in pkg_names_included:
+                        pkgname_bracket = '[' + pkg_name + ']'
+                        if pkgname_bracket not in log_entry.msg:
+                            pkg_names_included_str = pkgname_bracket + pkg_names_included_str
+                    if pkg_names_included_str:
+                        log_entry.msg = pkg_names_included_str + ' ' + log_entry.msg
+                        pkg_log_entries.append(log_entry)
+                elif log_entry.affects_path(pkg_path):
                     pkg_log_entries.append(log_entry)
+
         pkg_tag2log_entries[tag] = pkg_log_entries
+        i = i + 1
     return pkg_tag2log_entries
 
 
@@ -153,13 +199,13 @@ def generate_changelog_file(pkg_name, tag2log_entries, vcs_client=None, skip_con
     return '\n'.join(blocks)
 
 
-def update_changelog_file(data, tag2log_entries, vcs_client=None, skip_contributors=False):
+def update_changelog_file(data, tag2log_entries, vcs_client=None, skip_contributors=False, include_packagename=False):
     tags = sorted_tags(tag2log_entries.keys())
     for i, tag in enumerate(tags):
         log_entries = tag2log_entries[tag]
         if log_entries is None:
             continue
-        content = generate_version_content(log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
+        content = generate_version_content(log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors, include_packagename=include_packagename)
 
         # check if version section exists
         match = get_version_section_match(data, tag.name)
@@ -255,11 +301,18 @@ def get_version_headline(version, timestamp):
     return headline
 
 
-def generate_version_content(log_entries, vcs_client=None, skip_contributors=False):
+def generate_version_content(log_entries, vcs_client=None, skip_contributors=False, include_packagename=False):
     data = ''
     all_authors = set()
     for entry in log_entries:
         msg = entry.msg
+        # Metapackage aggregation
+        if include_packagename:
+            prefix_pkgs = ''
+            print('DEBUG 332 entry.get_package_names(): {}\n\tmsg: {}'.format(entry.get_package_names(), msg.encode('utf-8')))
+            for pkgname in entry.get_package_names():
+                prefix_pkgs = '[' + pkgname + ']' + prefix_pkgs
+            msg = prefix_pkgs + ' ' + msg
         lines = msg.splitlines()
         lines = [l.strip() for l in lines]
         lines = [l for l in lines if l]
@@ -270,6 +323,7 @@ def generate_version_content(log_entries, vcs_client=None, skip_contributors=Fal
         all_authors.add(entry.author)
     if all_authors and not skip_contributors:
         data += '* Contributors: %s\n' % ', '.join(sorted(all_authors))
+    #print('DEBUG 335 data {}'.format(data.encode('utf-8')))
     return data
 
 

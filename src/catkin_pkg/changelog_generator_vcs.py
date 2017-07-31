@@ -51,20 +51,38 @@ class Tag(object):
 
 class LogEntry(object):
 
-    def __init__(self, msg, affected_paths, author):
+    def __init__(self, msg, affected_paths, author, package_names=None):
         self.msg = msg
         self.author = author
         self._affected_paths = [p for p in affected_paths if p]
+        # List of package names that a log entry is associated with.
+        if package_names:
+            self._package_names = package_names
+        else:
+            self._package_names = []
 
     def affects_path(self, path):
+        #print('DEBUG) 550 path: {}\n\tself._affected_paths={}'.format(path, self._affected_paths))
         for apath in self._affected_paths:
             # if the path is the root of the repository
             # it is affected by all changes
+
+            print('DEBUG) 550 path={}'.format(path))
+            joined_path = os.path.join(path, '')  # e.g. moveit_planners/chomp/chomp_interface/
+            print('DEBUG) 551 joined_path={}'.format(joined_path))
+
             if path == '.':
                 return True
-            if apath.startswith(os.path.join(path, '')):
+            #if apath.startswith(os.path.join(path, '')):
+            if apath.startswith(joined_path):
                 return True
         return False
+
+    def add_package_name(self, package_name):
+        self._package_names.append(package_name)
+
+    def get_package_names(self):
+        return self._package_names
 
 
 class VcsClientBase(object):
@@ -205,6 +223,7 @@ class GitClient(VcsClientBase):
                 if result['returncode']:
                     raise RuntimeError('Could not fetch affected paths:\n%s' % result['output'])
                 affected_paths = result['output'].splitlines()
+                print('DEBUG) git result: {}\n\t\taffected_paths: {}'.format(result, affected_paths))
                 log_entries.append(LogEntry(msg, affected_paths, self._get_author(hash_)))
         return log_entries
 
