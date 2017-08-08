@@ -129,24 +129,26 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     if not data:
         return {}
 
-    if len(data) < 100:
+    try:
+        if len(data) < 100:
+            raise Error
+        parser = _PackageParser(warnings is not None)
+        pool = multiprocessing.Pool()
+        try:
+            path_parsed_packages, warnings_lists = zip(*pool.map(parser, data))
+        finally:
+            pool.close()
+            pool.join()
+        if parser.capture_warnings:
+            map(warnings.extend, warnings_lists)
+        return dict(path_parsed_packages)
+    except:
         parsed_packages = {}
         for xml, path, filename in data:
             parsed_package = parse_package_string(
                 xml, filename=filename, warnings=warnings)
             parsed_packages[path] = parsed_package
         return parsed_packages
-
-    parser = _PackageParser(warnings is not None)
-    pool = multiprocessing.Pool()
-    try:
-        path_parsed_packages, warnings_lists = zip(*pool.map(parser, data))
-    finally:
-        pool.close()
-        pool.join()
-    if parser.capture_warnings:
-        map(warnings.extend, warnings_lists)
-    return dict(path_parsed_packages)
 
 
 def verify_equal_package_versions(packages):
