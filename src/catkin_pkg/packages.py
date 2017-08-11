@@ -129,7 +129,17 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     if not data:
         return {}
 
-    if len(data) < 100:
+    parallel = len(data) > 100
+    if parallel:
+        try:
+            pool = multiprocessing.Pool()
+        except OSError:
+            # On chroot environment, multiprocessing is not available
+            # https://stackoverflow.com/questions/6033599/oserror-38-errno-38-with-multiprocessing
+            parallel = False
+
+    if not parallel:
+        #  use sequential loop
         parsed_packages = {}
         for xml, path, filename in data:
             parsed_package = parse_package_string(
@@ -137,8 +147,8 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
             parsed_packages[path] = parsed_package
         return parsed_packages
 
+    # use multiprocessing pool
     parser = _PackageParser(warnings is not None)
-    pool = multiprocessing.Pool()
     try:
         path_parsed_packages, warnings_lists = zip(*pool.map(parser, data))
     finally:
