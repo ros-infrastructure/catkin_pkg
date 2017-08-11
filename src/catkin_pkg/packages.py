@@ -132,7 +132,6 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     parallel = len(data) > 100
     if parallel:
         try:
-            parser = _PackageParser(warnings is not None)
             pool = multiprocessing.Pool()
         except OSError:
             # On chroot environment, multiprocessing is not available
@@ -141,6 +140,7 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
 
     if parallel:
         # use multiprocessing pool
+        parser = _PackageParser(warnings is not None)
         try:
             path_parsed_packages, warnings_lists = zip(*pool.map(parser, data))
         finally:
