@@ -215,7 +215,7 @@ class Package(object):
             errors.append('Package description must not be empty')
 
         if not self.maintainers:
-            errors.append('Package must declare at least one maintainer')
+            errors.append("Package '{}' must declare at least one maintainer".format(self.name))
         for maintainer in self.maintainers:
             try:
                 maintainer.validate()
