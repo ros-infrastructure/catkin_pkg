@@ -156,7 +156,7 @@ class TemplateTest(unittest.TestCase):
     def test_parse_generated(self):
         maint = self.get_maintainer()
         pack = PackageTemplate(name='bar',
-                               package_format=1,
+                               package_format=2,
                                version='0.0.0',
                                version_abi='pabi',
                                urls=[Url('foo')],
@@ -207,7 +207,7 @@ class TemplateTest(unittest.TestCase):
         # test with multiple attributes filled
         maint = self.get_maintainer()
         pack = PackageTemplate(name='bar',
-                               package_format=1,
+                               package_format=2,
                                version='0.0.0',
                                version_abi='pabi',
                                description='pdesc',
