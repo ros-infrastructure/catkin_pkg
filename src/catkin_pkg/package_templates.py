@@ -92,8 +92,9 @@ class PackageTemplate(Package):
         catkin_deps = list(catkin_deps or [])
         catkin_deps.sort()
         pkg_catkin_deps = []
+        depends = []
         build_depends = []
-        run_depends = []
+        exec_depends = []
         buildtool_depends = [Dependency('catkin')]
         for dep in catkin_deps:
             if dep.lower() == 'catkin':
@@ -111,12 +112,11 @@ class PackageTemplate(Package):
             if dep.lower() == 'message_runtime':
                 if not 'message_generation' in catkin_deps:
                     sys.stderr.write('WARNING: Packages with messages or services should depend on both message_generation and message_runtime\n')
-                run_depends.append(Dependency('message_runtime'))
+                exec_depends.append(Dependency('message_runtime'))
                 continue
             pkg_catkin_deps.append(Dependency(dep))
         for dep in pkg_catkin_deps:
-            build_depends.append(dep)
-            run_depends.append(dep)
+            depends.append(dep)
         if boost_comps:
             if not system_deps:
                 system_deps = ['boost']
@@ -124,15 +124,17 @@ class PackageTemplate(Package):
                 system_deps.append('boost')
         for dep in system_deps or []:
             if not dep.lower().startswith('python-'):
-                build_depends.append(Dependency(dep))
-            run_depends.append(Dependency(dep))
+                depends.append(Dependency(dep))
+            else:
+                exec_depends.append(Dependency(dep))
         package_temp = PackageTemplate(
             name=package_name,
             version=version or '0.0.0',
             description=description or 'The %s package' % package_name,
             buildtool_depends=buildtool_depends,
             build_depends=build_depends,
-            run_depends=run_depends,
+            depends=depends,
+            exec_depends=exec_depends,
             catkin_deps=catkin_deps,
             system_deps=system_deps,
             boost_comps=boost_comps,
@@ -391,12 +393,12 @@ def create_package_xml(package_template, rosdistro, meta=False):
     dep_map = {
         'build_depend': package_template.build_depends,
         'buildtool_depend': package_template.buildtool_depends,
-        'run_depend': package_template.run_depends,
+        'exec_depend': package_template.exec_depends,
         'test_depend': package_template.test_depends,
         'conflict': package_template.conflicts,
         'replace': package_template.replaces
     }
-    for dep_type in ['buildtool_depend', 'build_depend', 'run_depend',
+    for dep_type in ['buildtool_depend', 'build_depend', 'exec_depend',
                      'test_depend', 'conflict', 'replace']:
         for dep in sorted(dep_map[dep_type], key=lambda x: x.name):
             if 'depend' in dep_type:
