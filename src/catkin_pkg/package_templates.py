@@ -392,14 +392,15 @@ def create_package_xml(package_template, rosdistro, meta=False):
     dependencies = []
     dep_map = {
         'build_depend': package_template.build_depends,
+        'build_export_depend': package_template.build_export_depends,
         'buildtool_depend': package_template.buildtool_depends,
         'exec_depend': package_template.exec_depends,
         'test_depend': package_template.test_depends,
         'conflict': package_template.conflicts,
         'replace': package_template.replaces
     }
-    for dep_type in ['buildtool_depend', 'build_depend', 'exec_depend',
-                     'test_depend', 'conflict', 'replace']:
+    for dep_type in ['buildtool_depend', 'build_depend', 'build_export_depend',
+                     'exec_depend', 'test_depend', 'conflict', 'replace']:
         for dep in sorted(dep_map[dep_type], key=lambda x: x.name):
             if 'depend' in dep_type:
                 dep_tag = _create_depend_tag(
