@@ -4,10 +4,11 @@ import unittest
 import sys
 sys.stderr = sys.stdout
 
-from catkin_pkg.package import Dependency, Export, InvalidPackage, Package, Person
+from catkin_pkg.package import Dependency, Export, InvalidPackage, Package, Person, _check_known_attributes
+
+import xml.dom.minidom as dom
 
 from mock import Mock
-
 
 class PackageTest(unittest.TestCase):
 
@@ -216,3 +217,36 @@ class PackageTest(unittest.TestCase):
         self.assertRaises(InvalidPackage, Person.validate, auth1)
         auth1.email = 'foo<bar.com'
         self.assertRaises(InvalidPackage, Person.validate, auth1)
+
+    def test_check_known_attributes(self):
+
+        def create_node(tag, attrs):
+            data = '<%s %s/>' % (tag, ' '.join(('%s="%s"'%p) for p in attrs.items()))
+            return dom.parseString(data).firstChild
+
+        try:
+            create_node('tag', {'key': 'value'})
+        except Exception as e:
+            self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e),str(e)))
+
+        self.assertRaisesRegexp(Exception, "unbound prefix: line 1, column 0", create_node,'tag', {'ns:key': 'value'})
+
+        try:
+            create_node('tag', {'ns:key': 'value', 'xmlns:ns': 'urn:ns'})
+        except Exception as e:
+            self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e),str(e)))
+
+        def check(attrs, known, res=[]):
+            self.assertEqual(res, _check_known_attributes(create_node('tag', attrs), known))
+
+        expected_err = ['The "tag" tag must not have the following attributes: attr2']
+
+        check({}, [])
+        check({}, ['attr'])
+        check({'attr': 'value'}, ['attr'])
+        check({'attr2': 'value'}, ['attr'], expected_err)
+
+        check({'xmlns': 'urn:ns'}, ['attr'])
+        check({'xmlns:ns': 'urn:ns'}, ['attr'])
+        check({'xmlns:ns': 'urn:ns', 'ns:attr': 'value'}, ['attr'])
+        check({'xmlns:ns': 'urn:ns', 'ns:attr': 'value', 'attr2': 'value'}, ['attr'], expected_err)
