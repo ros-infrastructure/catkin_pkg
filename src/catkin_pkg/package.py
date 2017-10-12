@@ -419,6 +419,15 @@ def parse_package(path, warnings=None):
         raise
 
 
+def _check_known_attributes(node, known):
+    if node.hasAttributes():
+        attrs = map(str, node.attributes.keys())
+        # colon is the namespace separator in attributes, xmlns can be added to any tag
+        unknown_attrs = [attr for attr in attrs if not (attr in known or attr == 'xmlns' or ':' in attr)]
+        if unknown_attrs:
+            return ['The "%s" tag must not have the following attributes: %s' % (node.tagName, ', '.join(unknown_attrs))]
+    return []
+
 def parse_package_string(data, filename=None, warnings=None):
     """
     Parse package.xml string contents.
@@ -539,9 +548,7 @@ def parse_package_string(data, filename=None, warnings=None):
         pkg.exports = exports
 
     # verify that no unsupported tags and attributes are present
-    unknown_root_attributes = [attr for attr in root.attributes.keys() if str(attr) != 'format']
-    if unknown_root_attributes:
-        errors.append('The "package" tag must not have the following attributes: %s' % ', '.join(unknown_root_attributes))
+    errors += _check_known_attributes(root, ['format'])
     depend_attributes = ['version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
     known = {
         'name': [],
@@ -575,9 +582,7 @@ def parse_package_string(data, filename=None, warnings=None):
     if unknown_tags:
         errors.append('The manifest (with format version %d) must not contain the following tags: %s' % (pkg.package_format, ', '.join(unknown_tags)))
     for node in [n for n in nodes if n.tagName in known.keys()]:
-        unknown_attrs = [str(attr) for attr in node.attributes.keys() if str(attr) not in known[node.tagName]]
-        if unknown_attrs:
-            errors.append('The "%s" tag must not have the following attributes: %s' % (node.tagName, ', '.join(unknown_attrs)))
+        errors += _check_known_attributes(node, known[node.tagName])
         if node.tagName not in ['description', 'export']:
             subnodes = [n for n in node.childNodes if n.nodeType == n.ELEMENT_NODE]
             if subnodes:
