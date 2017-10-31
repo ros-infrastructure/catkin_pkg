@@ -193,8 +193,8 @@ def get_changelog_from_path(path, package_name=None):
     if os.path.isdir(path):
         path = os.path.join(path, CHANGELOG_FILENAME)
     try:
-        with open(path, 'r') as f:
-            populate_changelog_from_rst(changelog, f.read())
+        with open(path, 'rb') as f:
+            populate_changelog_from_rst(changelog, f.read().decode('utf-8'))
     except IOError:
         return None
     return changelog
