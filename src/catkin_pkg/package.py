@@ -505,7 +505,7 @@ def parse_package_string(data, filename=None, warnings=None):
         for d in run_depends:
             pkg.build_export_depends.append(deepcopy(d))
             pkg.exec_depends.append(deepcopy(d))
-    if pkg.package_format == 2:
+    if pkg.package_format in [2, 3]:
         pkg.build_export_depends = _get_dependencies(root, 'build_export_depend')
         pkg.buildtool_export_depends = _get_dependencies(root, 'buildtool_export_depend')
         pkg.exec_depends = _get_dependencies(root, 'exec_depend')
