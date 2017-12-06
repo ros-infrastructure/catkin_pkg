@@ -454,7 +454,7 @@ def parse_package_string(data, filename=None, warnings=None):
     # format attribute
     value = _get_node_attr(root, 'format', default=1)
     pkg.package_format = int(value)
-    assert pkg.package_format in [1, 2], "Unable to handle package.xml format version '%d', please update catkin_pkg (e.g. on Ubuntu/Debian use: sudo apt-get update && sudo apt-get install --only-upgrade python-catkin-pkg)" % pkg.package_format
+    assert pkg.package_format in [1, 2, 3], "Unable to handle package.xml format version '%d', please update catkin_pkg (e.g. on Ubuntu/Debian use: sudo apt-get update && sudo apt-get install --only-upgrade python-catkin-pkg)" % pkg.package_format
 
     # name
     pkg.name = _get_node_value(_get_node(root, 'name'))
@@ -569,13 +569,18 @@ def parse_package_string(data, filename=None, warnings=None):
         known.update({
             'run_depend': depend_attributes,
         })
-    if pkg.package_format == 2:
+    if pkg.package_format in [2, 3]:
         known.update({
             'build_export_depend': depend_attributes,
             'buildtool_export_depend': depend_attributes,
             'depend': depend_attributes,
             'exec_depend': depend_attributes,
             'doc_depend': depend_attributes,
+        })
+    if pkg.package_format == 3:
+        known.update({
+            'group_depend': [],
+            'member_of_group': []
         })
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
     unknown_tags = set([n.tagName for n in nodes if n.tagName not in known.keys()])
