@@ -43,6 +43,8 @@ import re
 import sys
 import xml.dom.minidom as dom
 
+from catkin_pkg.condition import evaluate_condition
+
 PACKAGE_MANIFEST_FILENAME = 'package.xml'
 
 
@@ -54,7 +56,7 @@ class Package(object):
         'package_format',
         'name',
         'version',
-        'version_abi',
+        'version_compatibility',
         'description',
         'maintainers',
         'licenses',
@@ -69,6 +71,8 @@ class Package(object):
         'doc_depends',
         'conflicts',
         'replaces',
+        'group_depends',
+        'member_of_groups',
         'exports',
         'filename'
     ]
@@ -173,6 +177,31 @@ class Package(object):
         """
         return 'metapackage' in [e.tagname for e in self.exports]
 
+    def evaluate_conditions(self, context):
+        """
+        Evaluate the conditions of all dependencies and memberships.
+
+        :param context: A dictionary with key value pairs to replace variables
+          starting with $ in the condition.
+        :raises: :exc:`ValueError` if any condition fails to parse
+        """
+        for attr in (
+            'build_depends',
+            'buildtool_depends',
+            'build_export_depends',
+            'buildtool_export_depends',
+            'exec_depends',
+            'test_depends',
+            'doc_depends',
+            'conflicts',
+            'replaces',
+            'group_depends',
+            'member_of_groups',
+        ):
+            conditionals = getattr(self, attr)
+            for conditional in conditionals:
+                conditional.evaluate_condition(context)
+
     def validate(self, warnings=None):
         """
         makes sure all standards for packages are met
@@ -204,12 +233,18 @@ class Package(object):
                         'Non-catkin package name "%s" does not follow the naming conventions. It should start with'
                         'a lower case letter and only contain lower case letters, digits, underscores, and dashes.' % self.name)
 
+        version_regexp = '^[0-9]+\.[0-9]+\.[0-9]+$'
         if not self.version:
             errors.append('Package version must not be empty')
-        elif not re.match('^[0-9]+\.[0-9]+\.[0-9]+$', self.version):
+        elif not re.match(version_regexp, self.version):
             errors.append('Package version "%s" does not follow version conventions' % self.version)
         elif not re.match('^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$', self.version):
             new_warnings.append('Package "%s" does not follow the version conventions. It should not contain leading zeros (unless the number is 0).' % self.name)
+        if self.version_compatibility:
+            if not re.match(version_regexp, self.version_compatibility):
+                errors.append(
+                    "Package compatibility version '%s' does not follow "
+                    'version conventions' % self.version_compatibility)
 
         if not self.description:
             errors.append('Package description must not be empty')
@@ -250,6 +285,14 @@ class Package(object):
                 if depend.name == self.name:
                     errors.append('The package must not "%s_depend" on a package with the same name as this package' % dep_type)
 
+        if (
+            {d.name for d in self.group_depends} &
+            {g.name for g in self.member_of_groups}
+        ):
+            errors.append(
+                "The package must not 'group_depend' on a package which it "
+                'also declares to be a member of')
+
         if self.is_metapackage():
             if not self.has_buildtool_depend_on_catkin():
                 # TODO escalate to error in the future, or use metapackage.validate_metapackage
@@ -269,9 +312,15 @@ class Package(object):
 
 
 class Dependency(object):
-    __slots__ = ['name', 'version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
+    __slots__ = [
+        'name',
+        'version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt',
+        'condition',
+        'evaluated_condition',
+    ]
 
     def __init__(self, name, **kwargs):
+        self.evaluated_condition = None
         for attr in self.__slots__:
             value = kwargs[attr] if attr in kwargs else None
             setattr(self, attr, value)
@@ -291,6 +340,21 @@ class Dependency(object):
 
     def __str__(self):
         return self.name
+
+    def evaluate_condition(self, context):
+        """
+        Evaluate the condition.
+
+        The result is also stored in the member variable `evaluated_condition`.
+
+        :param context: A dictionary with key value pairs to replace variables
+          starting with $ in the condition.
+
+        :returns: True if the condition evaluates to True, else False
+        :raises: :exc:`ValueError` if the condition fails to parse
+        """
+        self.evaluated_condition = evaluate_condition(self.condition, context)
+        return self.evaluated_condition
 
 
 class Export(object):
@@ -454,15 +518,16 @@ def parse_package_string(data, filename=None, warnings=None):
     # format attribute
     value = _get_node_attr(root, 'format', default=1)
     pkg.package_format = int(value)
-    assert pkg.package_format in [1, 2], "Unable to handle package.xml format version '%d', please update catkin_pkg (e.g. on Ubuntu/Debian use: sudo apt-get update && sudo apt-get install --only-upgrade python-catkin-pkg)" % pkg.package_format
+    assert pkg.package_format in (1, 2, 3), "Unable to handle package.xml format version '%d', please update catkin_pkg (e.g. on Ubuntu/Debian use: sudo apt-get update && sudo apt-get install --only-upgrade python-catkin-pkg)" % pkg.package_format
 
     # name
     pkg.name = _get_node_value(_get_node(root, 'name'))
 
-    # version and optional abi
+    # version and optional compatibility
     version_node = _get_node(root, 'version')
     pkg.version = _get_node_value(version_node)
-    pkg.version_abi = _get_node_attr(version_node, 'abi', default=None)
+    pkg.version_compatibility = _get_node_attr(
+        version_node, 'compatibility', default=None)
 
     # description
     pkg.description = _get_node_value(_get_node(root, 'description'), allow_xml=True, apply_str=False)
@@ -505,7 +570,7 @@ def parse_package_string(data, filename=None, warnings=None):
         for d in run_depends:
             pkg.build_export_depends.append(deepcopy(d))
             pkg.exec_depends.append(deepcopy(d))
-    if pkg.package_format == 2:
+    if pkg.package_format != 1:
         pkg.build_export_depends = _get_dependencies(root, 'build_export_depend')
         pkg.buildtool_export_depends = _get_dependencies(root, 'buildtool_export_depend')
         pkg.exec_depends = _get_dependencies(root, 'exec_depend')
@@ -529,6 +594,10 @@ def parse_package_string(data, filename=None, warnings=None):
     pkg.conflicts = _get_dependencies(root, 'conflict')
     pkg.replaces = _get_dependencies(root, 'replace')
 
+    # group dependencies and memberships
+    pkg.group_depends = _get_group_dependencies(root, 'group_depend')
+    pkg.member_of_groups = _get_group_memberships(root, 'member_of_group')
+
     if pkg.package_format == 1:
         for test_depend in pkg.test_depends:
             same_build_depends = ['build_depend' for d in pkg.build_depends if d.name == test_depend.name]
@@ -550,9 +619,11 @@ def parse_package_string(data, filename=None, warnings=None):
     # verify that no unsupported tags and attributes are present
     errors += _check_known_attributes(root, ['format'])
     depend_attributes = ['version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']
+    if pkg.package_format > 2:
+        depend_attributes.append('condition')
     known = {
         'name': [],
-        'version': ['abi'],
+        'version': ['compatibility'],
         'description': [],
         'maintainer': ['email'],
         'license': [],
@@ -569,13 +640,18 @@ def parse_package_string(data, filename=None, warnings=None):
         known.update({
             'run_depend': depend_attributes,
         })
-    if pkg.package_format == 2:
+    if pkg.package_format != 1:
         known.update({
             'build_export_depend': depend_attributes,
             'buildtool_export_depend': depend_attributes,
             'depend': depend_attributes,
             'exec_depend': depend_attributes,
             'doc_depend': depend_attributes,
+        })
+    if pkg.package_format > 2:
+        known.update({
+            'group_depend': ['condition'],
+            'member_of_group': ['condition']
         })
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
     unknown_tags = set([n.tagName for n in nodes if n.tagName not in known.keys()])
@@ -646,7 +722,29 @@ def _get_dependencies(parent, tagname):
     depends = []
     for node in _get_nodes(parent, tagname):
         depend = Dependency(_get_node_value(node))
-        for attr in ['version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt']:
+        for attr in ('version_lt', 'version_lte', 'version_eq', 'version_gte', 'version_gt', 'condition'):
             setattr(depend, attr, _get_node_attr(node, attr, None))
         depends.append(depend)
     return depends
+
+
+def _get_group_dependencies(parent, tagname):
+    from .group_dependency import GroupDependency
+    depends = []
+    for node in _get_nodes(parent, tagname):
+        depends.append(
+            GroupDependency(
+                _get_node_value(node),
+                condition=_get_node_attr(node, 'condition', default=None)))
+    return depends
+
+
+def _get_group_memberships(parent, tagname):
+    from .group_membership import GroupMembership
+    memberships = []
+    for node in _get_nodes(parent, tagname):
+        memberships.append(
+            GroupMembership(
+                _get_node_value(node),
+                condition=_get_node_attr(node, 'condition', default=None)))
+    return memberships

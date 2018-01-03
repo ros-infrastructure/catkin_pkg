@@ -352,10 +352,11 @@ def create_package_xml(package_template, rosdistro, meta=False):
     for key in package_template.__slots__:
         temp_dict[key] = getattr(package_template, key)
 
-    if package_template.version_abi:
-        temp_dict['version_abi'] = ' abi="%s"' % package_template.version_abi
+    if package_template.version_compatibility:
+        temp_dict['version_compatibility'] = \
+            ' compatibility="%s"' % package_template.version_compatibility
     else:
-        temp_dict['version_abi'] = ''
+        temp_dict['version_compatibility'] = ''
 
     if not package_template.description:
         temp_dict['description'] = 'The %s package ...' % package_template.name

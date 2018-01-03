@@ -7,7 +7,7 @@ python:
   - "3.3"
 # command to install dependencies
 install:
-  - pip install nose coverage argparse python-dateutil docutils
+  - pip install nose coverage argparse python-dateutil docutils pyparsing
 # command to run tests
 script:
   - nosetests -s --tests test

@@ -132,8 +132,8 @@ class TemplateTest(unittest.TestCase):
         pack = PackageTemplate(name='bar',
                                description='bar',
                                package_format='1',
-                               version='0.0.0',
-                               version_abi='pabi',
+                               version='0.0.1',
+                               version_compatibility='0.0.0',
                                maintainers=[maint],
                                licenses=['BSD'])
         try:
@@ -157,8 +157,8 @@ class TemplateTest(unittest.TestCase):
         maint = self.get_maintainer()
         pack = PackageTemplate(name='bar',
                                package_format=2,
-                               version='0.0.0',
-                               version_abi='pabi',
+                               version='0.0.1',
+                               version_compatibility='0.0.0',
                                urls=[Url('foo')],
                                description='pdesc',
                                maintainers=[maint],
@@ -175,7 +175,7 @@ class TemplateTest(unittest.TestCase):
             self.assertEqual(pack.name, pack_result.name)
             self.assertEqual(pack.package_format, pack_result.package_format)
             self.assertEqual(pack.version, pack_result.version)
-            self.assertEqual(pack.version_abi, pack_result.version_abi)
+            self.assertEqual(pack.version_compatibility, pack_result.version_compatibility)
             self.assertEqual(pack.description, pack_result.description)
             self.assertEqual(pack.maintainers[0].name, pack_result.maintainers[0].name)
             self.assertEqual(pack.maintainers[0].email, pack_result.maintainers[0].email)
@@ -197,7 +197,7 @@ class TemplateTest(unittest.TestCase):
                               'maintainer_email': 'foo@bar.com',
                               'description': 'pdesc',
                               'license': 'BSD',
-                              'version': '0.0.0',
+                              'version': '0.0.1',
                               'author': '',
                               'url': 'foo'}, rdict)
         finally:
@@ -208,8 +208,8 @@ class TemplateTest(unittest.TestCase):
         maint = self.get_maintainer()
         pack = PackageTemplate(name='bar',
                                package_format=2,
-                               version='0.0.0',
-                               version_abi='pabi',
+                               version='0.0.1',
+                               version_compatibility='0.0.0',
                                description='pdesc',
                                maintainers=[maint, maint],
                                authors=[maint, maint],
@@ -250,7 +250,7 @@ class TemplateTest(unittest.TestCase):
             self.assertEqual(pack.name, pack_result.name)
             self.assertEqual(pack.package_format, pack_result.package_format)
             self.assertEqual(pack.version, pack_result.version)
-            self.assertEqual(pack.version_abi, pack_result.version_abi)
+            self.assertEqual(pack.version_compatibility, pack_result.version_compatibility)
             self.assertEqual(pack.description, pack_result.description)
             self.assertEqual(len(pack.maintainers), len(pack_result.maintainers))
             self.assertEqual(len(pack.authors), len(pack_result.authors))
@@ -280,7 +280,7 @@ class TemplateTest(unittest.TestCase):
                               'maintainer': u('John Foo <foo@bar.com>, John Foo <foo@bar.com>'),
                               'description': 'pdesc',
                               'license': 'BSD, MIT',
-                              'version': '0.0.0',
+                              'version': '0.0.1',
                               'author': u('John Foo <foo@bar.com>, John Foo <foo@bar.com>'),
                               'url': 'bar'}, rdict)
         finally:

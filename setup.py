@@ -33,7 +33,8 @@ kwargs = {
     'install_requires': [
         'argparse',
         'docutils',
-        'python-dateutil'
+        'python-dateutil',
+        'pyparsing',
     ],
 }
 if 'SKIP_PYTHON_MODULES' in os.environ:
