@@ -15,6 +15,7 @@ def create_mock(name, build_depends, run_depends, path):
     m.buildtool_depends = []
     m.run_depends = run_depends
     m.test_depends = []
+    m.group_depends = []
     m.exports = []
     m.path = path
     return m
@@ -76,6 +77,7 @@ class TopologicalOrderTest(unittest.TestCase):
             m.build_depends = []
             m.buildtool_depends = []
             m.run_depends = run_depends
+            m.group_depends = []
             m.exports = []
             return m
 
@@ -92,6 +94,7 @@ class TopologicalOrderTest(unittest.TestCase):
         mockproject.buildtool_depends = [mockproject3, mockproject6]
         mockproject.run_depends = [mockproject7]
         mockproject.test_depends = []
+        mockproject.group_depends = []
         mockproject.exports = []
 
         pd = _PackageDecorator(mockproject, 'foo/bar')
@@ -187,6 +190,7 @@ class TopologicalOrderTest(unittest.TestCase):
             m.buildtool_depends = []
             m.run_depends = []
             m.test_depends = []
+            m.group_depends = []
             m.exports = []
             m.path = path
             return m
@@ -211,6 +215,7 @@ class TopologicalOrderTest(unittest.TestCase):
             m.buildtool_depends = []
             m.test_depends = []
             m.run_depends = []
+            m.group_depends = []
             m.exports = []
             m.path = path
             return m
