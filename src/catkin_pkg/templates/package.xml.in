@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>@name</name>
-  <version@version_abi>@version</version>
+  <version@version_compatibility>@version</version>
   <description>@description</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->

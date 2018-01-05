@@ -18,6 +18,11 @@ class PackageTest(unittest.TestCase):
         maint.name = 'John Foo'
         return maint
 
+    def get_group_dependency(self, name):
+        group = Mock()
+        group.name = name
+        return group
+
     def test_init(self):
         maint = self.get_maintainer()
         pack = Package(name='foo',
@@ -25,6 +30,8 @@ class PackageTest(unittest.TestCase):
                        maintainers=[maint],
                        licenses=['BSD'])
         self.assertEqual(None, pack.filename)
+        self.assertEqual('0.0.0', pack.version)
+        self.assertEqual(None, pack.version_compatibility)
         self.assertEqual([], pack.urls)
         self.assertEqual([], pack.authors)
         self.assertEqual([maint], pack.maintainers)
@@ -36,6 +43,8 @@ class PackageTest(unittest.TestCase):
         self.assertEqual([], pack.conflicts)
         self.assertEqual([], pack.replaces)
         self.assertEqual([], pack.exports)
+        self.assertEqual([], pack.group_depends)
+        self.assertEqual([], pack.member_of_groups)
         pack = Package('foo',
                        name='bar',
                        version='0.0.0',
@@ -51,13 +60,18 @@ class PackageTest(unittest.TestCase):
                          version_lte=2,
                          version_eq=3,
                          version_gte=4,
-                         version_gt=5)
+                         version_gt=5,
+                         condition='$foo == 23 and $bar != 42')
         self.assertEquals('foo', dep.name)
         self.assertEquals(1, dep.version_lt)
         self.assertEquals(2, dep.version_lte)
         self.assertEquals(3, dep.version_eq)
         self.assertEquals(4, dep.version_gte)
         self.assertEquals(5, dep.version_gt)
+        self.assertFalse(dep.evaluate_condition({'foo': 23, 'bar': 42}))
+        self.assertFalse(dep.evaluated_condition)
+        self.assertTrue(dep.evaluate_condition({'foo': 23, 'bar': 43}))
+        self.assertTrue(dep.evaluated_condition)
         self.assertRaises(TypeError, Dependency, 'foo', unknownattribute=42)
 
         d = {}
@@ -67,7 +81,9 @@ class PackageTest(unittest.TestCase):
                           version_lte=2,
                           version_eq=3,
                           version_gte=4,
-                          version_gt=5)
+                          version_gt=5,
+                          condition='$foo == 23 and $bar != 42')
+        dep2.evaluate_condition({'foo': 23, 'bar': 43})
         d[dep2] = None
         self.assertEquals(len(d), 1)
         dep3 = Dependency('foo',
@@ -79,21 +95,26 @@ class PackageTest(unittest.TestCase):
         d[dep3] = None
         self.assertEquals(len(d), 2)
 
+        dep = Dependency('foo', condition='foo > bar and bar < baz')
+        self.assertTrue(dep.evaluate_condition({}))
+
+        dep = Dependency('foo', condition='foo <= bar or bar >= baz')
+        self.assertFalse(dep.evaluate_condition({}))
 
     def test_init_kwargs_string(self):
         pack = Package('foo',
                        name='bar',
                        package_format='1',
-                       version='0.0.0',
-                       version_abi='pabi',
+                       version='0.0.1',
+                       version_compatibility='0.0.0',
                        description='pdesc',
                        licenses=['BSD'],
                        maintainers=[self.get_maintainer()])
         self.assertEqual('foo', pack.filename)
         self.assertEqual('bar', pack.name)
         self.assertEqual('1', pack.package_format)
-        self.assertEqual('pabi', pack.version_abi)
-        self.assertEqual('0.0.0', pack.version)
+        self.assertEqual('0.0.0', pack.version_compatibility)
+        self.assertEqual('0.0.1', pack.version)
         self.assertEqual('pdesc', pack.description)
 
     def test_init_kwargs_object(self):
@@ -108,7 +129,12 @@ class PackageTest(unittest.TestCase):
         mconf = [Mock(), Mock()]
         mrepl = [Mock(), Mock()]
         mexp = [Mock(), Mock()]
-        pack = Package(name='bar',
+        mgroup = [
+            self.get_group_dependency('group1'),
+            self.get_group_dependency('group2')]
+        mmember = ['member1', 'member2']
+        pack = Package(package_format='3',
+                       name='bar',
                        version='0.0.0',
                        maintainers=mmain,
                        licenses=mlis,
@@ -120,6 +146,8 @@ class PackageTest(unittest.TestCase):
                        test_depends=mtestdep,
                        conflicts=mconf,
                        replaces=mrepl,
+                       group_depends=mgroup,
+                       member_of_groups=mmember,
                        exports=mexp)
         self.assertEqual(mmain, pack.maintainers)
         self.assertEqual(mlis, pack.licenses)
@@ -134,14 +162,15 @@ class PackageTest(unittest.TestCase):
         self.assertEqual(mconf, pack.conflicts)
         self.assertEqual(mrepl, pack.replaces)
         self.assertEqual(mexp, pack.exports)
+        self.assertEqual(mgroup, pack.group_depends)
+        self.assertEqual(mmember, pack.member_of_groups)
 
     def test_validate_package(self):
         maint = self.get_maintainer()
         pack = Package('foo',
                        name='bar_2go',
                        package_format='1',
-                       version='0.0.0',
-                       version_abi='pabi',
+                       version='0.0.1',
                        description='pdesc',
                        licenses=['BSD'],
                        maintainers=[maint])

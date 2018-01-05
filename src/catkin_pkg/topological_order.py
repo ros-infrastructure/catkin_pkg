@@ -33,6 +33,7 @@
 from __future__ import print_function
 
 import copy
+import os
 import sys
 
 from .packages import find_packages
@@ -67,9 +68,17 @@ class _PackageDecorator(object):
         """
         self.depends_for_topological_order = set([])
         all_depends = self.package.build_depends + self.package.buildtool_depends + self.package.test_depends
+        names = [d.name for d in all_depends if d.evaluated_condition]
+
+        # collect all group dependencies
+        for group_depend in self.package.group_depends:
+            if group_depend.evaluated_condition:
+                assert group_depend.members is not None, \
+                    'Group members need to be determined before'
+                names += group_depend.members
+
         # skip external dependencies, meaning names that are not known packages
-        unique_depend_names = set([d.name for d in all_depends if d.name in packages.keys()])
-        for name in unique_depend_names:
+        for name in [n for n in names if n in packages.keys()]:
             if not self.is_metapackage and packages[name].is_metapackage:
                 print('WARNING: package "%s" should not depend on metapackage "%s" but on its packages instead' % (self.name, name), file=sys.stderr)
             if name in self.depends_for_topological_order:
@@ -89,11 +98,17 @@ class _PackageDecorator(object):
         """
         depends_for_topological_order.add(self.package.name)
         package_names = packages.keys()
-        for name in [d.name for d in self.package.run_depends if d.name in package_names]:
-            if name in depends_for_topological_order:
-                # avoid function call to improve performance
-                # check within the loop since the set changes every cycle
-                continue
+        names = [d.name for d in self.package.run_depends if d.evaluated_condition]
+
+        for group_depend in self.package.group_depends:
+            if group_depend.evaluated_condition:
+                assert group_depend.members is not None, \
+                    'Group members need to be determined before'
+                names += group_depend.members
+
+        for name in [n for n in names
+                     if (n in package_names and
+                         n not in depends_for_topological_order)]:
             packages[name]._add_recursive_run_depends(packages, depends_for_topological_order)
 
 
@@ -130,6 +145,12 @@ def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_wor
 def topological_order_packages(packages, whitelisted=None, blacklisted=None, underlay_packages=None):
     '''
     Topologically orders packages.
+
+    evaluate_conditions() will be called for each package.
+
+    If group dependencies haven't determined their members yet
+    extract_group_members() will be called for each group dependency to do so.
+
     First returning packages which have message generators and then
     the rest based on direct build-/buildtool_depends and indirect
     recursive run_depends.
@@ -164,6 +185,14 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None, und
                 continue
             underlay_decorators_by_name[package.name] = _PackageDecorator(package, path)
         decorators_by_name.update(underlay_decorators_by_name)
+
+    # evaluate conditions and determine group membership
+    pkgs = [d.package for d in decorators_by_name.values()]
+    for pkg in pkgs:
+        pkg.evaluate_conditions(os.environ)
+        for group_depend in pkg.group_depends:
+            if group_depend.evaluated_condition:
+                group_depend.extract_group_members(pkgs)
 
     # calculate transitive dependencies
     for decorator in decorators_by_name.values():
