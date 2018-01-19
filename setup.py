@@ -6,7 +6,7 @@ from setuptools import setup
 
 kwargs = {
     'name': 'catkin_pkg',
-    'version': '0.4.0',  # same version as in src/catkin_pkg/__init__.py
+    'version': '0.4.1',  # same version as in src/catkin_pkg/__init__.py
     'packages': ['catkin_pkg', 'catkin_pkg.cli'],
     'package_dir': {'': 'src'},
     'package_data': {'catkin_pkg': ['templates/*.in']},
