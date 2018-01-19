@@ -10,7 +10,24 @@ import xml.dom.minidom as dom
 
 from mock import Mock
 
+# mock assertRaisesRegexp for Python < 2.7
+if not hasattr(unittest.TestCase, 'assertRaisesRegexp'):
+    class MockAssert:
+        def __init__(self, *args, **kwargs):
+            pass
+        def __enter__(self, *args, **kwargs):
+            pass
+        def __exit__(self, *args, **kwargs):
+            return True
+    unittest.TestCase.assertRaisesRegexp = MockAssert
+
+
 class PackageTest(unittest.TestCase):
+
+    # implement assertIn for Python < 2.7
+    if not hasattr(unittest.TestCase, 'assertIn'):
+        def assertIn(self, first, second, *args):
+            self.assertTrue(first in second, *args)
 
     def get_maintainer(self):
         maint = Mock()

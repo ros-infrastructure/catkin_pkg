@@ -244,7 +244,7 @@ class Package(object):
             errors.append('Package description must not be empty')
 
         if not self.maintainers:
-            errors.append("Package '{}' must declare at least one maintainer".format(self.name))
+            errors.append("Package '{0}' must declare at least one maintainer".format(self.name))
         for maintainer in self.maintainers:
             try:
                 maintainer.validate()
@@ -280,8 +280,8 @@ class Package(object):
                     errors.append('The package must not "%s_depend" on a package with the same name as this package' % dep_type)
 
         if (
-            {d.name for d in self.group_depends} &
-            {g.name for g in self.member_of_groups}
+            set([d.name for d in self.group_depends]) &
+            set([g.name for g in self.member_of_groups])
         ):
             errors.append(
                 "The package must not 'group_depend' on a package which it "
