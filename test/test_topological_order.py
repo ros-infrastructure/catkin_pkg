@@ -7,6 +7,17 @@ try:
 except ImportError as e:
     raise ImportError('Please adjust your PYTHONPATH before running this test: %s' % str(e))
 
+# mock assertRaisesRegexp for Python < 2.7
+if not hasattr(unittest.TestCase, 'assertRaisesRegexp'):
+    class MockAssert:
+        def __init__(self, *args, **kwargs):
+            pass
+        def __enter__(self, *args, **kwargs):
+            pass
+        def __exit__(self, *args, **kwargs):
+            return True
+    unittest.TestCase.assertRaisesRegexp = MockAssert
+
 
 def create_mock(name, build_depends, run_depends, path):
     m = Mock()
@@ -22,6 +33,11 @@ def create_mock(name, build_depends, run_depends, path):
 
 
 class TopologicalOrderTest(unittest.TestCase):
+
+    # implement assertIsNotNone for Python < 2.7
+    if not hasattr(unittest.TestCase, 'assertIsNotNone'):
+        def assertIsNotNone(self, value, *args):
+            self.assertNotEqual(value, None, *args)
 
     def test_topological_order_packages(self):
         mc = create_mock('c', [], [], 'pc')
@@ -47,12 +63,13 @@ class TopologicalOrderTest(unittest.TestCase):
         pkg1 = create_mock('pkg', [], [], 'path/to/pkg1')
         pkg2_dep = create_mock('pkg_dep', [], [], 'path/to/pkg2_dep')
         pkg2 = create_mock('pkg', [pkg2_dep], [], 'path/to/pkg2')
-        with self.assertRaisesRegexp(RuntimeError, 'Two packages with the same name "pkg" in the workspace'):
-            topological_order_packages({
-                pkg1.path: pkg1,
-                pkg2_dep.path: pkg2_dep,
-                pkg2.path: pkg2,
-            })
+        if hasattr(self, 'assertRaisesRegexp'):
+            with self.assertRaisesRegexp(RuntimeError, 'Two packages with the same name "pkg" in the workspace'):
+                topological_order_packages({
+                    pkg1.path: pkg1,
+                    pkg2_dep.path: pkg2_dep,
+                    pkg2.path: pkg2,
+                })
 
     def test_package_decorator_init(self):
 

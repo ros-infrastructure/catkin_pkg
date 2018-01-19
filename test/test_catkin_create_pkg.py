@@ -15,6 +15,11 @@ from catkin_pkg.cli.create_pkg import main
 
 class CreatePkgTest(unittest.TestCase):
 
+    # implement assertIsNotNone for Python < 2.7
+    if not hasattr(unittest.TestCase, 'assertIsNotNone'):
+        def assertIsNotNone(self, value, *args):
+            self.assertNotEqual(value, None, *args)
+
     def test_create_package_template(self):
         template = PackageTemplate._create_package_template('foopackage')
         self.assertEqual('foopackage', template.name)
