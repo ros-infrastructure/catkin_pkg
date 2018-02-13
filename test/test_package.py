@@ -10,6 +10,7 @@ from catkin_pkg.package import (
     Dependency,
     Export,
     InvalidPackage,
+    License,
     Package,
     Person,
     parse_package,
@@ -66,6 +67,7 @@ class PackageTest(unittest.TestCase):
         self.assertEqual([], pack.authors)
         self.assertEqual([maint], pack.maintainers)
         self.assertEqual(['BSD'], pack.licenses)
+        self.assertEqual([None], [l.file for l in pack.licenses])
         self.assertEqual([], pack.build_depends)
         self.assertEqual([], pack.buildtool_depends)
         self.assertEqual([], pack.run_depends)
@@ -149,7 +151,7 @@ class PackageTest(unittest.TestCase):
 
     def test_init_kwargs_object(self):
         mmain = [self.get_maintainer(), self.get_maintainer()]
-        mlis = ['MIT', 'BSD']
+        mlis = ['MIT', License('BSD', 'LICENSE')]
         mauth = [self.get_maintainer(), self.get_maintainer()]
         murl = [Mock(), Mock()]
         mbuilddep = [Mock(), Mock()]
@@ -181,6 +183,7 @@ class PackageTest(unittest.TestCase):
                        exports=mexp)
         self.assertEqual(mmain, pack.maintainers)
         self.assertEqual(mlis, pack.licenses)
+        self.assertEqual([None, 'LICENSE'], [l.file for l in pack.licenses])
         self.assertEqual(murl, pack.urls)
         self.assertEqual(mauth, pack.authors)
         self.assertEqual(mbuilddep, pack.build_depends)

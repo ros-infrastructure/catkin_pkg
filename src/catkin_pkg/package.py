@@ -103,6 +103,7 @@ class Package(object):
                         slot.append(deepcopy(d))
             del kwargs['run_depends']
         self.filename = filename
+        self.licenses = [l if isinstance(l, License) else License(l) for l in self.licenses]
         # verify that no unknown keywords are passed
         unknown = set(kwargs.keys()).difference(self.__slots__)
         if unknown:
@@ -370,6 +371,14 @@ class Export(object):
         return txt
 
 
+# Subclassing ``str`` to keep backward compatibility.
+class License(str):
+    def __new__(cls, value, file_=None):
+        obj = str.__new__(cls, str(value))
+        obj.file = file_
+        return obj
+
+
 class Person(object):
     __slots__ = ['name', 'email']
 
@@ -553,7 +562,10 @@ def parse_package_string(data, filename=None, warnings=None):
     # at least one license
     licenses = _get_nodes(root, 'license')
     for node in licenses:
-        pkg.licenses.append(_get_node_value(node))
+        pkg.licenses.append(License(
+            _get_node_value(node),
+            _get_node_attr(node, 'file', default=None)
+        ))
 
     errors = []
     # dependencies and relationships
@@ -646,6 +658,10 @@ def parse_package_string(data, filename=None, warnings=None):
         known.update({
             'group_depend': ['condition'],
             'member_of_group': ['condition']
+        })
+    if pkg.package_format > 2:
+        known.update({
+            'license': ['file'],
         })
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
     unknown_tags = set([n.tagName for n in nodes if n.tagName not in known.keys()])
