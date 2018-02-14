@@ -139,7 +139,7 @@ class GitClient(VcsClientBase):
 
     # query author
     def _get_author(self, hash_):
-        cmd = [self._executable, 'log', hash_, '-n', '1', '--format=format:%an']
+        cmd = [self._executable, 'log', hash_, '-n', '1', '--format=format:%aN']
         result = self._run_command(cmd)
         if result['returncode']:
             raise RuntimeError('Could not fetch author:\n%s' % result['output'])
