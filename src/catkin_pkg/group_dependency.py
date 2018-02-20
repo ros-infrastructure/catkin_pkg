@@ -56,5 +56,7 @@ class GroupDependency:
     def extract_group_members(self, packages):
         self.members = set()
         for pkg in packages:
-            if self.name in [g.name for g in pkg.member_of_groups]:
+            for g in pkg.member_of_groups:
+                assert g.evaluated_condition is not None
+            if self.name in [g.name for g in pkg.member_of_groups if g.evaluated_condition]:
                 self.members.add(pkg.name)
