@@ -473,7 +473,7 @@ def parse_package(path, warnings=None):
     try:
         return parse_package_string(xml, filename, warnings=warnings)
     except InvalidPackage as e:
-        e.args = ['Invalid package manifest "%s": %s' % (filename, e.message)]
+        e.args = ['Invalid package manifest "{0}": {1}'.format(filename, e)]
         raise
 
 
