@@ -94,7 +94,11 @@ def _get_version_tags(vcs_client):
 def _get_latest_version_tag_name(vcs_client):
     # get latest tag
     tag_name = vcs_client.get_latest_tag_name()
-    version_tag_name = tag_name if re.match(r'^\d+\.\d+.\d+$', tag_name) else None
+    if re.match(r'^\d+\.\d+.\d+$', tag_name):
+        version_tag_name = tag_name
+    else:
+        raise RuntimeError(
+            "The tag name '{}' doesn't match the version pattern x.y.z".format(tag_name))
     return version_tag_name
 
 
