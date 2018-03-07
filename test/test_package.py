@@ -1,10 +1,20 @@
 import unittest
 
+import os.path
+
 # Redirect stderr to stdout to suppress output in tests
 import sys
 sys.stderr = sys.stdout
 
-from catkin_pkg.package import Dependency, Export, InvalidPackage, Package, Person, _check_known_attributes
+from catkin_pkg.package import (
+    Dependency,
+    Export,
+    InvalidPackage,
+    Package,
+    Person,
+    parse_package,
+    _check_known_attributes,
+)
 
 import xml.dom.minidom as dom
 
@@ -20,6 +30,9 @@ if not hasattr(unittest.TestCase, 'assertRaisesRegexp'):
         def __exit__(self, *args, **kwargs):
             return True
     unittest.TestCase.assertRaisesRegexp = MockAssert
+
+
+test_data_dir = os.path.join(os.path.dirname(__file__), 'data', 'package')
 
 
 class PackageTest(unittest.TestCase):
@@ -296,3 +309,18 @@ class PackageTest(unittest.TestCase):
         check({'xmlns:ns': 'urn:ns'}, ['attr'])
         check({'xmlns:ns': 'urn:ns', 'ns:attr': 'value'}, ['attr'])
         check({'xmlns:ns': 'urn:ns', 'ns:attr': 'value', 'attr2': 'value'}, ['attr'], expected_err)
+
+    def test_parse_package_valid(self):
+        filename = os.path.join(test_data_dir, 'valid_package.xml')
+        package = parse_package(filename)
+        assert package.filename == filename
+        assert not package.is_metapackage()
+        assert package.name == 'valid_package'
+        assert package.description == 'valid_package description'
+        assert package.version == '0.1.0'
+        assert package.licenses == ['BSD']
+        assert [x.name for x in package.run_depends] == ['foo', 'bar', 'baz']
+
+    def test_parse_package_invalid(self):
+        filename = os.path.join(test_data_dir, 'invalid_package.xml')
+        self.assertRaises(InvalidPackage, parse_package, filename)
