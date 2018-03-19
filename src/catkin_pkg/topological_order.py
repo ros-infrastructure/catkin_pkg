@@ -278,6 +278,8 @@ def _sort_decorated_packages(packages_orig):
             # the names list of remaining package names, with path
             # None to indicate cycle
             ordered_packages.append([None, ', '.join(sorted(_reduce_cycle_set(packages)))])
+            pkgs_circular = [pobj for pname, pobj in ordered_packages if not pname]
+            print("WARNING: cicular dependency found in {}".format(pkgs_circular))
             break
 
         # alphabetic order only for convenience
