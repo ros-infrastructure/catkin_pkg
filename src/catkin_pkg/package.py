@@ -470,11 +470,7 @@ def parse_package(path, warnings=None):
     :raises: :exc:`IOError`
     """
     xml, filename = _get_package_xml(path)
-    try:
-        return parse_package_string(xml, filename, warnings=warnings)
-    except InvalidPackage as e:
-        e.args = ['Invalid package manifest "{0}": {1}'.format(filename, e)]
-        raise
+    return parse_package_string(xml, filename, warnings=warnings)
 
 
 def _check_known_attributes(node, known):
@@ -486,6 +482,7 @@ def _check_known_attributes(node, known):
             return ['The "%s" tag must not have the following attributes: %s' % (node.tagName, ', '.join(unknown_attrs))]
     return []
 
+
 def parse_package_string(data, filename=None, warnings=None):
     """
     Parse package.xml string contents.
@@ -496,6 +493,14 @@ def parse_package_string(data, filename=None, warnings=None):
     :returns: return parsed :class:`Package`
     :raises: :exc:`InvalidPackage`
     """
+    try:
+        return _parse_package_string(data, filename=filename, warnings=warnings)
+    except InvalidPackage as e:
+        e.args = ('Invalid package manifest "{0}": {1}'.format(filename, e),)
+        raise
+
+
+def _parse_package_string(data, filename=None, warnings=None):
     try:
         root = dom.parseString(data)
     except Exception as ex:
@@ -659,7 +664,7 @@ def parse_package_string(data, filename=None, warnings=None):
                 errors.append('The "%s" tag must not contain the following children: %s' % (node.tagName, ', '.join([n.tagName for n in subnodes])))
 
     if errors:
-        raise InvalidPackage('Error(s) in %s:%s' % (filename, ''.join(['\n- %s' % e for e in errors])))
+        raise InvalidPackage('Error(s):%s' % (''.join(['\n- %s' % e for e in errors])))
 
     pkg.validate(warnings=warnings)
 
