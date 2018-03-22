@@ -209,6 +209,13 @@ class Package(object):
         :param warnings: Print warnings if None or return them in the given list
         :raises InvalidPackage: in case validation fails
         """
+        try:
+            self._validate(warnings)
+        except InvalidPackage as e:
+            e.args = ('Invalid package manifest "{0}": {1}'.format(self.filename, e),)
+            raise
+
+    def _validate(self, warnings):
         errors = []
         new_warnings = []
 
@@ -224,7 +231,7 @@ class Package(object):
         else:
             if not re.match('^[a-z][a-z0-9_-]*$', self.name):
                 new_warnings.append(
-                    'Package name "%s" does not follow the naming conventions. It should start with'
+                    'Package name "%s" does not follow the naming conventions. It should start with '
                     'a lower case letter and only contain lower case letters, digits, underscores, and dashes.' % self.name)
 
         version_regexp = '^[0-9]+\.[0-9]+\.[0-9]+$'
