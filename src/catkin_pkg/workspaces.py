@@ -40,6 +40,7 @@ import os
 
 CATKIN_WORKSPACE_MARKER_FILE = '.catkin_workspace'
 
+
 def get_spaces(paths=None):
     """
     Return a list of spaces based on the CMAKE_PREFIX_PATH or passed in list of workspaces.

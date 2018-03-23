@@ -222,7 +222,7 @@ def _reduce_cycle_set(packages_orig):
             if decorator.depends_for_topological_order:
                 depended = depended.union(decorator.depends_for_topological_order)
         for name in list(packages.keys()):
-            if not name in depended:
+            if name not in depended:
                 del packages[name]
         if last_depended:
             if last_depended == depended:

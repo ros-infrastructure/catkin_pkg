@@ -1,6 +1,9 @@
 from __future__ import print_function
+
 import unittest
+
 from mock import Mock
+
 try:
     from catkin_pkg.topological_order import topological_order_packages, _PackageDecorator, \
         _sort_decorated_packages
@@ -12,10 +15,13 @@ if not hasattr(unittest.TestCase, 'assertRaisesRegexp'):
     class MockAssert:
         def __init__(self, *args, **kwargs):
             pass
+
         def __enter__(self, *args, **kwargs):
             pass
+
         def __exit__(self, *args, **kwargs):
             return True
+
     unittest.TestCase.assertRaisesRegexp = MockAssert
 
 
@@ -33,7 +39,6 @@ def create_mock(name, build_depends, run_depends, path):
 
 
 class TopologicalOrderTest(unittest.TestCase):
-
     # implement assertIsNotNone for Python < 2.7
     if not hasattr(unittest.TestCase, 'assertIsNotNone'):
         def assertIsNotNone(self, value, *args):

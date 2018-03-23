@@ -43,8 +43,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import sys
-_py3 = sys.version_info[0] >= 3
-
 import dateutil.parser
 import docutils
 import docutils.core
@@ -52,6 +50,8 @@ import logging
 import os
 import pkg_resources
 import re
+
+_py3 = sys.version_info[0] >= 3
 
 try:
     _unicode = unicode

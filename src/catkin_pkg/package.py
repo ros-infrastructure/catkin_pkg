@@ -405,7 +405,8 @@ class Url(object):
 
 
 def parse_package_for_distutils(path=None):
-    print('WARNING: %s/setup.py: catkin_pkg.package.parse_package_for_distutils() is deprecated. Please use catkin_pkg.python_setup.generate_distutils_setup(**kwargs) instead.' % os.path.basename(os.path.abspath('.')))
+    print('WARNING: %s/setup.py: catkin_pkg.package.parse_package_for_distutils() is deprecated. Please use catkin_pkg.python_setup.generate_distutils_setup(**kwargs) instead.'
+          % os.path.basename(os.path.abspath('.')))
     from .python_setup import generate_distutils_setup
     data = {}
     if path is not None:
@@ -457,6 +458,7 @@ def _get_package_xml(path):
     with open(filename, 'r', **kwargs) as f:
         return f.read(), filename
 
+
 def parse_package(path, warnings=None):
     """
     Parse package manifest.
@@ -486,6 +488,7 @@ def _check_known_attributes(node, known):
             return ['The "%s" tag must not have the following attributes: %s' % (node.tagName, ', '.join(unknown_attrs))]
     return []
 
+
 def parse_package_string(data, filename=None, warnings=None):
     """
     Parse package.xml string contents.
@@ -512,7 +515,8 @@ def parse_package_string(data, filename=None, warnings=None):
     # format attribute
     value = _get_node_attr(root, 'format', default=1)
     pkg.package_format = int(value)
-    assert pkg.package_format in (1, 2, 3), "Unable to handle package.xml format version '%d', please update catkin_pkg (e.g. on Ubuntu/Debian use: sudo apt-get update && sudo apt-get install --only-upgrade python-catkin-pkg)" % pkg.package_format
+    assert pkg.package_format in (1, 2, 3), "Unable to handle package.xml format version '%d', please update catkin_pkg " \
+                                            "(e.g. on Ubuntu/Debian use: sudo apt-get update && sudo apt-get install --only-upgrade python-catkin-pkg)" % pkg.package_format
 
     # name
     pkg.name = _get_node_value(_get_node(root, 'name'))

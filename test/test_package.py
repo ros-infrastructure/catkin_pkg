@@ -1,10 +1,8 @@
-import unittest
-
 import os.path
-
 # Redirect stderr to stdout to suppress output in tests
 import sys
-sys.stderr = sys.stdout
+import unittest
+
 
 from catkin_pkg.package import (
     Dependency,
@@ -20,23 +18,26 @@ import xml.dom.minidom as dom
 
 from mock import Mock
 
+sys.stderr = sys.stdout
+
 # mock assertRaisesRegexp for Python < 2.7
 if not hasattr(unittest.TestCase, 'assertRaisesRegexp'):
     class MockAssert:
         def __init__(self, *args, **kwargs):
             pass
+
         def __enter__(self, *args, **kwargs):
             pass
+
         def __exit__(self, *args, **kwargs):
             return True
-    unittest.TestCase.assertRaisesRegexp = MockAssert
 
+    unittest.TestCase.assertRaisesRegexp = MockAssert
 
 test_data_dir = os.path.join(os.path.dirname(__file__), 'data', 'package')
 
 
 class PackageTest(unittest.TestCase):
-
     # implement assertIn for Python < 2.7
     if not hasattr(unittest.TestCase, 'assertIn'):
         def assertIn(self, first, second, *args):
@@ -280,20 +281,20 @@ class PackageTest(unittest.TestCase):
     def test_check_known_attributes(self):
 
         def create_node(tag, attrs):
-            data = '<%s %s/>' % (tag, ' '.join(('%s="%s"'%p) for p in attrs.items()))
+            data = '<%s %s/>' % (tag, ' '.join(('%s="%s"' % p) for p in attrs.items()))
             return dom.parseString(data).firstChild
 
         try:
             create_node('tag', {'key': 'value'})
         except Exception as e:
-            self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e),str(e)))
+            self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e), str(e)))
 
-        self.assertRaisesRegexp(Exception, "unbound prefix: line 1, column 0", create_node,'tag', {'ns:key': 'value'})
+        self.assertRaisesRegexp(Exception, "unbound prefix: line 1, column 0", create_node, 'tag', {'ns:key': 'value'})
 
         try:
             create_node('tag', {'ns:key': 'value', 'xmlns:ns': 'urn:ns'})
         except Exception as e:
-            self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e),str(e)))
+            self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e), str(e)))
 
         def check(attrs, known, res=[]):
             self.assertEqual(res, _check_known_attributes(create_node('tag', attrs), known))
