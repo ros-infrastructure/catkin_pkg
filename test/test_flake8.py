@@ -18,7 +18,8 @@ import os
 import sys
 
 # flake8 doesn't support Python < 2.7 anymore
-if sys.version_info[0] > 2 or sys.version_info[1] >= 7:
+# flake8 3.5.0 does't work on Python 3.2, skip it as well
+if (sys.version_info[0] > 2 or sys.version_info[1] >= 7) and not (sys.version_info[0] == 3 and sys.version_info[1] == 2):
     from flake8.api.legacy import get_style_guide
 else:
     get_style_guide = None
