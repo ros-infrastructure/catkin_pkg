@@ -154,7 +154,7 @@ class Package(object):
             return 'catkin'
         if len(build_type_exports) == 1:
             return build_type_exports[0]
-        raise InvalidPackage('Only one <build_type> element is permitted.')
+        raise InvalidPackage('Only one <build_type> element is permitted.', self.filename)
 
     def has_invalid_metapackage_dependencies(self):
         """
@@ -209,13 +209,6 @@ class Package(object):
         :param warnings: Print warnings if None or return them in the given list
         :raises InvalidPackage: in case validation fails
         """
-        try:
-            self._validate(warnings)
-        except InvalidPackage as e:
-            e.args = ('Invalid package manifest "{0}": {1}'.format(self.filename, e),)
-            raise
-
-    def _validate(self, warnings):
         errors = []
         new_warnings = []
 
@@ -256,7 +249,7 @@ class Package(object):
             try:
                 maintainer.validate()
             except InvalidPackage as e:
-                errors.append(str(e))
+                errors.append(e.msg)
             if not maintainer.email:
                 errors.append('Maintainers must have an email address')
 
@@ -270,7 +263,7 @@ class Package(object):
                 try:
                     author.validate()
                 except InvalidPackage as e:
-                    errors.append(str(e))
+                    errors.append(e.msg)
 
         dep_types = {
             'build': self.build_depends,
@@ -309,7 +302,7 @@ class Package(object):
                 warnings.append(warning)
 
         if errors:
-            raise InvalidPackage('\n'.join(errors))
+            raise InvalidPackage('\n'.join(errors), self.filename)
 
 
 class Dependency(object):
@@ -421,7 +414,14 @@ def parse_package_for_distutils(path=None):
 
 
 class InvalidPackage(Exception):
-    pass
+    def __init__(self, msg, package_path=None):
+        self.msg = msg
+        self.package_path = package_path
+        Exception.__init__(self, self.msg)
+
+    def __str__(self):
+        result = '' if not self.package_path else 'Error(s) in package \'%s\':\n' % self.package_path
+        return result + Exception.__str__(self)
 
 
 def package_exists_at(path):
@@ -503,7 +503,8 @@ def parse_package_string(data, filename=None, warnings=None):
     try:
         return _parse_package_string(data, filename=filename, warnings=warnings)
     except InvalidPackage as e:
-        e.args = ('Invalid package manifest "{0}": {1}'.format(filename, e),)
+        if not e.package_path:
+            e.package_path = filename
         raise
 
 
@@ -511,14 +512,14 @@ def _parse_package_string(data, filename=None, warnings=None):
     try:
         root = dom.parseString(data)
     except Exception as ex:
-        raise InvalidPackage('The manifest contains invalid XML:\n%s' % ex)
+        raise InvalidPackage('The manifest contains invalid XML:\n%s' % ex, filename)
 
     pkg = Package(filename)
 
     # verify unique root node
     nodes = _get_nodes(root, 'package')
     if len(nodes) != 1:
-        raise InvalidPackage('The manifest must contain a single "package" root tag')
+        raise InvalidPackage('The manifest must contain a single "package" root tag', filename)
     root = nodes[0]
 
     # format attribute
@@ -671,7 +672,7 @@ def _parse_package_string(data, filename=None, warnings=None):
                 errors.append('The "%s" tag must not contain the following children: %s' % (node.tagName, ', '.join([n.tagName for n in subnodes])))
 
     if errors:
-        raise InvalidPackage('Error(s):%s' % (''.join(['\n- %s' % e for e in errors])))
+        raise InvalidPackage('Error(s):%s' % (''.join(['\n- %s' % e for e in errors])), filename)
 
     pkg.validate(warnings=warnings)
 
