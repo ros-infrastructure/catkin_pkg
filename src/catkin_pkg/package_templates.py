@@ -193,8 +193,17 @@ def _safe_write_files(newfiles, target_dir):
         print('Created file %s' % os.path.relpath(target_file, os.path.dirname(target_dir)))
 
 
+def _create_empty_file(path):
+    """
+    Creates an empty file on the disk.
+    :param path: The filename to be created.
+    """
+    with open(path, 'a'):
+        pass
+
+
 def create_package_files(target_path, package_template, rosdistro,
-                         newfiles=None, meta=False):
+                         newfiles=None, meta=False, python_modules=None):
     """
     creates several files from templates to start a new package.
 
@@ -205,6 +214,11 @@ def create_package_files(target_path, package_template, rosdistro,
     """
     if newfiles is None:
         newfiles = {}
+    # we distinguish between None and [] here: [] means to create a module
+    # with the same name as the package; None means "do not generate setup.py"
+    has_python_modules = python_modules is not None
+    if has_python_modules and len(python_modules) == 0:
+        python_modules = [package_template.name]
     # allow to replace default templates when path string is equal
     manifest_path = os.path.join(target_path, PACKAGE_MANIFEST_FILENAME)
     if manifest_path not in newfiles:
@@ -212,17 +226,31 @@ def create_package_files(target_path, package_template, rosdistro,
             create_package_xml(package_template, rosdistro, meta=meta)
     cmake_path = os.path.join(target_path, 'CMakeLists.txt')
     if not cmake_path in newfiles:
-        newfiles[cmake_path] = create_cmakelists(package_template, rosdistro, meta=meta)
+        newfiles[cmake_path] = create_cmakelists(package_template, rosdistro, meta=meta,
+                                                 has_python_modules=has_python_modules)
+    if has_python_modules:
+        setup_py_path = os.path.join(target_path, 'setup.py')
+        if not setup_py_path in newfiles:
+            newfiles[setup_py_path] = create_setup_py(package_template, rosdistro,
+                                                      python_modules=python_modules)
     _safe_write_files(newfiles, target_path)
     if 'roscpp' in package_template.catkin_deps:
         fname = os.path.join(target_path, 'include', package_template.name)
         os.makedirs(fname)
         print('Created folder %s' % os.path.relpath(fname, os.path.dirname(target_path)))
     if 'roscpp' in package_template.catkin_deps or \
-            'rospy' in package_template.catkin_deps:
+            'rospy' in package_template.catkin_deps or has_python_modules:
         fname = os.path.join(target_path, 'src')
         os.makedirs(fname)
         print('Created folder %s' % os.path.relpath(fname, os.path.dirname(target_path)))
+    if has_python_modules:
+        for module in python_modules:
+            fname = os.path.join(target_path, 'src', module)
+            os.makedirs(fname)
+            print('Created folder %s' % os.path.relpath(fname, os.path.dirname(target_path)))
+            fname = os.path.join(fname, '__init__.py')
+            _create_empty_file(fname)
+            print('Created file %s' % os.path.relpath(fname, os.path.dirname(target_path)))
 
 
 class CatkinTemplate(string.Template):
@@ -231,7 +259,7 @@ class CatkinTemplate(string.Template):
     escape = '@'
 
 
-def create_cmakelists(package_template, rosdistro, meta=False):
+def create_cmakelists(package_template, rosdistro, meta=False, has_python_modules=False):
     """
     :param package_template: contains the required information
     :returns: file contents as string
@@ -272,6 +300,9 @@ def create_cmakelists(package_template, rosdistro, meta=False):
             message_depends = '#   %s' % '#   '.join(message_pkgs)
         else:
             message_depends = '#   std_msgs  # Or other packages containing msgs'
+        catkin_python_setup = "catkin_python_setup()"
+        if not has_python_modules:
+            catkin_python_setup = "# " + catkin_python_setup
         temp_dict = {'name': package_template.name,
                      'components': components,
                      'include_directories': _create_include_macro(package_template),
@@ -280,7 +311,8 @@ def create_cmakelists(package_template, rosdistro, meta=False):
                      'catkin_depends': catkin_depends,
                      'system_depends': system_depends,
                      'target_libraries': _create_targetlib_args(package_template),
-                     'message_dependencies': message_depends
+                     'message_dependencies': message_depends,
+                     'catkin_python_setup': catkin_python_setup,
                      }
         return ctemp.substitute(temp_dict)
 
@@ -439,4 +471,21 @@ def create_package_xml(package_template, rosdistro, meta=False):
 
     temp_dict['components'] = package_template.catkin_deps
 
+    return ctemp.substitute(temp_dict)
+
+
+def create_setup_py(package_template, rosdistro, python_modules=None):
+    """
+    :param package_template: contains the required information
+    :returns: file contents as string
+    """
+    setup_py_template = read_template_file('setup.py', rosdistro)
+    ctemp = CatkinTemplate(setup_py_template)
+
+    python_modules = python_modules or []
+    modules = ", ".join(["'%s'" % module for module in python_modules])
+
+    temp_dict = {'name': package_template.name,
+                 'python_modules': modules
+                 }
     return ctemp.substitute(temp_dict)
