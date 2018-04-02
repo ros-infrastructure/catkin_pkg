@@ -277,7 +277,7 @@ class Package(object):
         for dep_type, depends in dep_types.items():
             for depend in depends:
                 if depend.name == self.name:
-                    errors.append('The package must not "%s_depend" on a package with the same name as this package' % dep_type)
+                    errors.append('The package "%s" must not "%s_depend" on a package with the same name as this package' % (self.name, dep_type))
 
         if (
             set([d.name for d in self.group_depends]) &
