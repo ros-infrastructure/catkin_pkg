@@ -268,10 +268,10 @@ class PackageTest(unittest.TestCase):
             self.assertEqual('foo', str(e))
             self.assertEqual(None, e.package_path)
         try:
-            raise InvalidPackage('foo', package_path='\\bar')
+            raise InvalidPackage('foo', package_path='./bar')
         except InvalidPackage as e:
-            self.assertEqual('Error(s) in package \'\\bar\':\nfoo', str(e))
-            self.assertEqual('\\bar', e.package_path)
+            self.assertEqual("Error(s) in package './bar':\nfoo", str(e))
+            self.assertEqual('./bar', e.package_path)
 
     def test_validate_person(self):
         auth1 = Person('foo')
