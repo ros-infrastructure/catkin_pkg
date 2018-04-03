@@ -420,7 +420,7 @@ class InvalidPackage(Exception):
         Exception.__init__(self, self.msg)
 
     def __str__(self):
-        result = '' if not self.package_path else 'Error(s) in package \'%s\':\n' % self.package_path
+        result = '' if not self.package_path else "Error(s) in package '%s':\n" % self.package_path
         return result + Exception.__str__(self)
 
 
