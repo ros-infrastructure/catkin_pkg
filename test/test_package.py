@@ -265,6 +265,18 @@ class PackageTest(unittest.TestCase):
             self.assertRaises(InvalidPackage, Package.validate, pack)
             dep_type.remove(depend)
 
+    def test_invalid_package_exception(self):
+        try:
+            raise InvalidPackage('foo')
+        except InvalidPackage as e:
+            self.assertEqual('foo', str(e))
+            self.assertEqual(None, e.package_path)
+        try:
+            raise InvalidPackage('foo', package_path='./bar')
+        except InvalidPackage as e:
+            self.assertEqual("Error(s) in package './bar':\nfoo", str(e))
+            self.assertEqual('./bar', e.package_path)
+
     def test_validate_person(self):
         auth1 = Person('foo')
         auth1.email = 'foo@bar.com'

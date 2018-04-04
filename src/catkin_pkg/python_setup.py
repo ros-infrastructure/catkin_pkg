@@ -112,7 +112,7 @@ def generate_distutils_setup(package_xml_path=os.path.curdir, **kwargs):
     for k, v in kwargs.items():
         if k in data:
             if v != data[k]:
-                raise InvalidPackage('The keyword argument "%s" does not match the information from package.xml: "%s" != "%s"' % (k, v, data[k]))
+                raise InvalidPackage('The keyword argument "%s" does not match the information from package.xml: "%s" != "%s"' % (k, v, data[k]), package_xml_path)
         else:
             data[k] = v
 
