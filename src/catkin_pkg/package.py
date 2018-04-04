@@ -501,15 +501,6 @@ def parse_package_string(data, filename=None, warnings=None):
     :raises: :exc:`InvalidPackage`
     """
     try:
-        return _parse_package_string(data, filename=filename, warnings=warnings)
-    except InvalidPackage as e:
-        if not e.package_path:
-            e.package_path = filename
-        raise
-
-
-def _parse_package_string(data, filename=None, warnings=None):
-    try:
         root = dom.parseString(data)
     except Exception as ex:
         raise InvalidPackage('The manifest contains invalid XML:\n%s' % ex, filename)
@@ -528,16 +519,16 @@ def _parse_package_string(data, filename=None, warnings=None):
     assert pkg.package_format in (1, 2, 3), "Unable to handle package.xml format version '%d', please update catkin_pkg (e.g. on Ubuntu/Debian use: sudo apt-get update && sudo apt-get install --only-upgrade python-catkin-pkg)" % pkg.package_format
 
     # name
-    pkg.name = _get_node_value(_get_node(root, 'name'))
+    pkg.name = _get_node_value(_get_node(root, 'name', filename))
 
     # version and optional compatibility
-    version_node = _get_node(root, 'version')
+    version_node = _get_node(root, 'version', filename)
     pkg.version = _get_node_value(version_node)
     pkg.version_compatibility = _get_node_attr(
         version_node, 'compatibility', default=None)
 
     # description
-    pkg.description = _get_node_value(_get_node(root, 'description'), allow_xml=True, apply_str=False)
+    pkg.description = _get_node_value(_get_node(root, 'description', filename), allow_xml=True, apply_str=False)
 
     # at least one maintainer, all must have email
     maintainers = _get_nodes(root, 'maintainer')
@@ -613,7 +604,7 @@ def _parse_package_string(data, filename=None, warnings=None):
                 errors.append('The test dependency on "%s" is redundant with: %s' % (test_depend.name, ', '.join(same_build_depends + same_run_depends)))
 
     # exports
-    export_node = _get_optional_node(root, 'export')
+    export_node = _get_optional_node(root, 'export', filename)
     if export_node is not None:
         exports = []
         for node in [n for n in export_node.childNodes if n.nodeType == n.ELEMENT_NODE]:
@@ -683,17 +674,17 @@ def _get_nodes(parent, tagname):
     return [n for n in parent.childNodes if n.nodeType == n.ELEMENT_NODE and n.tagName == tagname]
 
 
-def _get_node(parent, tagname):
+def _get_node(parent, tagname, filename):
     nodes = _get_nodes(parent, tagname)
     if len(nodes) != 1:
-        raise InvalidPackage('The manifest must contain exactly one "%s" tags' % tagname)
+        raise InvalidPackage('The manifest must contain exactly one "%s" tags' % tagname, filename)
     return nodes[0]
 
 
-def _get_optional_node(parent, tagname):
+def _get_optional_node(parent, tagname, filename):
     nodes = _get_nodes(parent, tagname)
     if len(nodes) > 1:
-        raise InvalidPackage('The manifest must not contain more than one "%s" tags' % tagname)
+        raise InvalidPackage('The manifest must not contain more than one "%s" tags' % tagname, filename)
     return nodes[0] if nodes else None
 
 
@@ -705,13 +696,6 @@ def _get_node_value(node, allow_xml=False, apply_str=True):
     if apply_str:
         value = str(value)
     return value
-
-
-def _get_optional_node_value(parent, tagname, default=None):
-    node = _get_optional_node(parent, tagname)
-    if node is None:
-        return default
-    return _get_node_value(node)
 
 
 def _get_node_attr(node, attr, default=False):
