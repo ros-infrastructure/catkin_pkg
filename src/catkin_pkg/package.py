@@ -677,7 +677,7 @@ def _get_nodes(parent, tagname):
 def _get_node(parent, tagname, filename):
     nodes = _get_nodes(parent, tagname)
     if len(nodes) != 1:
-        raise InvalidPackage('The manifest must contain exactly one "%s" tags' % tagname, filename)
+        raise InvalidPackage('The manifest must contain exactly one "%s" tag' % tagname, filename)
     return nodes[0]
 
 
