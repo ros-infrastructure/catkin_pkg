@@ -176,7 +176,7 @@ def _safe_write_files(newfiles, target_dir):
         if os.path.exists(target_file):
             raise ValueError('File exists: %s' % target_file)
         dirname = os.path.dirname(target_file)
-        while (dirname != target_dir):
+        while dirname != target_dir:
             if os.path.isfile(dirname):
                 raise ValueError('Cannot create directory, file exists: %s' %
                                  dirname)
