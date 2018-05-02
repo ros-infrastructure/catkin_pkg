@@ -238,9 +238,10 @@ def create_cmakelists(package_template, rosdistro, meta=False):
     """
     if meta:
         template_path = get_metapackage_cmake_template_path()
-        temp_dict = {'name': package_template.name,
-                     'metapackage_arguments': ''
-                     }
+        temp_dict = {
+            'name': package_template.name,
+            'metapackage_arguments': '',
+        }
         return configure_file(template_path, temp_dict)
     else:
         cmakelists_txt_template = read_template_file('CMakeLists.txt', rosdistro)
