@@ -30,7 +30,6 @@ def test_flake8():
         return
 
     style_guide = get_style_guide(
-        exclude=['conf.py'],
         ignore=[
             'C402',  # ignore presence of unnecessary generators
             'C405',  # ignore presence of unnecessary literals
