@@ -515,8 +515,9 @@ def parse_package_string(data, filename=None, warnings=None):
     # format attribute
     value = _get_node_attr(root, 'format', default=1)
     pkg.package_format = int(value)
-    assert pkg.package_format in (1, 2, 3), "Unable to handle package.xml format version '%d', please update catkin_pkg " \
-                                            "(e.g. on Ubuntu/Debian use: sudo apt-get update && sudo apt-get install --only-upgrade python-catkin-pkg)" % pkg.package_format
+    assert pkg.package_format in (1, 2, 3), \
+        "Unable to handle package.xml format version '%d', please update catkin_pkg " \
+        "(e.g. on Ubuntu/Debian use: sudo apt-get update && sudo apt-get install --only-upgrade python-catkin-pkg)" % pkg.package_format
 
     # name
     pkg.name = _get_node_value(_get_node(root, 'name'))
