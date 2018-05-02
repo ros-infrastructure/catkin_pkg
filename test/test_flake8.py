@@ -59,8 +59,8 @@ def test_flake8():
         print()
         report._application.formatter.show_statistics(report._stats)
         print(
-            'flake8 reported {report.total_errors} errors'
-            .format_map(locals()), file=sys.stderr)
+            'flake8 reported %d errors' % report.total_errors,
+            file=sys.stderr)
 
     assert not report.total_errors, \
         'flake8 reported %d errors' % report.total_errors
