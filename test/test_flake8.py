@@ -27,7 +27,6 @@ else:
 
 def test_flake8():
     if get_style_guide is None:
-        # skip test on Python 2.6 and older
         return
 
     style_guide = get_style_guide(
