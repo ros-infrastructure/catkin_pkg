@@ -40,15 +40,20 @@ def prompt_continue(msg, default):
 
 def main(sysargs=None):
     parser = argparse.ArgumentParser(description='Generate a REP-0132 %s' % CHANGELOG_FILENAME)
-    parser.add_argument('-a', '--all', action='store_true', default=False,
+    parser.add_argument(
+        '-a', '--all', action='store_true', default=False,
         help='Generate changelog for all versions instead of only the forthcoming one (only supported when no changelog file exists yet)')
-    parser.add_argument('--print-root', action='store_true', default=False,
+    parser.add_argument(
+        '--print-root', action='store_true', default=False,
         help='Output changelog content to the console as if there would be only one package in the root of the repository')
-    parser.add_argument('--skip-contributors', action='store_true', default=False,
+    parser.add_argument(
+        '--skip-contributors', action='store_true', default=False,
         help='Skip adding the list of contributors to the changelog')
-    parser.add_argument('--skip-merges', action='store_true', default=False,
+    parser.add_argument(
+        '--skip-merges', action='store_true', default=False,
         help='Skip adding merge commits to the changelog')
-    parser.add_argument('-y', '--non-interactive', action='store_true', default=False,
+    parser.add_argument(
+        '-y', '--non-interactive', action='store_true', default=False,
         help="Run without user interaction, confirming all questions with 'yes'")
     args = parser.parse_args(sysargs)
 

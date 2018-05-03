@@ -3,6 +3,7 @@ from __future__ import print_function
 import contextlib
 import os
 import re
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -21,10 +22,13 @@ if not hasattr(unittest.TestCase, 'assertRaises'):
     class MockAssert:
         def __init__(self, *args, **kwargs):
             pass
+
         def __enter__(self, *args, **kwargs):
             pass
+
         def __exit__(self, *args, **kwargs):
             return True
+
     unittest.TestCase.assertRaises = MockAssert
     unittest.TestCase.assertRaisesRegexp = MockAssert
 
@@ -81,6 +85,7 @@ def _validate_metapackage(path, package):
 
 class TestMetapackageValidation(unittest.TestCase):
     """Tests the metapackage validator"""
+
     def test_validate_metapackage(self):
         pkgs_dict = find_packages(test_data_dir)
         for path, package in pkgs_dict.items():

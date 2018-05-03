@@ -40,8 +40,8 @@ import sys
 from catkin_pkg.cmake import configure_file
 from catkin_pkg.cmake import get_metapackage_cmake_template_path
 from catkin_pkg.package import Dependency
-from catkin_pkg.package import Package
 from catkin_pkg.package import PACKAGE_MANIFEST_FILENAME
+from catkin_pkg.package import Package
 from catkin_pkg.package import Person
 
 
@@ -105,12 +105,12 @@ class PackageTemplate(Package):
                 buildtool_depends.append(Dependency('genmsg'))
                 continue
             if dep.lower() == 'message_generation':
-                if not 'message_runtime' in catkin_deps:
+                if 'message_runtime' not in catkin_deps:
                     sys.stderr.write('WARNING: Packages with messages or services should depend on both message_generation and message_runtime\n')
                 build_depends.append(Dependency('message_generation'))
                 continue
             if dep.lower() == 'message_runtime':
-                if not 'message_generation' in catkin_deps:
+                if 'message_generation' not in catkin_deps:
                     sys.stderr.write('WARNING: Packages with messages or services should depend on both message_generation and message_runtime\n')
                 exec_depends.append(Dependency('message_runtime'))
                 continue
@@ -120,7 +120,7 @@ class PackageTemplate(Package):
         if boost_comps:
             if not system_deps:
                 system_deps = ['boost']
-            elif not 'boost' in system_deps:
+            elif 'boost' not in system_deps:
                 system_deps.append('boost')
         for dep in system_deps or []:
             if not dep.lower().startswith('python-'):
@@ -176,7 +176,7 @@ def _safe_write_files(newfiles, target_dir):
         if os.path.exists(target_file):
             raise ValueError('File exists: %s' % target_file)
         dirname = os.path.dirname(target_file)
-        while(dirname != target_dir):
+        while dirname != target_dir:
             if os.path.isfile(dirname):
                 raise ValueError('Cannot create directory, file exists: %s' %
                                  dirname)
@@ -211,7 +211,7 @@ def create_package_files(target_path, package_template, rosdistro,
         newfiles[manifest_path] = \
             create_package_xml(package_template, rosdistro, meta=meta)
     cmake_path = os.path.join(target_path, 'CMakeLists.txt')
-    if not cmake_path in newfiles:
+    if cmake_path not in newfiles:
         newfiles[cmake_path] = create_cmakelists(package_template, rosdistro, meta=meta)
     _safe_write_files(newfiles, target_path)
     if 'roscpp' in package_template.catkin_deps:
@@ -238,9 +238,10 @@ def create_cmakelists(package_template, rosdistro, meta=False):
     """
     if meta:
         template_path = get_metapackage_cmake_template_path()
-        temp_dict = {'name': package_template.name,
-                      'metapackage_arguments': ''
-                      }
+        temp_dict = {
+            'name': package_template.name,
+            'metapackage_arguments': '',
+        }
         return configure_file(template_path, temp_dict)
     else:
         cmakelists_txt_template = read_template_file('CMakeLists.txt', rosdistro)
@@ -313,6 +314,7 @@ def _create_include_macro(package_template):
     if includes:
         result += '\n'.join(includes)
     return result
+
 
 def _create_depend_tag(dep_type,
                        name,
@@ -412,7 +414,7 @@ def create_package_xml(package_template, rosdistro, meta=False):
                     dep.version_lte,
                     dep.version_gt,
                     dep.version_gte
-                    )
+                )
                 dependencies.append(dep_tag)
             else:
                 dependencies.append(_create_depend_tag(dep_type,

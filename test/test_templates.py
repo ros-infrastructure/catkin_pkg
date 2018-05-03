@@ -120,12 +120,14 @@ class TemplateTest(unittest.TestCase):
         mock_pack.boost_comps = []
         mock_pack.system_deps = ['log4cxx', 'BZip2']
         statement = _create_include_macro(mock_pack)
-        self.assertEqual('# include\n  ${catkin_INCLUDE_DIRS}\n# TODO: Check names of system library include directories (log4cxx, BZip2)\n  ${log4cxx_INCLUDE_DIRS}\n  ${BZip2_INCLUDE_DIRS}', statement)
+        self.assertEqual('# include\n  ${catkin_INCLUDE_DIRS}\n# TODO: Check names of system library include directories (log4cxx, BZip2)\n'
+                         '  ${log4cxx_INCLUDE_DIRS}\n  ${BZip2_INCLUDE_DIRS}', statement)
         mock_pack.catkin_deps = ['roscpp']
         mock_pack.boost_comps = ['thread', 'filesystem']
         mock_pack.system_deps = ['log4cxx', 'BZip2']
         statement = _create_include_macro(mock_pack)
-        self.assertEqual('# include\n  ${catkin_INCLUDE_DIRS}\n  ${Boost_INCLUDE_DIRS}\n# TODO: Check names of system library include directories (log4cxx, BZip2)\n  ${log4cxx_INCLUDE_DIRS}\n  ${BZip2_INCLUDE_DIRS}', statement)
+        self.assertEqual('# include\n  ${catkin_INCLUDE_DIRS}\n  ${Boost_INCLUDE_DIRS}\n# TODO: Check names of system library include directories (log4cxx, BZip2)\n'
+                         '  ${log4cxx_INCLUDE_DIRS}\n  ${BZip2_INCLUDE_DIRS}', statement)
 
     def test_create_package(self):
         maint = self.get_maintainer()
