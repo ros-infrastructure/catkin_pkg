@@ -8,6 +8,7 @@ from catkin_pkg.packages import find_packages_allowing_duplicates
 
 from .util import in_temporary_directory
 
+
 def _create_pkg_in_dir(path, version='0.1.0'):
     path = os.path.abspath(path)
     os.makedirs(path)
@@ -44,6 +45,7 @@ def test_find_packages_allowing_duplicates_with_no_packages():
     res = find_packages_allowing_duplicates('.')
     assert isinstance(res, dict)
     assert not res
+
 
 @in_temporary_directory
 def test_find_packages_invalid_version():
