@@ -23,6 +23,7 @@ from flake8.api.legacy import get_style_guide
 def test_flake8():
     style_guide = get_style_guide(
         ignore=[
+            'C403',  # Unnecessary list comprehension - rewrite as a set comprehension -- invalid syntax in Python 2
             'D100',  # Missing docstring in public module
             'D101',  # Missing docstring in public class
             'D102',  # Missing docstring in public method
