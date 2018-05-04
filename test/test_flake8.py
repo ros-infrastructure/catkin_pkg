@@ -23,15 +23,18 @@ from flake8.api.legacy import get_style_guide
 def test_flake8():
     style_guide = get_style_guide(
         ignore=[
-            'C402',  # ignore presence of unnecessary generators
-            'C405',  # ignore presence of unnecessary literals
-            'C407',  # ignore presence of unnecessary comprehensions
-            'C408',  # ignore presence of unnecessary tuple/list/dict
-            'D',  # ignore documentation related warnings
-            'F401',  # ignore presence of unused imports
-            'F841',  # ignore presence of unused variables
-            'I',  # ignore import order related warnings
-            'N802',  # ignore presence of upper case in function names
+            'D100',  # Missing docstring in public module
+            'D101',  # Missing docstring in public class
+            'D102',  # Missing docstring in public method
+            'D103',  # Missing docstring in public function
+            'D104',  # Missing docstring in public package
+            'D105',  # Missing docstring in magic method
+            'D106',  # Missing docstring in public nested class
+            'D107',  # Missing docstring in __init__
+            'D203',  # 1 blank line required before class docstring
+            'D212',  # Multi-line docstring summary should start at the first line
+            'D404',  # First word of the docstring should be This
+            'I202',  # Additional newline in a group of imports
         ],
         max_line_length=200,
         max_complexity=10,
