@@ -373,6 +373,7 @@ class Export(object):
 
 # Subclassing ``str`` to keep backward compatibility.
 class License(str):
+
     def __new__(cls, value, file_=None):
         obj = str.__new__(cls, str(value))
         obj.file = file_
@@ -424,6 +425,7 @@ def parse_package_for_distutils(path=None):
 
 
 class InvalidPackage(Exception):
+
     def __init__(self, msg, package_path=None):
         self.msg = msg
         self.package_path = package_path

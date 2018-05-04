@@ -97,6 +97,7 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warning
 
 
 class _PackageParser(object):
+
     def __init__(self, capture_warnings):
         self.capture_warnings = capture_warnings
 
