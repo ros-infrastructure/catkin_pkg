@@ -109,7 +109,7 @@ class TopologicalOrderTest(unittest.TestCase):
                     mockproject6.name: mockproject6}
 
         pd.calculate_depends_for_topological_order(packages)
-        self.assertEqual({mockproject1.name, mockproject4.name, mockproject5.name, mockproject6.name},
+        self.assertEqual(set([mockproject1.name, mockproject4.name, mockproject5.name, mockproject6.name]),
                          pd.depends_for_topological_order)
 
     def test_sort_decorated_packages(self):
@@ -147,7 +147,7 @@ class TopologicalOrderTest(unittest.TestCase):
         mock1 = create_mock('mock1')
         mock2 = create_mock('mock2')
         mock3 = create_mock('mock3')
-        mock3.depends_for_topological_order = {'mock2'}
+        mock3.depends_for_topological_order = set(['mock2'])
         mock3.message_generator = True
 
         projects = {'mock3': mock3, 'mock2': mock2, 'mock1': mock1}
@@ -162,7 +162,7 @@ class TopologicalOrderTest(unittest.TestCase):
         def create_mock(path, depend):
             m = Mock()
             m.path = path
-            m.depends_for_topological_order = {depend}
+            m.depends_for_topological_order = set([depend])
             m.message_generator = False
             return m
 
