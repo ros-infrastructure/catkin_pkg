@@ -245,7 +245,7 @@ def _sort_decorated_packages(packages_orig):
     packages = copy.deepcopy(packages_orig)
 
     # mark all packages which are (recursively) dependent on by message generators
-    dependency_names_to_follow = set([name for name, decorator in packages.items() if decorator.message_generator])
+    dependency_names_to_follow = {name for name, decorator in packages.items() if decorator.message_generator}
     not_marked_package_names = set(packages.keys()) - dependency_names_to_follow
     while dependency_names_to_follow:
         pkg_name = dependency_names_to_follow.pop()

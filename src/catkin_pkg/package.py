@@ -281,8 +281,8 @@ class Package(object):
                     errors.append('The package "%s" must not "%s_depend" on a package with the same name as this package' % (self.name, dep_type))
 
         if (
-            set([d.name for d in self.group_depends]) &
-            set([g.name for g in self.member_of_groups])
+            {d.name for d in self.group_depends} &
+            {g.name for g in self.member_of_groups}
         ):
             errors.append(
                 "The package must not 'group_depend' on a package which it "
@@ -672,7 +672,7 @@ def parse_package_string(data, filename=None, warnings=None):
             'license': ['file'],
         })
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
-    unknown_tags = set([n.tagName for n in nodes if n.tagName not in known.keys()])
+    unknown_tags = {n.tagName for n in nodes if n.tagName not in known.keys()}
     if unknown_tags:
         errors.append('The manifest (with format version %d) must not contain the following tags: %s' % (pkg.package_format, ', '.join(unknown_tags)))
     for node in [n for n in nodes if n.tagName in known.keys()]:
