@@ -89,7 +89,7 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warning
         if package.name not in package_paths_by_name:
             package_paths_by_name[package.name] = set([])
         package_paths_by_name[package.name].add(path)
-    duplicates = dict([(name, paths) for name, paths in package_paths_by_name.items() if len(paths) > 1])
+    duplicates = {name: paths for name, paths in package_paths_by_name.items() if len(paths) > 1}
     if duplicates:
         duplicates = ['Multiple packages found with the same name "%s":%s' % (name, ''.join(['\n- %s' % path_ for path_ in sorted(duplicates[name])])) for name in sorted(duplicates.keys())]
         raise RuntimeError('\n'.join(duplicates))
