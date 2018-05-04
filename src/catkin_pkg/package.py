@@ -328,10 +328,10 @@ class Dependency(object):
     def __eq__(self, other):
         if not isinstance(other, Dependency):
             return False
-        return all([getattr(self, attr) == getattr(other, attr) for attr in self.__slots__])
+        return all(getattr(self, attr) == getattr(other, attr) for attr in self.__slots__)
 
     def __hash__(self):
-        return hash(tuple([getattr(self, slot) for slot in self.__slots__]))
+        return hash(tuple(getattr(self, slot) for slot in self.__slots__))
 
     def __str__(self):
         return self.name

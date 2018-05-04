@@ -81,7 +81,7 @@ def main(sysargs=None):
     packages = find_packages(base_path)
     if not packages:
         raise RuntimeError('No packages found')
-    print('Found packages: %s' % ', '.join(sorted([p.name for p in packages.values()])))
+    print('Found packages: %s' % ', '.join(sorted(p.name for p in packages.values())))
 
     # check for missing changelogs
     missing_changelogs = []
