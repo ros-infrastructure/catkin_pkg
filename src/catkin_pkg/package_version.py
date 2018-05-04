@@ -50,7 +50,7 @@ def bump_version(version, bump='patch'):
     new_version = match.groups()
     new_version = [int(x) for x in new_version]
     # find the desired index
-    idx = dict(major=0, minor=1, patch=2)[bump]
+    idx = {'major': 0, 'minor': 1, 'patch': 2}[bump]
     # increment the desired part
     new_version[idx] += 1
     # reset all parts behind the bumped part
