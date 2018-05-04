@@ -94,7 +94,7 @@ def main(sysargs=None):
         raise RuntimeError('All packages already have a changelog. Either remove (some of) them before using --all or invoke the script without --all.')
 
     if args.all and len(missing_changelogs) != len(packages):
-        ignored = {p.name for p in packages.values()} - set(missing_changelogs)
+        ignored = set([p.name for p in packages.values()]) - set(missing_changelogs)
         print('The following packages already have a changelog file and will be ignored: %s' % ', '.join(sorted(ignored)), file=sys.stderr)
 
     # prompt to switch to --all
