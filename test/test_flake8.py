@@ -17,18 +17,10 @@ from __future__ import print_function
 import os
 import sys
 
-# flake8 doesn't support Python < 2.7 anymore
-# flake8 3.5.0 does't work on Python 3.2, skip it as well
-if (sys.version_info[0] > 2 or sys.version_info[1] >= 7) and not (sys.version_info[0] == 3 and sys.version_info[1] == 2):
-    from flake8.api.legacy import get_style_guide
-else:
-    get_style_guide = None
+from flake8.api.legacy import get_style_guide
 
 
 def test_flake8():
-    if get_style_guide is None:
-        return
-
     style_guide = get_style_guide(
         ignore=[
             'C402',  # ignore presence of unnecessary generators

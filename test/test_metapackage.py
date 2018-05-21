@@ -17,20 +17,6 @@ from catkin_pkg.metapackage import validate_metapackage
 
 from catkin_pkg.packages import find_packages
 
-# mock assertRaises and assertRaisesRegexp for Python < 2.7
-if not hasattr(unittest.TestCase, 'assertRaises'):
-    class MockAssert:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def __enter__(self, *args, **kwargs):
-            pass
-
-        def __exit__(self, *args, **kwargs):
-            return True
-
-    unittest.TestCase.assertRaises = MockAssert
-    unittest.TestCase.assertRaisesRegexp = MockAssert
 
 test_data_dir = os.path.join(os.path.dirname(__file__), 'data', 'metapackages')
 

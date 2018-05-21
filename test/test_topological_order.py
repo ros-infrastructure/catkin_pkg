@@ -10,20 +10,6 @@ try:
 except ImportError as e:
     raise ImportError('Please adjust your PYTHONPATH before running this test: %s' % str(e))
 
-# mock assertRaisesRegexp for Python < 2.7
-if not hasattr(unittest.TestCase, 'assertRaisesRegexp'):
-    class MockAssert:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def __enter__(self, *args, **kwargs):
-            pass
-
-        def __exit__(self, *args, **kwargs):
-            return True
-
-    unittest.TestCase.assertRaisesRegexp = MockAssert
-
 
 def create_mock(name, build_depends, run_depends, path):
     m = Mock()
@@ -39,10 +25,6 @@ def create_mock(name, build_depends, run_depends, path):
 
 
 class TopologicalOrderTest(unittest.TestCase):
-    # implement assertIsNotNone for Python < 2.7
-    if not hasattr(unittest.TestCase, 'assertIsNotNone'):
-        def assertIsNotNone(self, value, *args):
-            self.assertNotEqual(value, None, *args)
 
     def test_topological_order_packages(self):
         mc = create_mock('c', [], [], 'pc')
