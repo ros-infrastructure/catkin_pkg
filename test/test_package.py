@@ -21,28 +21,10 @@ from mock import Mock
 
 sys.stderr = sys.stdout
 
-# mock assertRaisesRegexp for Python < 2.7
-if not hasattr(unittest.TestCase, 'assertRaisesRegexp'):
-    class MockAssert:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def __enter__(self, *args, **kwargs):
-            pass
-
-        def __exit__(self, *args, **kwargs):
-            return True
-
-    unittest.TestCase.assertRaisesRegexp = MockAssert
-
 test_data_dir = os.path.join(os.path.dirname(__file__), 'data', 'package')
 
 
 class PackageTest(unittest.TestCase):
-    # implement assertIn for Python < 2.7
-    if not hasattr(unittest.TestCase, 'assertIn'):
-        def assertIn(self, first, second, *args):
-            self.assertTrue(first in second, *args)
 
     def get_maintainer(self):
         maint = Mock()
