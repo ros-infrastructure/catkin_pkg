@@ -77,12 +77,12 @@ class PackageTest(unittest.TestCase):
                          version_gte=4,
                          version_gt=5,
                          condition='$foo == 23 and $bar != 42')
-        self.assertEquals('foo', dep.name)
-        self.assertEquals(1, dep.version_lt)
-        self.assertEquals(2, dep.version_lte)
-        self.assertEquals(3, dep.version_eq)
-        self.assertEquals(4, dep.version_gte)
-        self.assertEquals(5, dep.version_gt)
+        self.assertEqual('foo', dep.name)
+        self.assertEqual(1, dep.version_lt)
+        self.assertEqual(2, dep.version_lte)
+        self.assertEqual(3, dep.version_eq)
+        self.assertEqual(4, dep.version_gte)
+        self.assertEqual(5, dep.version_gt)
         self.assertFalse(dep.evaluate_condition({'foo': 23, 'bar': 42}))
         self.assertFalse(dep.evaluated_condition)
         self.assertTrue(dep.evaluate_condition({'foo': 23, 'bar': 43}))
@@ -100,7 +100,7 @@ class PackageTest(unittest.TestCase):
                           condition='$foo == 23 and $bar != 42')
         dep2.evaluate_condition({'foo': 23, 'bar': 43})
         d[dep2] = None
-        self.assertEquals(len(d), 1)
+        self.assertEqual(len(d), 1)
         dep3 = Dependency('foo',
                           version_lt=1,
                           version_lte=2,
@@ -108,7 +108,7 @@ class PackageTest(unittest.TestCase):
                           version_gte=4,
                           version_gt=6)
         d[dep3] = None
-        self.assertEquals(len(d), 2)
+        self.assertEqual(len(d), 2)
 
         dep = Dependency('foo', condition='foo > bar and bar < baz')
         self.assertTrue(dep.evaluate_condition({}))
@@ -207,7 +207,7 @@ class PackageTest(unittest.TestCase):
         pack.name = 'bar-bza'
         warnings = []
         pack.validate(warnings=warnings)
-        self.assertEquals(warnings, [])
+        self.assertEqual(warnings, [])
 
         pack.name = 'BAR'
         warnings = []
@@ -219,7 +219,7 @@ class PackageTest(unittest.TestCase):
         pack.name = 'bar-bza'
         warnings = []
         pack.validate(warnings=warnings)
-        self.assertEquals(warnings, [])
+        self.assertEqual(warnings, [])
         pack.exports.pop()
 
         # check authors emails

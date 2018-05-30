@@ -12,11 +12,11 @@ from catkin_pkg.package import parse_package, Dependency, Export, Url, PACKAGE_M
 from catkin_pkg.python_setup import generate_distutils_setup
 
 
-def u(str):
+def u(line):
     try:
-        return unicode(str)
+        return unicode(line)
     except NameError:
-        return str
+        return line
 
 
 class TemplateTest(unittest.TestCase):

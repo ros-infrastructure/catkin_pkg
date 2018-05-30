@@ -52,6 +52,7 @@ DEFINITION_URL = 'http://ros.org/reps/rep-0127.html#metapackage'
 
 
 class InvalidMetapackage(Exception):
+
     def __init__(self, msg, path, package):
         self.path = path
         self.package = package

@@ -87,7 +87,7 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warning
     package_paths_by_name = {}
     for path, package in packages.items():
         if package.name not in package_paths_by_name:
-            package_paths_by_name[package.name] = set([])
+            package_paths_by_name[package.name] = set()
         package_paths_by_name[package.name].add(path)
     duplicates = dict([(name, paths) for name, paths in package_paths_by_name.items() if len(paths) > 1])
     if duplicates:
@@ -97,6 +97,7 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warning
 
 
 class _PackageParser(object):
+
     def __init__(self, capture_warnings):
         self.capture_warnings = capture_warnings
 

@@ -5,6 +5,7 @@ import tempfile
 
 
 class temporary_directory(object):
+
     def __init__(self, prefix=''):
         self.prefix = prefix
 

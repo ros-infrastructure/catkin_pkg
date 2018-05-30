@@ -66,7 +66,7 @@ class _PackageDecorator(object):
 
         :param packages: dict of name to ``_PackageDecorator``
         """
-        self.depends_for_topological_order = set([])
+        self.depends_for_topological_order = set()
         all_depends = self.package.build_depends + self.package.buildtool_depends + self.package.test_depends
         names = [d.name for d in all_depends if d.evaluated_condition]
 
@@ -217,7 +217,7 @@ def _reduce_cycle_set(packages_orig):
     packages = copy.copy(packages_orig)
     last_depended = None
     while len(packages) > 0:
-        depended = set([])
+        depended = set()
         for name, decorator in packages.items():
             if decorator.depends_for_topological_order:
                 depended = depended.union(decorator.depends_for_topological_order)

@@ -15,7 +15,7 @@ from catkin_pkg.packages import find_packages
 try:
     raw_input
 except NameError:
-    raw_input = input
+    raw_input = input  # noqa: ignore=A001
 
 
 def prompt_continue(msg, default):
@@ -81,7 +81,7 @@ def main(sysargs=None):
     packages = find_packages(base_path)
     if not packages:
         raise RuntimeError('No packages found')
-    print('Found packages: %s' % ', '.join(sorted([p.name for p in packages.values()])))
+    print('Found packages: %s' % ', '.join(sorted(p.name for p in packages.values())))
 
     # check for missing changelogs
     missing_changelogs = []

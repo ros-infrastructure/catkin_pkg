@@ -92,7 +92,7 @@ class TestMetapackageValidation(unittest.TestCase):
     def test_collect_warnings(self):
         """Tests warnings collection"""
         warnings = []
-        pkgs_dict = find_packages(test_data_dir, warnings=warnings)
+        find_packages(test_data_dir, warnings=warnings)
 
         self.assertEqual(warnings.sort(), test_expected_warnings.sort())
 
