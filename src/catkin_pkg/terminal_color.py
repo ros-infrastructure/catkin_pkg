@@ -99,6 +99,7 @@ def disable_ANSI_colors():
     for key in _ansi:
         _ansi[key] = ''
 
+
 # Default to ansi colors on
 enable_ANSI_colors()
 if os.name in ['nt']:

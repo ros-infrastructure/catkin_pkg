@@ -14,6 +14,11 @@ from catkin_pkg.packages import find_packages, verify_equal_package_versions
 from catkin_pkg.terminal_color import disable_ANSI_colors, fmt
 from catkin_pkg.workspace_vcs import get_repository_type, vcs_remotes
 
+try:
+    raw_input
+except NameError:
+    raw_input = input  # noqa: A001
+
 
 def has_changes(base_path, path, vcs_type):
     cmd = [_find_executable(vcs_type), 'diff', path]
@@ -45,7 +50,11 @@ def prompt_continue(msg, default):
         if response in ['y', 'n']:
             return response == 'y'
 
-        print(fmt("@{yf}Response '@{boldon}%s@{boldoff}' was not recognized, please use one of the following options: %s" % (response, ', '.join([('@{boldon}%s@{boldoff}' % x) for x in ['y', 'Y', 'n', 'N']]))), file=sys.stderr)
+        print(
+            fmt(
+                "@{yf}Response '@{boldon}%s@{boldoff}' was not recognized, please use one of the following options: %s" %
+                (response, ', '.join([('@{boldon}%s@{boldoff}' % x) for x in ['y', 'Y', 'n', 'N']]))
+            ), file=sys.stderr)
 
 
 def _flush_stdin():
@@ -201,10 +210,8 @@ def _main():
     parser.add_argument('--version', help='Specify a specific version to use')
     parser.add_argument('--no-color', action='store_true', default=False, help='Disables colored output')
     parser.add_argument('--no-push', action='store_true', default=False, help='Disables pushing to remote repository')
-    parser.add_argument('-t', '--tag-prefix', default='', 
-                        help='Add this prefix to the created release tag')
-    parser.add_argument('-y', '--non-interactive', action='store_true', default=False,
-        help="Run without user interaction, confirming all questions with 'yes'")
+    parser.add_argument('-t', '--tag-prefix', default='', help='Add this prefix to the created release tag')
+    parser.add_argument('-y', '--non-interactive', action='store_true', default=False, help="Run without user interaction, confirming all questions with 'yes'")
     args = parser.parse_args()
 
     if args.version and not re.match('^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$', args.version):
@@ -244,17 +251,26 @@ def _main():
     non_catkin_pkg_names = []
     invalid_pkg_names = []
     for package in packages.values():
-        build_type = ([e.content for e in package.exports if e.tagname == 'build_type'][0]) if 'build_type' in [e.tagname for e in package.exports] else 'catkin'
+        build_types = [export.content for export in package.exports if export.tagname == 'build_type']
+        build_type = build_types[0] if build_types else 'catkin'
         if build_type != 'catkin':
             non_catkin_pkg_names.append(package.name)
         if package.name != package.name.lower():
             invalid_pkg_names.append(package.name)
     if non_catkin_pkg_names:
-        print(fmt("@{yf}Warning: the following package are not of build_type catkin and may require manual steps to release': %s" % ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(non_catkin_pkg_names)])), file=sys.stderr)
+        print(
+            fmt(
+                "@{yf}Warning: the following package are not of build_type catkin and may require manual steps to release': %s" %
+                ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(non_catkin_pkg_names)])
+            ), file=sys.stderr)
         if not args.non_interactive and not prompt_continue('Continue anyway', default=False):
             raise RuntimeError(fmt("@{rf}Aborted release, verify that non-catkin packages are ready to be released or release manually."))
     if invalid_pkg_names:
-        print(fmt("@{yf}Warning: the following package names contain upper case characters which violate both ROS and Debian naming conventions': %s" % ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(invalid_pkg_names)])), file=sys.stderr)
+        print(
+            fmt(
+                "@{yf}Warning: the following package names contain upper case characters which violate both ROS and Debian naming conventions': %s" %
+                ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(invalid_pkg_names)])
+            ), file=sys.stderr)
         if not args.non_interactive and not prompt_continue('Continue anyway', default=False):
             raise RuntimeError(fmt("@{rf}Aborted release, fix the names of the packages."))
 
@@ -269,7 +285,9 @@ def _main():
             try:
                 metapackage.validate_metapackage(pkg_path, package)
             except metapackage.InvalidMetapackage as e:
-                raise RuntimeError(fmt("@{rf}Invalid metapackage at path '@{boldon}%s@{boldoff}':\n  %s\n\nSee requirements for metapackages: %s" % (os.path.abspath(pkg_path), str(e), metapackage.DEFINITION_URL)))
+                raise RuntimeError(fmt(
+                    "@{rf}Invalid metapackage at path '@{boldon}%s@{boldoff}':\n  %s\n\nSee requirements for metapackages: %s" %
+                    (os.path.abspath(pkg_path), str(e), metapackage.DEFINITION_URL)))
 
     # fetch current version and verify that all packages have same version number
     old_version = verify_equal_package_versions(packages.values())
@@ -279,7 +297,14 @@ def _main():
         new_version = bump_version(old_version, args.bump)
     tag_name = args.tag_prefix + new_version
 
-    if not args.non_interactive and not prompt_continue(fmt("Prepare release of version '@{bf}@{boldon}%s@{boldoff}@{reset}'%s" % (new_version, " (tagged as '@{bf}@{boldon}%s@{boldoff}@{reset}')" % tag_name if args.tag_prefix else '')), default=True):
+    if (
+        not args.non_interactive and
+        not prompt_continue(
+            fmt(
+                "Prepare release of version '@{bf}@{boldon}%s@{boldoff}@{reset}'%s" %
+                (new_version, " (tagged as '@{bf}@{boldon}%s@{boldoff}@{reset}')" % tag_name if args.tag_prefix else '')
+            ), default=True)
+    ):
         raise RuntimeError(fmt("@{rf}Aborted release, use option '--bump' to release a different version and/or '--tag-prefix' to add a prefix to the tag name."))
 
     # check for changelog entries
@@ -308,7 +333,11 @@ def _main():
         raise RuntimeError(fmt('@{rf}The following files have modifications, please commit/revert them before:' + ''.join([('\n- @{boldon}%s@{boldoff}' % path) for path in local_modifications])))
 
     if missing_changelogs:
-        print(fmt("@{yf}Warning: the following packages do not have a changelog file or entry for version '@{boldon}%s@{boldoff}': %s" % (new_version, ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(missing_changelogs)]))), file=sys.stderr)
+        print(
+            fmt(
+                "@{yf}Warning: the following packages do not have a changelog file or entry for version '@{boldon}%s@{boldoff}': %s" %
+                (new_version, ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(missing_changelogs)]))
+            ), file=sys.stderr)
         if not args.non_interactive and not prompt_continue('Continue without changelogs', default=False):
             raise RuntimeError(fmt("@{rf}Aborted release, populate the changelog with '@{boldon}catkin_generate_changelog@{boldoff}' and review / clean up the content."))
 
@@ -330,7 +359,9 @@ def _main():
 
     # tag forthcoming changelog sections
     update_changelog_sections(missing_changelogs_but_forthcoming, new_version)
-    print(fmt("@{gf}Rename the forthcoming section@{reset} of the following packages to version '@{bf}@{boldon}%s@{boldoff}@{reset}': %s" % (new_version, ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(missing_changelogs_but_forthcoming.keys())]))))
+    print(fmt(
+        "@{gf}Rename the forthcoming section@{reset} of the following packages to version '@{bf}@{boldon}%s@{boldoff}@{reset}': %s" %
+        (new_version, ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(missing_changelogs_but_forthcoming.keys())]))))
 
     # bump version number
     update_versions(packages.keys(), new_version)
@@ -391,7 +422,8 @@ def _main():
     if pushed:
         print(fmt("@{gf}The source repository has been released successfully. The next step will be '@{boldon}bloom-release@{boldoff}'."))
     else:
-        msg = "The release of the source repository has been prepared successfully but the changes have not been pushed yet. After pushing the changes manually the next step will be '@{boldon}bloom-release@{boldoff}'."
+        msg = 'The release of the source repository has been prepared successfully but the changes have not been pushed yet. ' \
+            "After pushing the changes manually the next step will be '@{boldon}bloom-release@{boldoff}'."
         if args.no_push or pushed is False:
             print(fmt('@{yf}%s' % msg))
         else:
