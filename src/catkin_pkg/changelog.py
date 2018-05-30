@@ -217,6 +217,7 @@ def populate_changelog_from_rst(changelog, rst):
 def processes_changelog_children(changelog, children):
     '''
     Processes docutils children into a REP-0132 changelog instance.
+
     Recurse into sections, check (sub-)titles if they are valid versions.
 
     :param changelog: ``Changelog`` changelog to be populated
@@ -313,6 +314,8 @@ class BulletList(object):
 
     def __init__(self, bullets=None, bullet_type=None):
         '''
+        Initialize BulletList.
+
         :param bullets: ``list(MixedText)`` list of text bullets
         :param bullet_type: ``str`` either 'bullet' or 'enumerated'
         '''

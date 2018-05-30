@@ -60,8 +60,7 @@ class PackageTemplate(Package):
                                  version=None, catkin_deps=None, system_deps=None,
                                  boost_comps=None):
         """
-        Alternative factory method mapping CLI args to argument for
-        Package class
+        Alternative factory method mapping CLI args to argument for Package class
 
         :param package_name:
         :param description:
@@ -165,6 +164,7 @@ def read_template_file(filename, rosdistro):
 def _safe_write_files(newfiles, target_dir):
     """
     Writes file contents to target_dir/filepath for all entries of newfiles.
+
     Aborts early if files exist in places for new files or directories
 
     :param newfiles: a dict {filepath: contents}
@@ -233,7 +233,8 @@ class CatkinTemplate(string.Template):
 
 
 def create_cmakelists(package_template, rosdistro, meta=False):
-    """
+    """ Create CMake file contents from the template
+
     :param package_template: contains the required information
     :returns: file contents as string
     """
@@ -342,6 +343,8 @@ def _create_depend_tag(dep_type,
 
 def create_package_xml(package_template, rosdistro, meta=False):
     """
+    Create package xml file content
+
     :param package_template: contains the required information
     :returns: file contents as string
     """

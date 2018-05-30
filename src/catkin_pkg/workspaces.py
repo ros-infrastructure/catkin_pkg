@@ -42,6 +42,7 @@ CATKIN_WORKSPACE_MARKER_FILE = '.catkin_workspace'
 def get_spaces(paths=None):
     """
     Return a list of spaces based on the CMAKE_PREFIX_PATH or passed in list of workspaces.
+
     It resolves the source space for each devel space and ignores non-catkin paths.
     :param paths_to_order: list of paths
     :param prefix_paths: list of prefixes, must not end with '/'
@@ -70,6 +71,7 @@ def get_spaces(paths=None):
 def order_paths(paths_to_order, prefix_paths):
     """
     Return a list containing all items of paths_to_order ordered by list of prefix_paths, compared as strings
+
     :param paths_to_order: list of paths
     :param prefix_paths: list of prefixes, must not end with '/'
     """

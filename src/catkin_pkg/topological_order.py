@@ -58,10 +58,10 @@ class _PackageDecorator(object):
 
     def calculate_depends_for_topological_order(self, packages):
         """
-        Sets self.depends_for_topological_order to the recursive
-        dependencies required for topological order. It contains all
-        direct build- and buildtool dependencies and their recursive
-        runtime dependencies. The set only contains packages which
+        Sets self.depends_for_topological_order to the recursive \
+        dependencies required for topological order. It contains all \
+        direct build- and buildtool dependencies and their recursive \
+        runtime dependencies. The set only contains packages which \
         are in the passed packages dictionary.
 
         :param packages: dict of name to ``_PackageDecorator``
@@ -89,8 +89,8 @@ class _PackageDecorator(object):
 
     def _add_recursive_run_depends(self, packages, depends_for_topological_order):
         """
-        Modifies depends_for_topological_order argument by adding
-        run_depends of self recursively. Only packages which are in
+        Modifies depends_for_topological_order argument by adding \
+        run_depends of self recursively. Only packages which are in \
         the passed packages are added and recursed into.
 
         :param packages: dict of name to ``_PackageDecorator``
@@ -114,7 +114,7 @@ class _PackageDecorator(object):
 
 def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_workspaces=None):
     '''
-    Crawls the filesystem to find packages and uses their
+    Crawls the filesystem to find packages and uses their \
     dependencies to return a topologically order list.
 
     When a circular dependency is detected, the last item in the returned list
@@ -232,8 +232,8 @@ def _reduce_cycle_set(packages_orig):
 
 def _sort_decorated_packages(packages_orig):
     '''
-    Sorts packages according to dependency ordering,
-    first considering the message generators and their recursive dependencies
+    Sorts packages according to dependency ordering, \
+    first considering the message generators and their recursive dependencies \
     and then the rest of the packages.
 
     When a circle is detected, a tuple with None and a string giving a

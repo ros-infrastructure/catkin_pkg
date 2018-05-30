@@ -30,10 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Library for parsing package.xml and providing an object
-representation.
-"""
+"""Library for parsing package.xml and providing an object representation."""
 
 from __future__ import print_function
 
@@ -78,6 +75,8 @@ class Package(object):
 
     def __init__(self, filename=None, **kwargs):
         """
+        Initialize Package.
+
         :param filename: location of package.xml.  Necessary if
           converting ``${prefix}`` in ``<export>`` values, ``str``.
         """
@@ -205,6 +204,7 @@ class Package(object):
     def validate(self, warnings=None):
         """
         Makes sure all standards for packages are met
+
         :param package: Package to check
         :param warnings: Print warnings if None or return them in the given list
         :raises InvalidPackage: in case validation fails
