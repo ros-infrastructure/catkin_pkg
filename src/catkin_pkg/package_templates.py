@@ -233,7 +233,7 @@ class CatkinTemplate(string.Template):
 
 
 def create_cmakelists(package_template, rosdistro, meta=False):
-    """ Create CMake file contents from the template
+    """Create CMake file contents from the template
 
     :param package_template: contains the required information
     :returns: file contents as string
@@ -325,7 +325,7 @@ def _create_depend_tag(dep_type,
                        version_lte=None,
                        version_gt=None,
                        version_gte=None):
-    """ Helper to create xml snippet for package.xml """
+    """Helper to create xml snippet for package.xml"""
     version_string = []
     for key, var in {'version_eq': version_eq,
                      'version_lt': version_lt,

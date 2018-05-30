@@ -46,7 +46,7 @@ PACKAGE_MANIFEST_FILENAME = 'package.xml'
 
 
 class Package(object):
-    """ Object representation of a package manifest file """
+    """Object representation of a package manifest file"""
 
     __slots__ = [
         'package_format',
@@ -720,7 +720,7 @@ def _get_node_value(node, allow_xml=False, apply_str=True):
 
 
 def _get_node_attr(node, attr, default=False):
-    """ :param default: False means value is required """
+    """:param default: False means value is required"""
     if node.hasAttribute(attr):
         return str(node.getAttribute(attr))
     if default is False:
