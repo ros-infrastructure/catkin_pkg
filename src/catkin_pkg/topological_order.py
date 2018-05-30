@@ -58,7 +58,7 @@ class _PackageDecorator(object):
 
     def calculate_depends_for_topological_order(self, packages):
         """
-        Sets self.depends_for_topological_order to the recursive dependencies required for topological order.
+        Set self.depends_for_topological_order to the recursive dependencies required for topological order.
 
         It contains all direct build- and buildtool dependencies and their recursive
         runtime dependencies. The set only contains packages which
@@ -89,7 +89,7 @@ class _PackageDecorator(object):
 
     def _add_recursive_run_depends(self, packages, depends_for_topological_order):
         """
-        Modifies depends_for_topological_order argument by adding run_depends of self recursively.
+        Modify depends_for_topological_order argument by adding run_depends of self recursively.
 
         Only packages which are in the passed packages are added and recursed into.
 
@@ -204,7 +204,7 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None, und
 
 def _reduce_cycle_set(packages_orig):
     """
-    This function iteratively removes some packages from a set that are definitely not part of any cycle.
+    Remove iteratively some packages from a set that are definitely not part of any cycle.
 
     When there is a cycle in the package dependencies,
     _sort_decorated_packages only knows the set of packages containing

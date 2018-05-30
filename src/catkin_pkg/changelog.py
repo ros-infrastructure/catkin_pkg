@@ -125,7 +125,7 @@ The library should now compile under ``Win32``
 
 def bullet_list_class_from_docutils(bullet_list, bullet_type=None):
     """
-    Processes elements of bullet list into an encapsulating class.
+    Process elements of bullet list into an encapsulating class.
 
     :param bullet_list: ``docutils.nodes.bullet_list`` list to be processed
     :param bullet_type: ``str`` either 'bullet' or 'enumerated'
@@ -142,7 +142,7 @@ def bullet_list_class_from_docutils(bullet_list, bullet_type=None):
 
 def mixed_text_from_docutils(node):
     """
-    Takes most Text-ish docutils objects and converts them to MixedText.
+    Take most Text-ish docutils objects and converts them to MixedText.
 
     :param node: ``docutils.nodes.{paragraph, list_item, ...}`` text-ish
     :returns: ``MixedText`` representing the given docutils object
@@ -216,7 +216,7 @@ def populate_changelog_from_rst(changelog, rst):
 
 def processes_changelog_children(changelog, children):
     """
-    Processes docutils children into a REP-0132 changelog instance.
+    Process docutils children into a REP-0132 changelog instance.
 
     Recurse into sections, check (sub-)titles if they are valid versions.
 
@@ -274,7 +274,7 @@ def processes_changelog_children(changelog, children):
 
 def reference_from_docutils(reference):
     """
-    Turns a reference element into a ``Reference``.
+    Turn a reference element into a ``Reference``.
 
     :param reference: ``docutils.nodes.reference`` reference element
     :returns: ``Reference`` simpler object representing the reference
@@ -290,7 +290,7 @@ def reference_from_docutils(reference):
 
 def version_and_date_from_title(title):
     """
-    Splits a section title into version and date if possible.
+    Split a section title into version and date if possible.
 
     :param title: ``str`` raw section title to be processed
     :returns: ``(str, datetime.datetime)``
@@ -310,7 +310,7 @@ def version_and_date_from_title(title):
 
 
 class BulletList(object):
-    """Represents a bulleted list of text."""
+    """Represent a bulleted list of text."""
 
     def __init__(self, bullets=None, bullet_type=None):
         """
@@ -405,7 +405,7 @@ class Changelog(object):
 
     def add_version_section(self, version, date, contents):
         """
-        Adds a version section.
+        Add a version section.
 
         :param version: ``str`` version as a string
         :param date: ``datetime.datetime`` version date
@@ -432,7 +432,7 @@ class Changelog(object):
 
     def foreach_version(self, reverse=False):
         """
-        Creates a generator for iterating over the versions, dates and content.
+        Create a generator for iterating over the versions, dates and content.
 
         Versions are stored and iterated in order.
 
@@ -443,14 +443,14 @@ class Changelog(object):
             yield version, self.__dates[version], self.__content[version]
 
     def get_date_of_version(self, version):
-        """Returns date of a given version as a ``datetime.datetime``."""
+        """Return date of a given version as a ``datetime.datetime``."""
         if version not in self.__versions:
             raise KeyError("No date for version '{0}'".format(version))
         return self.__dates[version]
 
     def get_content_of_version(self, version):
         """
-        Returns changelog content for a given version.
+        Return changelog content for a given version.
 
         :param version: ``str`` version
         :returns: ``list(list([str|Reference]))`` content expanded

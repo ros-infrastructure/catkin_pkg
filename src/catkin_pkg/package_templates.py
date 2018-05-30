@@ -163,7 +163,7 @@ def read_template_file(filename, rosdistro):
 
 def _safe_write_files(newfiles, target_dir):
     """
-    Writes file contents to target_dir/filepath for all entries of newfiles.
+    Write file contents to target_dir/filepath for all entries of newfiles.
 
     Aborts early if files exist in places for new files or directories
 
@@ -196,7 +196,7 @@ def _safe_write_files(newfiles, target_dir):
 def create_package_files(target_path, package_template, rosdistro,
                          newfiles=None, meta=False):
     """
-    Creates several files from templates to start a new package.
+    Create several files from templates to start a new package.
 
     :param target_path: parent folder where to create the package
     :param package_template: contains the required information
@@ -325,7 +325,7 @@ def _create_depend_tag(dep_type,
                        version_lte=None,
                        version_gt=None,
                        version_gte=None):
-    """Helper to create xml snippet for package.xml."""
+    """Create xml snippet for package.xml."""
     version_string = []
     for key, var in {'version_eq': version_eq,
                      'version_lt': version_lt,

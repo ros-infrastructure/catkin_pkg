@@ -61,7 +61,7 @@ class InvalidMetapackage(Exception):
 
 def get_expected_cmakelists_txt(metapackage_name):
     """
-    Returns the expected boilerplate CMakeLists.txt file for a metapackage.
+    Return the expected boilerplate CMakeLists.txt file for a metapackage.
 
     :param metapackage_name: name of the metapackage
     :type metapackage_name: str
@@ -77,7 +77,7 @@ def get_expected_cmakelists_txt(metapackage_name):
 
 def has_cmakelists_txt(path):
     """
-    Returns True if the given path contains a CMakeLists.txt, otherwise False.
+    Return True if the given path contains a CMakeLists.txt, otherwise False.
 
     :param path: path to folder potentially containing CMakeLists.txt
     :type path: str
@@ -90,7 +90,7 @@ def has_cmakelists_txt(path):
 
 def get_cmakelists_txt(path):
     """
-    Fetches the CMakeLists.txt from a given path.
+    Fetch the CMakeLists.txt from a given path.
 
     :param path: path to the folder containing the CMakeLists.txt
     :type path: str
@@ -105,7 +105,7 @@ def get_cmakelists_txt(path):
 
 def has_valid_cmakelists_txt(path, metapackage_name):
     """
-    Returns True if the given path contains a valid CMakeLists.txt, otherwise False.
+    Return True if the given path contains a valid CMakeLists.txt, otherwise False.
 
     A valid CMakeLists.txt for a metapackage is defined by REP-0127
 
@@ -124,7 +124,7 @@ def has_valid_cmakelists_txt(path, metapackage_name):
 
 def validate_metapackage(path, package):
     """
-    Validates the given package (catkin_pkg.package.Package) as a metapackage.
+    Validate the given package (catkin_pkg.package.Package) as a metapackage.
 
     This validates the metapackage against the definition from REP-0127
 

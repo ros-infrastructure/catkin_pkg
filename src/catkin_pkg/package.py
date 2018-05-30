@@ -133,7 +133,7 @@ class Package(object):
 
     def has_buildtool_depend_on_catkin(self):
         """
-        Returns True if this Package buildtool depends on catkin, otherwise False.
+        Return True if this Package buildtool depends on catkin, otherwise False.
 
         :returns: True if the given package buildtool depends on catkin
         :rtype: bool
@@ -157,7 +157,7 @@ class Package(object):
 
     def has_invalid_metapackage_dependencies(self):
         """
-        Returns True if this package has invalid dependencies for a metapackage.
+        Return True if this package has invalid dependencies for a metapackage.
 
         This is defined by REP-0127 as any non-run_depends dependencies other then a buildtool_depend on catkin.
 
@@ -169,7 +169,7 @@ class Package(object):
 
     def is_metapackage(self):
         """
-        Returns True if this pacakge is a metapackage, otherwise False.
+        Return True if this pacakge is a metapackage, otherwise False.
 
         :returns: True if metapackage, else False
         :rtype: bool
@@ -203,7 +203,7 @@ class Package(object):
 
     def validate(self, warnings=None):
         """
-        Makes sure all standards for packages are met.
+        Make sure all standards for packages are met.
 
         :param package: Package to check
         :param warnings: Print warnings if None or return them in the given list
@@ -437,7 +437,7 @@ class InvalidPackage(Exception):
 
 def package_exists_at(path):
     """
-    Checks that a package exists at the given path.
+    Check that a package exists at the given path.
 
     :param path: path to a package
     :type path: str

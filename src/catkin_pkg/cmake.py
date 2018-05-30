@@ -39,7 +39,7 @@ import re
 
 def get_metapackage_cmake_template_path():
     """
-    Returns the location of the metapackage CMakeLists.txt CMake template.
+    Return the location of the metapackage CMakeLists.txt CMake template.
 
     :returns: ``str`` location of the metapackage CMakeLists.txt CMake template
     """
