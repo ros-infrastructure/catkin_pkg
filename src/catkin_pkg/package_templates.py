@@ -60,7 +60,7 @@ class PackageTemplate(Package):
                                  version=None, catkin_deps=None, system_deps=None,
                                  boost_comps=None):
         """
-        Alternative factory method mapping CLI args to argument for Package class
+        Alternative factory method mapping CLI args to argument for Package class.
 
         :param package_name:
         :param description:
@@ -226,14 +226,14 @@ def create_package_files(target_path, package_template, rosdistro,
 
 
 class CatkinTemplate(string.Template):
-    """subclass to use @ instead of $ as markers"""
+    """subclass to use @ instead of $ as markers."""
 
     delimiter = '@'
     escape = '@'
 
 
 def create_cmakelists(package_template, rosdistro, meta=False):
-    """Create CMake file contents from the template
+    """Create CMake file contents from the template.
 
     :param package_template: contains the required information
     :returns: file contents as string
@@ -325,7 +325,7 @@ def _create_depend_tag(dep_type,
                        version_lte=None,
                        version_gt=None,
                        version_gte=None):
-    """Helper to create xml snippet for package.xml"""
+    """Helper to create xml snippet for package.xml."""
     version_string = []
     for key, var in {'version_eq': version_eq,
                      'version_lt': version_lt,
@@ -343,7 +343,7 @@ def _create_depend_tag(dep_type,
 
 def create_package_xml(package_template, rosdistro, meta=False):
     """
-    Create package xml file content
+    Create package xml file content.
 
     :param package_template: contains the required information
     :returns: file contents as string

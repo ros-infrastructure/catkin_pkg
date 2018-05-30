@@ -125,7 +125,7 @@ The library should now compile under ``Win32``
 
 def bullet_list_class_from_docutils(bullet_list, bullet_type=None):
     """
-    Processes elements of bullet list into an encapsulating class
+    Processes elements of bullet list into an encapsulating class.
 
     :param bullet_list: ``docutils.nodes.bullet_list`` list to be processed
     :param bullet_type: ``str`` either 'bullet' or 'enumerated'
@@ -142,7 +142,7 @@ def bullet_list_class_from_docutils(bullet_list, bullet_type=None):
 
 def mixed_text_from_docutils(node):
     """
-    Takes most Text-ish docutils objects and converts them to MixedText
+    Takes most Text-ish docutils objects and converts them to MixedText.
 
     :param node: ``docutils.nodes.{paragraph, list_item, ...}`` text-ish
     :returns: ``MixedText`` representing the given docutils object
@@ -183,7 +183,7 @@ def mixed_text_from_docutils(node):
 
 def get_changelog_from_path(path, package_name=None):
     """
-    Changelog factory, which reads a changelog file into a class
+    Changelog factory, which reads a changelog file into a class.
 
     :param path: ``str`` the path of the changelog including or excluding the filename CHANGELOG.rst
     :param package_name: ``str`` the package name
@@ -202,7 +202,7 @@ def get_changelog_from_path(path, package_name=None):
 
 def populate_changelog_from_rst(changelog, rst):
     """
-    Changelog factory, which converts the raw ReST into a class
+    Changelog factory, which converts the raw ReST into a class.
 
     :param changelog: ``Changelog`` changelog to be populated
     :param rst: ``str`` raw ReST changelog
@@ -274,7 +274,7 @@ def processes_changelog_children(changelog, children):
 
 def reference_from_docutils(reference):
     """
-    Turns a reference element into a ``Reference``
+    Turns a reference element into a ``Reference``.
 
     :param reference: ``docutils.nodes.reference`` reference element
     :returns: ``Reference`` simpler object representing the reference
@@ -310,7 +310,7 @@ def version_and_date_from_title(title):
 
 
 class BulletList(object):
-    """Represents a bulleted list of text"""
+    """Represents a bulleted list of text."""
 
     def __init__(self, bullets=None, bullet_type=None):
         """
@@ -361,7 +361,7 @@ class BulletList(object):
 
 
 class Changelog(object):
-    """Represents a REP-0132 changelog"""
+    """Represents a REP-0132 changelog."""
 
     def __init__(self, package_name=None):
         self.__package_name = package_name
@@ -405,7 +405,7 @@ class Changelog(object):
 
     def add_version_section(self, version, date, contents):
         """
-        Adds a version section
+        Adds a version section.
 
         :param version: ``str`` version as a string
         :param date: ``datetime.datetime`` version date
@@ -432,7 +432,7 @@ class Changelog(object):
 
     def foreach_version(self, reverse=False):
         """
-        Creates a generator for iterating over the versions, dates and content
+        Creates a generator for iterating over the versions, dates and content.
 
         Versions are stored and iterated in order.
 
@@ -443,14 +443,14 @@ class Changelog(object):
             yield version, self.__dates[version], self.__content[version]
 
     def get_date_of_version(self, version):
-        """Returns date of a given version as a ``datetime.datetime``"""
+        """Returns date of a given version as a ``datetime.datetime``."""
         if version not in self.__versions:
             raise KeyError("No date for version '{0}'".format(version))
         return self.__dates[version]
 
     def get_content_of_version(self, version):
         """
-        Returns changelog content for a given version
+        Returns changelog content for a given version.
 
         :param version: ``str`` version
         :returns: ``list(list([str|Reference]))`` content expanded
@@ -461,7 +461,7 @@ class Changelog(object):
 
 
 class DuplicateVersionsException(Exception):
-    """Raised when more than one section per version is given"""
+    """Raised when more than one section per version is given."""
 
     def __init__(self, version):
         self.version = version
@@ -469,7 +469,7 @@ class DuplicateVersionsException(Exception):
 
 
 class InvalidSectionTitle(Exception):
-    """raised on non REP-0132 section titles"""
+    """raised on non REP-0132 section titles."""
 
     def __init__(self, title):
         self.title = title
@@ -478,7 +478,7 @@ class InvalidSectionTitle(Exception):
 
 
 class MixedText(object):
-    """Represents text mixed with references and nested bullets"""
+    """Represents text mixed with references and nested bullets."""
 
     def __init__(self, texts=[]):
         self.texts = list(texts)
@@ -509,7 +509,7 @@ class MixedText(object):
 
 
 class Reference(object):
-    """Represents a piece of text with an associated link"""
+    """Represents a piece of text with an associated link."""
 
     def __init__(self, text, link):
         self.text = text
@@ -525,20 +525,20 @@ class Reference(object):
         return self.as_txt()
 
     def as_rst(self):
-        """Self as rst (unicode)"""
+        """Self as rst (unicode)."""
         if self.text is None:
             return _unicode(self.link)
         return "`{0} <{1}>`_".format(self.text, self.link)
 
     def as_txt(self):
-        """Self formatted for plain text (unicode)"""
+        """Self formatted for plain text (unicode)."""
         if self.text is None:
             return _unicode(self.link)
         return "{0} <{1}>".format(self.text, self.link)
 
 
 class Transition(object):
-    """Represents a trasition element from ReST"""
+    """Represents a trasition element from ReST."""
 
     def __str__(self):
         value = self.__unicode__()

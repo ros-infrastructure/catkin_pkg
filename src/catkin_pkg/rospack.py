@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""API provided for rospack to reorder include/library paths according to the chained workspaces"""
+"""API provided for rospack to reorder include/library paths according to the chained workspaces."""
 
 from __future__ import print_function
 

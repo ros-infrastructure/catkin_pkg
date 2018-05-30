@@ -1,4 +1,4 @@
-"""This script tests REP-0132 changelog files"""
+"""This script tests REP-0132 changelog files."""
 
 from __future__ import print_function
 

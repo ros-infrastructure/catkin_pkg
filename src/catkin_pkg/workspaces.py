@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""Library to provided logic for chained workspaces"""
+"""Library to provided logic for chained workspaces."""
 
 from __future__ import print_function
 
@@ -70,7 +70,7 @@ def get_spaces(paths=None):
 
 def order_paths(paths_to_order, prefix_paths):
     """
-    Return a list containing all items of paths_to_order ordered by list of prefix_paths, compared as strings
+    Return a list containing all items of paths_to_order ordered by list of prefix_paths, compared as strings.
 
     :param paths_to_order: list of paths
     :param prefix_paths: list of prefixes, must not end with '/'
@@ -93,7 +93,7 @@ def order_paths(paths_to_order, prefix_paths):
 
 def ensure_workspace_marker(base_path):
     """
-    Creates workspace marker file at path if not existing
+    Creates workspace marker file at path if not existing.
 
     :param path: target folder
     """

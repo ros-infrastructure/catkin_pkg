@@ -13,7 +13,7 @@ from catkin_pkg.changelog import version_and_date_from_title
 
 
 class TestSectionTitleParsing(unittest.TestCase):
-    """Tests the section title parsing"""
+    """Tests the section title parsing."""
 
     def test_version_and_date_from_title(self):
         title = '0.1.26 (2012-12-26)'

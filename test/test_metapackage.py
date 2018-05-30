@@ -70,7 +70,7 @@ def _validate_metapackage(path, package):
 
 
 class TestMetapackageValidation(unittest.TestCase):
-    """Tests the metapackage validator"""
+    """Tests the metapackage validator."""
 
     def test_validate_metapackage(self):
         pkgs_dict = find_packages(test_data_dir)
@@ -90,7 +90,7 @@ class TestMetapackageValidation(unittest.TestCase):
                     _validate_metapackage(path, package)
 
     def test_collect_warnings(self):
-        """Tests warnings collection"""
+        """Tests warnings collection."""
         warnings = []
         find_packages(test_data_dir, warnings=warnings)
 

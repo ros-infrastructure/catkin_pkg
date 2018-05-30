@@ -1,4 +1,4 @@
-"""This script generates REP-0132 CHANGELOG.rst files for git or hg repositories"""
+"""This script generates REP-0132 CHANGELOG.rst files for git or hg repositories."""
 
 from __future__ import print_function
 
