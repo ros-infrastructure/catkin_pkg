@@ -128,7 +128,7 @@ class VcsClientBase(object):
 
 class GitClient(VcsClientBase):
 
-    client_type = 'git'
+    type = 'git'
 
     def __init__(self, path):
         super(GitClient, self).__init__(path)
@@ -257,7 +257,7 @@ class GitClient(VcsClientBase):
 
 class HgClient(VcsClientBase):
 
-    client_type = 'hg'
+    type = 'hg'
 
     def __init__(self, path):
         super(HgClient, self).__init__(path)
@@ -345,11 +345,11 @@ def get_vcs_client(base_path):
     vcs_clients = []
     vcs_clients.append(GitClient)
     vcs_clients.append(HgClient)
-    client_types = [c.client_type for c in vcs_clients]
+    client_types = [c.type for c in vcs_clients]
     if len(client_types) != len(set(client_types)):
         raise RuntimeError('Multiple vcs clients share the same type: %s' % ', '.join(sorted(client_types)))
 
     for vcs_client in vcs_clients:
-        if os.path.exists(os.path.join(base_path, '.%s' % vcs_client.client_type)):
+        if os.path.exists(os.path.join(base_path, '.%s' % vcs_client.type)):
             return vcs_client(base_path)
-    raise RuntimeError('Could not detect repository type - currently supports: %s' % ', '.join([c.client_type for c in vcs_clients]))
+    raise RuntimeError('Could not detect repository type - currently supports: %s' % ', '.join([c.type for c in vcs_clients]))
