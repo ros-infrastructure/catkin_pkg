@@ -93,7 +93,7 @@ def order_paths(paths_to_order, prefix_paths):
 
 def ensure_workspace_marker(base_path):
     """
-    creates workspace marker file at path if not existing
+    Creates workspace marker file at path if not existing
 
     :param path: target folder
     """

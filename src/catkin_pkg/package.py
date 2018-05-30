@@ -205,7 +205,7 @@ class Package(object):
 
     def validate(self, warnings=None):
         """
-        makes sure all standards for packages are met
+        Makes sure all standards for packages are met
         :param package: Package to check
         :param warnings: Print warnings if None or return them in the given list
         :raises InvalidPackage: in case validation fails
