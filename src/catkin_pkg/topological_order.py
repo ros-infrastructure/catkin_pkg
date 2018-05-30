@@ -113,7 +113,7 @@ class _PackageDecorator(object):
 
 
 def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_workspaces=None):
-    '''
+    """
     Crawls the filesystem to find packages and uses their \
     dependencies to return a topologically order list.
 
@@ -125,7 +125,7 @@ def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_wor
     :param blacklisted: A list of blacklisted package names, ``list``
     :param underlay_workspaces: A list of underlay workspaces of packages which might provide dependencies in case of partial workspaces, ``list``
     :returns: A list of tuples containing the relative path and a ``Package`` object, ``list``
-    '''
+    """
     packages = find_packages(root_dir)
 
     # find packages in underlayed workspaces
@@ -143,7 +143,7 @@ def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_wor
 
 
 def topological_order_packages(packages, whitelisted=None, blacklisted=None, underlay_packages=None):
-    '''
+    """
     Topologically orders packages.
 
     evaluate_conditions() will be called for each package.
@@ -163,7 +163,7 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None, und
     :param blacklisted: A list of blacklisted package names, ``list``
     :param underlay_packages: A dict mapping relative paths to ``Package`` objects ``dict``
     :returns: A list of tuples containing the relative path and a ``Package`` object, ``list``
-    '''
+    """
     decorators_by_name = {}
     for path, package in packages.items():
         # skip non-whitelisted packages
@@ -204,7 +204,7 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None, und
 
 
 def _reduce_cycle_set(packages_orig):
-    '''
+    """
     This function iteratively removes some packages from a set that are definitely not part of any cycle.
 
     When there is a cycle in the package dependencies,
@@ -212,7 +212,7 @@ def _reduce_cycle_set(packages_orig):
     the cycle.
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
     :returns: A list of package names from the input which could not easily be detected as not being part of a cycle.
-    '''
+    """
     assert(packages_orig)
     packages = copy.copy(packages_orig)
     last_depended = None
@@ -231,7 +231,7 @@ def _reduce_cycle_set(packages_orig):
 
 
 def _sort_decorated_packages(packages_orig):
-    '''
+    """
     Sorts packages according to dependency ordering, \
     first considering the message generators and their recursive dependencies \
     and then the rest of the packages.
@@ -241,7 +241,7 @@ def _sort_decorated_packages(packages_orig):
 
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
     :returns: A List of tuples containing the relative path and a ``Package`` object ``list``
-    '''
+    """
     packages = copy.deepcopy(packages_orig)
 
     # mark all packages which are (recursively) dependent on by message generators
