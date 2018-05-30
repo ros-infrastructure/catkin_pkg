@@ -310,6 +310,7 @@ def version_and_date_from_title(title):
 
 class BulletList(object):
     '''Represents a bulleted list of text'''
+
     def __init__(self, bullets=None, bullet_type=None):
         '''
         :param bullets: ``list(MixedText)`` list of text bullets
@@ -358,6 +359,7 @@ class BulletList(object):
 
 class Changelog(object):
     ''' Represents a REP-0132 changelog '''
+
     def __init__(self, package_name=None):
         self.__package_name = package_name
         self.__versions = []
@@ -457,6 +459,7 @@ class Changelog(object):
 
 class DuplicateVersionsException(Exception):
     '''Raised when more than one section per version is given'''
+
     def __init__(self, version):
         self.version = version
         Exception.__init__(self, "Version '{0}' is specified twice".format(version))
@@ -464,6 +467,7 @@ class DuplicateVersionsException(Exception):
 
 class InvalidSectionTitle(Exception):
     '''raised on non REP-0132 section titles'''
+
     def __init__(self, title):
         self.title = title
         msg = "Section title does not conform to REP-0132: '{0}'".format(title)
@@ -472,6 +476,7 @@ class InvalidSectionTitle(Exception):
 
 class MixedText(object):
     '''Represents text mixed with references and nested bullets'''
+
     def __init__(self, texts=[]):
         self.texts = list(texts)
 
@@ -502,6 +507,7 @@ class MixedText(object):
 
 class Reference(object):
     ''' Represents a piece of text with an associated link '''
+
     def __init__(self, text, link):
         self.text = text
         self.link = link
@@ -530,6 +536,7 @@ class Reference(object):
 
 class Transition(object):
     '''Represents a trasition element from ReST'''
+
     def __str__(self):
         value = self.__unicode__()
         if not _py3:

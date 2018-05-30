@@ -227,6 +227,7 @@ def create_package_files(target_path, package_template, rosdistro,
 
 class CatkinTemplate(string.Template):
     """subclass to use @ instead of $ as markers"""
+
     delimiter = '@'
     escape = '@'
 

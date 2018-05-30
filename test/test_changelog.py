@@ -14,6 +14,7 @@ from catkin_pkg.changelog import version_and_date_from_title
 
 class TestSectionTitleParsing(unittest.TestCase):
     """Tests the section title parsing"""
+
     def test_version_and_date_from_title(self):
         title = '0.1.26 (2012-12-26)'
         assert '0.1.26' == version_and_date_from_title(title)[0]

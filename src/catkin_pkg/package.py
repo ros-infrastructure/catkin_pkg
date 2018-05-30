@@ -50,6 +50,7 @@ PACKAGE_MANIFEST_FILENAME = 'package.xml'
 
 class Package(object):
     """ Object representation of a package manifest file """
+
     __slots__ = [
         'package_format',
         'name',
