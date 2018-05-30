@@ -30,9 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Library to find packages in the filesystem.
-"""
+""" Library to find packages in the filesystem. """
 
 import multiprocessing
 import os

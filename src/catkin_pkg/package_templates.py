@@ -323,9 +323,7 @@ def _create_depend_tag(dep_type,
                        version_lte=None,
                        version_gt=None,
                        version_gte=None):
-    """
-    Helper to create xml snippet for package.xml
-    """
+    """ Helper to create xml snippet for package.xml """
 
     version_string = []
     for key, var in {'version_eq': version_eq,

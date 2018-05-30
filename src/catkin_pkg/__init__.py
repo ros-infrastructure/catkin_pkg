@@ -30,8 +30,6 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Library for retrieving information about catkin packages.
-"""
+""" Library for retrieving information about catkin packages. """
 
 __version__ = '0.4.3'  # same version as in setup.py

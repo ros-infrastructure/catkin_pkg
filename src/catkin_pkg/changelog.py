@@ -357,9 +357,7 @@ class BulletList(object):
 
 
 class Changelog(object):
-    '''
-    Represents a REP-0132 changelog
-    '''
+    ''' Represents a REP-0132 changelog '''
     def __init__(self, package_name=None):
         self.__package_name = package_name
         self.__versions = []
@@ -503,9 +501,7 @@ class MixedText(object):
 
 
 class Reference(object):
-    '''
-    Represents a piece of text with an associated link
-    '''
+    ''' Represents a piece of text with an associated link '''
     def __init__(self, text, link):
         self.text = text
         self.link = link
