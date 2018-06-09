@@ -126,7 +126,7 @@ class VcsClientBase(object):
 
 class GitClient(VcsClientBase):
 
-    type = 'git'  # noqa: ignore=A003
+    type = 'git'  # noqa: A003
 
     def __init__(self, path):
         super(GitClient, self).__init__(path)
@@ -255,7 +255,7 @@ class GitClient(VcsClientBase):
 
 class HgClient(VcsClientBase):
 
-    type = 'hg'  # noqa: ignore=A003
+    type = 'hg'  # noqa: A003
 
     def __init__(self, path):
         super(HgClient, self).__init__(path)

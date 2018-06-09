@@ -45,9 +45,10 @@ def bump_version(version, bump='patch'):
     """
     Increases version number.
 
-    :param version: str, must be in version format "int.int.int"
-    :param bump: str, one of 'patch, minor, major'
+    :param str version: must be in version format "int.int.int"
+    :param str bump: one of 'patch, minor, major'
     :returns: version with the given part increased, and all inferior parts reset to 0
+    :rtype: str
     :raises ValueError: if the version string is not in the format x.y.z
     """
     # split the version number
@@ -69,9 +70,10 @@ def _replace_version(package_str, new_version):
     """
     Replace the version tag in contents if there is only one instance.
 
-    :param package_str: str contents of package.xml
-    :param new_version: str version number
-    :returns: str new package.xml
+    :param str package_str: contents of package.xml
+    :param str new_version: version number
+    :returns: new package.xml
+    :rtype: str
     :raises RuntimeError:
     """
     # try to replace contens
@@ -85,9 +87,10 @@ def _check_for_version_comment(package_str, new_version):
     """
     Check if a comment is present behind the version tag and return it.
 
-    :param package_str: str contents of package.xml
-    :param version: str version number
-    :returns: str comment if available, else None
+    :param str package_str: contents of package.xml
+    :param str new_version: version number
+    :returns: comment if available, else None
+    :rtype: str
     """
     version_tag = '>%s</version>' % new_version
     pattern = '%s[ \t]*%s *(.+) *%s' % (re.escape(version_tag), re.escape('<!--'), re.escape('-->'))
@@ -101,8 +104,8 @@ def update_versions(paths, new_version):
     """
     Bulk replace of version: searches for package.xml files directly in given folders and replaces version tag within.
 
-    :param paths: list of string, folder names
-    :param new_version: version string "int.int.int"
+    :param list paths: folder names
+    :param str new_version: version string "int.int.int"
     :raises RuntimeError: if any one package.xml cannot be updated
     """
     files = {}
