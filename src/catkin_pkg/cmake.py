@@ -47,7 +47,7 @@ def get_metapackage_cmake_template_path():
     return os.path.join(os.path.dirname(__file__), rel_path)
 
 
-def configure_file(template_file, environment):  # noqa: ignore=D402
+def configure_file(template_file, environment):  # noqa: D402
     """
     Evaluate a .in template file used in CMake with configure_file().
 
