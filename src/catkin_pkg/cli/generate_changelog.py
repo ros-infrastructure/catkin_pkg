@@ -15,7 +15,7 @@ from catkin_pkg.packages import find_packages
 try:
     raw_input
 except NameError:
-    raw_input = input  # noqa: ignore=A001
+    raw_input = input  # noqa: A001
 
 
 def prompt_continue(msg, default):
