@@ -30,10 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Library for providing the relevant information from the package
-manifest for the Python setup.py file.
-"""
+"""Library for providing the relevant information from the package manifest for the Python setup.py file."""
 
 from __future__ import print_function
 
@@ -45,8 +42,9 @@ from .package import InvalidPackage, parse_package
 
 def generate_distutils_setup(package_xml_path=os.path.curdir, **kwargs):
     """
-    Extract the information relevant for distutils from the package
-    manifest. The following keys will be set:
+    Extract the information relevant for distutils from the package manifest.
+
+    The following keys will be set:
 
     The "name" and "version" are taken from the eponymous tags.
 

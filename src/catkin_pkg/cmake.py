@@ -38,17 +38,17 @@ import re
 
 
 def get_metapackage_cmake_template_path():
-    '''
-    Returns the location of the metapackage CMakeLists.txt CMake template.
+    """
+    Return the location of the metapackage CMakeLists.txt CMake template.
 
     :returns: ``str`` location of the metapackage CMakeLists.txt CMake template
-    '''
+    """
     rel_path = os.path.join('templates', 'metapackage.cmake.in')
     return os.path.join(os.path.dirname(__file__), rel_path)
 
 
-def configure_file(template_file, environment):
-    '''
+def configure_file(template_file, environment):  # noqa: D402
+    """
     Evaluate a .in template file used in CMake with configure_file().
 
     :param template_file: path to the template, ``str``
@@ -57,14 +57,14 @@ def configure_file(template_file, environment):
     :returns: string with evaluates template
     :raises: KeyError for placeholders in the template which are not
       in the environment
-    '''
+    """
     with open(template_file, 'r') as f:
         template = f.read()
         return configure_string(template, environment)
 
 
 def configure_string(template, environment):
-    '''
+    """
     Substitute variables enclosed by @ characters.
 
     :param template: the template, ``str``
@@ -73,7 +73,7 @@ def configure_string(template, environment):
     :returns: string with evaluates template
     :raises: KeyError for placeholders in the template which are not
       in the environment
-    '''
+    """
     def substitute(match):
         var = match.group(0)[1:-1]
         return environment[var]

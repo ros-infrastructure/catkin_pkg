@@ -1,4 +1,4 @@
-"""This script finds a catkin packages"""
+"""This script finds a catkin packages."""
 
 from __future__ import print_function
 import argparse

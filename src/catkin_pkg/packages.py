@@ -30,9 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Library to find packages in the filesystem.
-"""
+"""Library to find packages in the filesystem."""
 
 import multiprocessing
 import os
@@ -162,7 +160,7 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
 
 def verify_equal_package_versions(packages):
     """
-    Verifies that all packages have the same version number.
+    Verify that all packages have the same version number.
 
     :param packages: The list of ``Package`` objects, ``list``
     :returns: The version number

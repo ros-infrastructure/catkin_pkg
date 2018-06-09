@@ -30,9 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Module to enable color terminal output
-"""
+"""Module to enable color terminal output."""
 
 from __future__ import print_function
 
@@ -43,15 +41,13 @@ _ansi = {}
 
 
 def ansi(key):
-    """Returns the escape sequence for a given ansi color key"""
+    """Return the escape sequence for a given ansi color key."""
     global _ansi
     return _ansi[key]
 
 
 def enable_ANSI_colors():
-    """
-    Populates the global module dictionary `ansi` with ANSI escape sequences.
-    """
+    """Populate the global module dictionary `ansi` with ANSI escape sequences."""
     global _ansi
     color_order = [
         'black', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'white'
@@ -91,10 +87,7 @@ def enable_ANSI_colors():
 
 
 def disable_ANSI_colors():
-    """
-    Sets all the ANSI escape sequences to empty strings, effectively disabling
-    console colors.
-    """
+    """Set all the ANSI escape sequences to empty strings, effectively disabling console colors."""
     global _ansi
     for key in _ansi:
         _ansi[key] = ''
@@ -111,7 +104,7 @@ class ColorTemplate(string.Template):
 
 
 def sanitize(msg):
-    """Sanitizes the existing msg, use before adding color annotations"""
+    """Sanitize the existing msg, use before adding color annotations."""
     msg = msg.replace('@', '@@')
     msg = msg.replace('{', '{{')
     msg = msg.replace('}', '}}')
@@ -123,7 +116,7 @@ def sanitize(msg):
 
 
 def fmt(msg):
-    """Replaces color annotations with ansi escape sequences"""
+    """Replace color annotations with ansi escape sequences."""
     global _ansi
     msg = msg.replace('@!', '@{boldon}')
     msg = msg.replace('@/', '@{italicson}')

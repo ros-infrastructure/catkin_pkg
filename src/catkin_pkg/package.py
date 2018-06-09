@@ -30,10 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Library for parsing package.xml and providing an object
-representation.
-"""
+"""Library for parsing package.xml and providing an object representation."""
 
 from __future__ import print_function
 
@@ -49,9 +46,8 @@ PACKAGE_MANIFEST_FILENAME = 'package.xml'
 
 
 class Package(object):
-    """
-    Object representation of a package manifest file
-    """
+    """Object representation of a package manifest file."""
+
     __slots__ = [
         'package_format',
         'name',
@@ -79,6 +75,8 @@ class Package(object):
 
     def __init__(self, filename=None, **kwargs):
         """
+        Initialize Package.
+
         :param filename: location of package.xml.  Necessary if
           converting ``${prefix}`` in ``<export>`` values, ``str``.
         """
@@ -135,7 +133,7 @@ class Package(object):
 
     def has_buildtool_depend_on_catkin(self):
         """
-        Returns True if this Package buildtool depends on catkin, otherwise False
+        Return True if this Package buildtool depends on catkin, otherwise False.
 
         :returns: True if the given package buildtool depends on catkin
         :rtype: bool
@@ -159,7 +157,7 @@ class Package(object):
 
     def has_invalid_metapackage_dependencies(self):
         """
-        Returns True if this package has invalid dependencies for a metapackage
+        Return True if this package has invalid dependencies for a metapackage.
 
         This is defined by REP-0127 as any non-run_depends dependencies other then a buildtool_depend on catkin.
 
@@ -171,7 +169,7 @@ class Package(object):
 
     def is_metapackage(self):
         """
-        Returns True if this pacakge is a metapackage, otherwise False
+        Return True if this pacakge is a metapackage, otherwise False.
 
         :returns: True if metapackage, else False
         :rtype: bool
@@ -205,7 +203,8 @@ class Package(object):
 
     def validate(self, warnings=None):
         """
-        makes sure all standards for packages are met
+        Make sure all standards for packages are met.
+
         :param package: Package to check
         :param warnings: Print warnings if None or return them in the given list
         :raises InvalidPackage: in case validation fails
@@ -438,7 +437,7 @@ class InvalidPackage(Exception):
 
 def package_exists_at(path):
     """
-    Checks that a package exists at the given path
+    Check that a package exists at the given path.
 
     :param path: path to a package
     :type path: str
@@ -721,9 +720,7 @@ def _get_node_value(node, allow_xml=False, apply_str=True):
 
 
 def _get_node_attr(node, attr, default=False):
-    """
-    :param default: False means value is required
-    """
+    """:param default: False means value is required."""
     if node.hasAttribute(attr):
         return str(node.getAttribute(attr))
     if default is False:

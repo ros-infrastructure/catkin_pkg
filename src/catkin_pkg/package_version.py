@@ -67,7 +67,7 @@ def bump_version(version, bump='patch'):
 
 def _replace_version(package_str, new_version):
     """
-    replaces the version tag in contents if there is only one instance
+    Replace the version tag in contents if there is only one instance.
 
     :param package_str: str contents of package.xml
     :param new_version: str version number
@@ -83,7 +83,7 @@ def _replace_version(package_str, new_version):
 
 def _check_for_version_comment(package_str, new_version):
     """
-    checks if a comment is present behind the version tag and return it
+    Check if a comment is present behind the version tag and return it.
 
     :param package_str: str contents of package.xml
     :param version: str version number
@@ -99,7 +99,7 @@ def _check_for_version_comment(package_str, new_version):
 
 def update_versions(paths, new_version):
     """
-    bulk replace of version: searches for package.xml files directly in given folders and replaces version tag within.
+    Bulk replace of version: searches for package.xml files directly in given folders and replaces version tag within.
 
     :param paths: list of string, folder names
     :param new_version: version string "int.int.int"

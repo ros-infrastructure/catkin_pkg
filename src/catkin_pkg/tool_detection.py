@@ -31,10 +31,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 """
-Common functions that can be used to mark spaces, e.g. build and devel, to
-indicate which tools previously built the space. This allows the tools to
-detect cross tool talk and avoid it where appropriate.
+Common functions that can be used to mark spaces, e.g. build and devel, to indicate which tools previously built the space.
+
+This allows the tools to detect cross tool talk and avoid it where appropriate
 """
+
 
 from __future__ import print_function
 import os
