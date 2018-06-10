@@ -4,11 +4,11 @@ import unittest
 
 from catkin_pkg.changelog import BulletList
 from catkin_pkg.changelog import Changelog
-from catkin_pkg.changelog import example_rst
 from catkin_pkg.changelog import InvalidSectionTitle
 from catkin_pkg.changelog import MixedText
-from catkin_pkg.changelog import populate_changelog_from_rst
 from catkin_pkg.changelog import Transition
+from catkin_pkg.changelog import example_rst
+from catkin_pkg.changelog import populate_changelog_from_rst
 from catkin_pkg.changelog import version_and_date_from_title
 
 

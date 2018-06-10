@@ -11,8 +11,8 @@ except ImportError:
 import sys
 import unittest
 
-from catkin_pkg.metapackage import get_expected_cmakelists_txt
 from catkin_pkg.metapackage import InvalidMetapackage
+from catkin_pkg.metapackage import get_expected_cmakelists_txt
 from catkin_pkg.metapackage import validate_metapackage
 
 from catkin_pkg.packages import find_packages

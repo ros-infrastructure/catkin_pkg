@@ -3,6 +3,7 @@ import os.path
 import sys
 import unittest
 
+import xml.dom.minidom as dom
 
 from catkin_pkg.package import (
     Dependency,
@@ -11,11 +12,9 @@ from catkin_pkg.package import (
     License,
     Package,
     Person,
-    parse_package,
     _check_known_attributes,
+    parse_package,
 )
-
-import xml.dom.minidom as dom
 
 from mock import Mock
 

@@ -1,11 +1,12 @@
 """This script creates the skeletton of a catkin package."""
 
 from __future__ import print_function
+
 import argparse
 import os
 import sys
 
-from catkin_pkg.package_templates import create_package_files, PackageTemplate
+from catkin_pkg.package_templates import PackageTemplate, create_package_files
 
 
 def main(argv=sys.argv[1:], parent_path=os.getcwd()):

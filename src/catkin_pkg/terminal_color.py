@@ -34,8 +34,8 @@
 
 from __future__ import print_function
 
-import string
 import os
+import string
 
 _ansi = {}
 

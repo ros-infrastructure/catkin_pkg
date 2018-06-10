@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import argparse
 import datetime
-import docutils.core
 import os
 import re
 import sys
@@ -13,6 +12,8 @@ from catkin_pkg.changelog import CHANGELOG_FILENAME, get_changelog_from_path
 from catkin_pkg.changelog_generator import FORTHCOMING_LABEL
 from catkin_pkg.package_version import bump_version
 from catkin_pkg.packages import find_packages, verify_equal_package_versions
+
+import docutils.core
 
 
 def get_forthcoming_label(rst):
