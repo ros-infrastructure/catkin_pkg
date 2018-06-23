@@ -94,12 +94,10 @@ def _get_version_tags(vcs_client):
 def _get_latest_version_tag_name(vcs_client):
     # get latest tag
     tag_name = vcs_client.get_latest_tag_name()
-    if re.match(r'^\d+\.\d+.\d+$', tag_name):
-        version_tag_name = tag_name
-    else:
+    if not re.match(r'^\d+\.\d+.\d+$', tag_name):
         raise RuntimeError(
             "The tag name '{}' doesn't match the version pattern x.y.z".format(tag_name))
-    return version_tag_name
+    return tag_name
 
 
 def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None, skip_contributors=False):
