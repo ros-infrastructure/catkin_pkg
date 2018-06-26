@@ -44,7 +44,10 @@ def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
     """
     Crawls the filesystem to find package manifest files.
 
-    When a subfolder contains a file ``CATKIN_IGNORE`` it is ignored.
+    When a subfolder contains either of the following files it is ignored:
+    - ``AMENT_IGNORE``
+    - ``CATKIN_IGNORE``
+    - ``COLCON_IGNORE``
 
     :param basepath: The path to search in, ``str``
     :param exclude_paths: A list of paths which should not be searched, ``list``
@@ -55,7 +58,9 @@ def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
     paths = []
     real_exclude_paths = [os.path.realpath(p) for p in exclude_paths] if exclude_paths is not None else []
     for dirpath, dirnames, filenames in os.walk(basepath, followlinks=True):
-        if 'CATKIN_IGNORE' in filenames or \
+        if 'AMENT_IGNORE' in filenames or \
+            'CATKIN_IGNORE' in filenames or \
+            'COLCON_IGNORE' in filenames or \
             os.path.realpath(dirpath) in real_exclude_paths or \
                 (exclude_subspaces and '.catkin' in filenames):
             del dirnames[:]
