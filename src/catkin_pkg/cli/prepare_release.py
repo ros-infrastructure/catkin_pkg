@@ -23,9 +23,10 @@ except NameError:
 def has_changes(base_path, path, vcs_type):
     cmd = [_find_executable(vcs_type), 'diff', path]
     try:
-        output = subprocess.check_output(cmd, cwd=base_path).rstrip()
+        output = subprocess.check_output(cmd, cwd=base_path)
     except subprocess.CalledProcessError as e:
         raise RuntimeError(fmt("@{rf}Failed to check if '@{boldon}%s@{boldoff}' has modifications: %s" % (path, str(e))))
+    output = output.rstrip().decode('utf-8')
     return output != ''
 
 
@@ -69,17 +70,19 @@ def _flush_stdin():
 def get_git_remote_and_branch(base_path):
     cmd_branch = [_find_executable('git'), 'rev-parse', '--abbrev-ref', 'HEAD']
     try:
-        branch = subprocess.check_output(cmd_branch, cwd=base_path).rstrip()
+        branch = subprocess.check_output(cmd_branch, cwd=base_path)
     except subprocess.CalledProcessError as e:
         raise RuntimeError(fmt('@{rf}Could not determine git branch: %s' % str(e)))
+    branch = branch.rstrip().decode('utf-8')
 
     cmd_remote = [_find_executable('git'), 'config', '--get', 'branch.%s.remote' % branch]
     try:
-        remote = subprocess.check_output(cmd_remote, cwd=base_path).rstrip()
+        remote = subprocess.check_output(cmd_remote, cwd=base_path)
     except subprocess.CalledProcessError as e:
         msg = 'Could not determine git remote: %s' % str(e)
         msg += "\n\nMay be the branch '%s' is not tracking a remote branch?" % branch
         raise RuntimeError(fmt('@{rf}%s' % msg))
+    remote = remote.rstrip().decode('utf-8')
 
     return [remote, branch]
 
@@ -104,9 +107,10 @@ def check_clean_working_copy(base_path, vcs_type):
     else:
         assert False, 'Unknown vcs type: %s' % vcs_type
     try:
-        output = subprocess.check_output(cmd, cwd=base_path).rstrip()
+        output = subprocess.check_output(cmd, cwd=base_path)
     except subprocess.CalledProcessError as e:
         raise RuntimeError(fmt("@{rf}Failed to check working copy state: %s" % str(e)))
+    output = output.rstrip().decode('utf-8')
     if output != '':
         print(output)
         return False
