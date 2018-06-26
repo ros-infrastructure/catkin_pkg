@@ -33,6 +33,7 @@
 from __future__ import print_function
 import os
 import subprocess
+import sys
 
 
 def get_repository_type(path):
@@ -46,14 +47,22 @@ def vcs_remotes(path, vcs_type=None):
     if vcs_type is None:
         vcs_type = get_repository_type(path)
     if vcs_type == 'git':
-        return subprocess.check_output(['git', 'remote', '-v'], cwd=path)
+        return check_output_string_rstrip(['git', 'remote', '-v'], cwd=path)
     elif vcs_type == 'hg':
-        return subprocess.check_output(['hg', 'paths'], cwd=path)
+        return check_output_string_rstrip(['hg', 'paths'], cwd=path)
     elif vcs_type == 'svn':
-        output = subprocess.check_output(['svn', 'info'], cwd=path)
+        output = check_output_string_rstrip(['svn', 'info'], cwd=path)
         for line in output.split(os.linesep):
             if line.startswith('URL: '):
                 return line
         raise RuntimeError('Could not determine URL of svn working copy')
     else:
         raise RuntimeError('"remotes" command not supported for vcs type "%s"' % vcs_type)
+
+
+def check_output_string_rstrip(*args, **kwargs):
+    """Clean up the output of check_output to be 2/3 compatible and rstrip."""
+    output = subprocess.check_output(*args, **kwargs)
+    if sys.version_info.major == 3:
+        return output.decode('utf-8').rstrip()
+    return output.rstrip()
