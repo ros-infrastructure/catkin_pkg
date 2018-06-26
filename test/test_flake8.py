@@ -21,28 +21,8 @@ from flake8.api.legacy import get_style_guide
 
 
 def test_flake8():
-    style_guide = get_style_guide(
-        ignore=[
-            'C403',  # Unnecessary list comprehension - rewrite as a set comprehension -- invalid syntax in Python 2
-            'C404',  # Unnecessary list comprehension - rewrite as a dict comprehension -- invalid syntax in Python 2
-            'C405',  # Unnecessary list literal - rewrite as a set literal.  -- invalid syntax in Python 2
-            'D100',  # Missing docstring in public module
-            'D101',  # Missing docstring in public class
-            'D102',  # Missing docstring in public method
-            'D103',  # Missing docstring in public function
-            'D104',  # Missing docstring in public package
-            'D105',  # Missing docstring in magic method
-            'D106',  # Missing docstring in public nested class
-            'D107',  # Missing docstring in __init__
-            'D203',  # 1 blank line required before class docstring
-            'D212',  # Multi-line docstring summary should start at the first line
-            'D404',  # First word of the docstring should be This
-            'I202',  # Additional newline in a group of imports
-        ],
-        max_line_length=200,
-        max_complexity=10,
-        show_source=True,
-    )
+    # Configure flake8 using the .flake8 file in the root of this repository.
+    style_guide = get_style_guide()
 
     stdout = sys.stdout
     sys.stdout = sys.stderr
