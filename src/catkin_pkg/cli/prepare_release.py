@@ -13,8 +13,6 @@ from catkin_pkg.package_version import get_forthcoming_label, update_versions, u
 from catkin_pkg.packages import find_packages, verify_equal_package_versions
 from catkin_pkg.terminal_color import disable_ANSI_colors, fmt
 from catkin_pkg.workspace_vcs import get_repository_type, vcs_remotes
-from catkin_pkg.workspace_vcs import check_output_string_rstrip
-
 
 try:
     raw_input
@@ -25,10 +23,10 @@ except NameError:
 def has_changes(base_path, path, vcs_type):
     cmd = [_find_executable(vcs_type), 'diff', path]
     try:
-        output = check_output_string_rstrip(cmd, cwd=base_path)
+        output = subprocess.check_output(cmd, cwd=base_path)
     except subprocess.CalledProcessError as e:
         raise RuntimeError(fmt("@{rf}Failed to check if '@{boldon}%s@{boldoff}' has modifications: %s" % (path, str(e))))
-    return output != ''
+    return output.decode('utf-8').rstrip() != ''
 
 
 def prompt_continue(msg, default):
@@ -71,17 +69,19 @@ def _flush_stdin():
 def get_git_remote_and_branch(base_path):
     cmd_branch = [_find_executable('git'), 'rev-parse', '--abbrev-ref', 'HEAD']
     try:
-        branch = check_output_string_rstrip(cmd_branch, cwd=base_path)
+        branch = subprocess.check_output(cmd_branch, cwd=base_path)
     except subprocess.CalledProcessError as e:
         raise RuntimeError(fmt('@{rf}Could not determine git branch: %s' % str(e)))
+    branch = branch.decode('utf-8').rstrip()
 
     cmd_remote = [_find_executable('git'), 'config', '--get', 'branch.%s.remote' % branch]
     try:
-        remote = check_output_string_rstrip(cmd_remote, cwd=base_path)
+        remote = subprocess.check_output(cmd_remote, cwd=base_path)
     except subprocess.CalledProcessError as e:
         msg = 'Could not determine git remote: %s' % str(e)
         msg += "\n\nMay be the branch '%s' is not tracking a remote branch?" % branch
         raise RuntimeError(fmt('@{rf}%s' % msg))
+    remote = remote.decode('utf-8').rstrip()
 
     return [remote, branch]
 
@@ -106,9 +106,10 @@ def check_clean_working_copy(base_path, vcs_type):
     else:
         assert False, 'Unknown vcs type: %s' % vcs_type
     try:
-        output = check_output_string_rstrip(cmd, cwd=base_path)
+        output = subprocess.check_output(cmd, cwd=base_path)
     except subprocess.CalledProcessError as e:
         raise RuntimeError(fmt("@{rf}Failed to check working copy state: %s" % str(e)))
+    output = output.decode('utf-8').rstrip()
     if output != '':
         print(output)
         return False
