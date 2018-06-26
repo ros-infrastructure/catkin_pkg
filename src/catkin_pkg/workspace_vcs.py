@@ -46,11 +46,14 @@ def vcs_remotes(path, vcs_type=None):
     if vcs_type is None:
         vcs_type = get_repository_type(path)
     if vcs_type == 'git':
-        return subprocess.check_output(['git', 'remote', '-v'], cwd=path)
+        output = subprocess.check_output(['git', 'remote', '-v'], cwd=path)
+        return output.decode('utf-8').rstrip()
     elif vcs_type == 'hg':
-        return subprocess.check_output(['hg', 'paths'], cwd=path)
+        output = subprocess.check_output(['hg', 'paths'], cwd=path)
+        return output.decode('utf-8').rstrip()
     elif vcs_type == 'svn':
         output = subprocess.check_output(['svn', 'info'], cwd=path)
+        output = output.decode('utf-8').rstrip()
         for line in output.split(os.linesep):
             if line.startswith('URL: '):
                 return line
