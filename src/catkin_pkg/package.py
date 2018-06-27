@@ -34,12 +34,11 @@
 
 from __future__ import print_function
 
+from copy import deepcopy
 import os
 import re
 import sys
 import xml.dom.minidom as dom
-
-from copy import deepcopy
 
 from catkin_pkg.condition import evaluate_condition
 

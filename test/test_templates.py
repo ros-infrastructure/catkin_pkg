@@ -3,9 +3,9 @@ import shutil
 import tempfile
 import unittest
 
-from catkin_pkg.package import Dependency, Export, PACKAGE_MANIFEST_FILENAME, Url, parse_package
-from catkin_pkg.package_templates import PackageTemplate, _create_include_macro, _create_targetlib_args, \
-    _safe_write_files, create_cmakelists, create_package_files, create_package_xml
+from catkin_pkg.package import Dependency, Export, PACKAGE_MANIFEST_FILENAME, parse_package, Url
+from catkin_pkg.package_templates import _create_include_macro, _create_targetlib_args, _safe_write_files, \
+    create_cmakelists, create_package_files, create_package_xml, PackageTemplate
 from catkin_pkg.python_setup import generate_distutils_setup
 
 from mock import MagicMock, Mock

@@ -6,14 +6,14 @@ import unittest
 import xml.dom.minidom as dom
 
 from catkin_pkg.package import (
+    _check_known_attributes,
     Dependency,
     Export,
     InvalidPackage,
     License,
     Package,
-    Person,
-    _check_known_attributes,
     parse_package,
+    Person,
 )
 
 from mock import Mock

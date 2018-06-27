@@ -6,7 +6,7 @@ import argparse
 import os
 import sys
 
-from catkin_pkg.package_templates import PackageTemplate, create_package_files
+from catkin_pkg.package_templates import create_package_files, PackageTemplate
 
 
 def main(argv=sys.argv[1:], parent_path=os.getcwd()):

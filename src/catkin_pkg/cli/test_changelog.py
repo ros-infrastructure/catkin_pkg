@@ -8,7 +8,7 @@ import os
 import sys
 
 import catkin_pkg.changelog
-from catkin_pkg.changelog import CHANGELOG_FILENAME, Changelog
+from catkin_pkg.changelog import Changelog, CHANGELOG_FILENAME
 from catkin_pkg.changelog import populate_changelog_from_rst
 
 
