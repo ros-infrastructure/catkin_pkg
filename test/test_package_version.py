@@ -1,5 +1,4 @@
 import datetime
-import mock
 import os
 import shutil
 import tempfile
@@ -9,6 +8,8 @@ from catkin_pkg.package_version import _replace_version
 from catkin_pkg.package_version import bump_version
 from catkin_pkg.package_version import update_changelog_sections
 from catkin_pkg.package_version import update_versions
+
+import mock
 
 
 class PackageVersionTest(unittest.TestCase):

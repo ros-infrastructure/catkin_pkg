@@ -41,8 +41,8 @@ from __future__ import print_function
 
 import os
 
-from catkin_pkg.cmake import get_metapackage_cmake_template_path
 from catkin_pkg.cmake import configure_file
+from catkin_pkg.cmake import get_metapackage_cmake_template_path
 
 __author__ = "William Woodall"
 __email__ = "william@osrfoundation.org"

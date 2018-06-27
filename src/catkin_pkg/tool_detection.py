@@ -38,6 +38,7 @@ This allows the tools to detect cross tool talk and avoid it where appropriate
 
 
 from __future__ import print_function
+
 import os
 
 SPACE_BUILT_BY_MARKER_FILENAME = '.built_by'

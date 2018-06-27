@@ -1,4 +1,5 @@
 from __future__ import print_function
+
 import argparse
 import os
 import re
@@ -9,7 +10,7 @@ from catkin_pkg import metapackage
 from catkin_pkg.changelog import CHANGELOG_FILENAME, get_changelog_from_path
 from catkin_pkg.package import InvalidPackage, PACKAGE_MANIFEST_FILENAME
 from catkin_pkg.package_version import bump_version
-from catkin_pkg.package_version import get_forthcoming_label, update_versions, update_changelog_sections
+from catkin_pkg.package_version import get_forthcoming_label, update_changelog_sections, update_versions
 from catkin_pkg.packages import find_packages, verify_equal_package_versions
 from catkin_pkg.terminal_color import disable_ANSI_colors, fmt
 from catkin_pkg.workspace_vcs import get_repository_type, vcs_remotes

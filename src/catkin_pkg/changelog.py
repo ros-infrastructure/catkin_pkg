@@ -42,14 +42,15 @@ http://ros.org/reps/rep-0132.html
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import logging
+import os
+import re
 import sys
+
 import dateutil.parser
 import docutils
 import docutils.core
-import logging
-import os
 import pkg_resources
-import re
 
 _py3 = sys.version_info[0] >= 3
 

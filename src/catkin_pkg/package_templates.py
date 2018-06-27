@@ -40,8 +40,8 @@ import sys
 from catkin_pkg.cmake import configure_file
 from catkin_pkg.cmake import get_metapackage_cmake_template_path
 from catkin_pkg.package import Dependency
-from catkin_pkg.package import PACKAGE_MANIFEST_FILENAME
 from catkin_pkg.package import Package
+from catkin_pkg.package import PACKAGE_MANIFEST_FILENAME
 from catkin_pkg.package import Person
 
 

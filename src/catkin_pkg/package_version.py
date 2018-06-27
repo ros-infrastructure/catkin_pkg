@@ -33,12 +33,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import print_function
+
 import datetime
-import docutils.core
 import os
 import re
 
 from catkin_pkg.changelog_generator import FORTHCOMING_LABEL
+import docutils.core
 
 
 def bump_version(version, bump='patch'):

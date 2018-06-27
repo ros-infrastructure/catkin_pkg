@@ -1,15 +1,14 @@
 import os
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
+
+from catkin_pkg.package import Dependency, Export, PACKAGE_MANIFEST_FILENAME, parse_package, Url
+from catkin_pkg.package_templates import _create_include_macro, _create_targetlib_args, _safe_write_files, \
+    create_cmakelists, create_package_files, create_package_xml, PackageTemplate
+from catkin_pkg.python_setup import generate_distutils_setup
 
 from mock import MagicMock, Mock
-
-from catkin_pkg.package_templates import _safe_write_files, create_package_files, \
-    create_cmakelists, create_package_xml, PackageTemplate, _create_include_macro, \
-    _create_targetlib_args
-from catkin_pkg.package import parse_package, Dependency, Export, Url, PACKAGE_MANIFEST_FILENAME
-from catkin_pkg.python_setup import generate_distutils_setup
 
 
 def u(line):
