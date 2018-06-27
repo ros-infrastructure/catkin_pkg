@@ -39,7 +39,6 @@ import os
 import re
 
 from catkin_pkg.changelog_generator import FORTHCOMING_LABEL
-
 import docutils.core
 
 

@@ -48,10 +48,8 @@ import re
 import sys
 
 import dateutil.parser
-
 import docutils
 import docutils.core
-
 import pkg_resources
 
 _py3 = sys.version_info[0] >= 3

@@ -1,7 +1,6 @@
 import os
 
 from catkin_pkg.package import InvalidPackage
-
 from catkin_pkg.packages import find_package_paths
 from catkin_pkg.packages import find_packages
 from catkin_pkg.packages import find_packages_allowing_duplicates
