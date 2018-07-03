@@ -71,7 +71,7 @@ class PackageTemplate(Package):
         :param catkin_deps:
         """
         # Sort so they are alphebetical
-        licenses = list(licenses or ["TODO"])
+        licenses = list(licenses or ['TODO'])
         licenses.sort()
         if not maintainer_names:
             maintainer_names = [getpass.getuser()]
@@ -155,9 +155,9 @@ def read_template_file(filename, rosdistro):
                 template_contents = fhand.read()
             return template_contents
     raise IOError(
-        "Could not read template for ROS distro "
+        'Could not read template for ROS distro '
         "'{}' at '{}': ".format(rosdistro, ', '.join(templates)) +
-        "no such file or directory"
+        'no such file or directory'
     )
 
 
@@ -371,7 +371,7 @@ def create_package_xml(package_template, rosdistro, meta=False):
 
     def get_person_tag(tagname, person):
         email_string = (
-            "" if person.email is None else 'email="%s"' % person.email
+            '' if person.email is None else 'email="%s"' % person.email
         )
         return '  <%s %s>%s</%s>\n' % (tagname, email_string,
                                        person.name, tagname)
@@ -383,7 +383,7 @@ def create_package_xml(package_template, rosdistro, meta=False):
 
     urls = []
     for url in package_template.urls:
-        type_string = ("" if url.type is None
+        type_string = ('' if url.type is None
                        else 'type="%s"' % url.type)
         urls.append('    <url %s >%s</url>\n' % (type_string, url.url))
     temp_dict['urls'] = ''.join(urls)

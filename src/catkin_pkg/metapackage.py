@@ -44,9 +44,9 @@ import os
 from catkin_pkg.cmake import configure_file
 from catkin_pkg.cmake import get_metapackage_cmake_template_path
 
-__author__ = "William Woodall"
-__email__ = "william@osrfoundation.org"
-__maintainer__ = "William Woodall"
+__author__ = 'William Woodall'
+__email__ = 'william@osrfoundation.org'
+__maintainer__ = 'William Woodall'
 
 DEFINITION_URL = 'http://ros.org/reps/rep-0127.html#metapackage'
 
@@ -156,9 +156,9 @@ Got:
         )
     # Does it buildtool depend on catkin, else raise
     if not package.has_buildtool_depend_on_catkin():
-        raise InvalidMetapackage("No buildtool dependency on catkin", path, package)
+        raise InvalidMetapackage('No buildtool dependency on catkin', path, package)
     # Does it have only run depends, else raise
     if package.has_invalid_metapackage_dependencies():
         raise InvalidMetapackage(
-            "Has build, buildtool, and/or test depends, but only run depends are allowed (except buildtool catkin)",
+            'Has build, buildtool, and/or test depends, but only run depends are allowed (except buildtool catkin)',
             path, package)
