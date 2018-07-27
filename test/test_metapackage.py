@@ -97,10 +97,10 @@ class TestMetapackageValidation(unittest.TestCase):
 
 
 def test_get_expected_cmakelists_txt():
-    expected = '''\
+    expected = """\
 cmake_minimum_required(VERSION 2.8.3)
 project(example)
 find_package(catkin REQUIRED)
 catkin_metapackage()
-'''
+"""
     assert expected == get_expected_cmakelists_txt('example')

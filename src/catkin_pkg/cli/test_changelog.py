@@ -14,10 +14,10 @@ from catkin_pkg.changelog import populate_changelog_from_rst
 
 def main(sysargs=None):
     parser = argparse.ArgumentParser(
-        description="Tests a REP-0132 %s" % CHANGELOG_FILENAME)
+        description='Tests a REP-0132 %s' % CHANGELOG_FILENAME)
     parser.add_argument(
         'changelog_file',
-        help="%s file to parse" % CHANGELOG_FILENAME,
+        help='%s file to parse' % CHANGELOG_FILENAME,
         default='.',
         nargs='?')
 
@@ -37,7 +37,7 @@ def main(sysargs=None):
             return 1
 
     if os.path.basename(changelog_file) != CHANGELOG_FILENAME:
-        print("WARNING: changelog file name should be %s" % CHANGELOG_FILENAME)
+        print('WARNING: changelog file name should be %s' % CHANGELOG_FILENAME)
 
     logging.basicConfig()
     catkin_pkg.changelog.log.setLevel(logging.DEBUG)

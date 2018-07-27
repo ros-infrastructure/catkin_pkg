@@ -96,7 +96,7 @@ def try_repo_push(base_path, vcs_type):
         try:
             subprocess.check_call(cmd, cwd=base_path)
         except (subprocess.CalledProcessError, RuntimeError) as e:
-            raise RuntimeError(fmt("@{rf}Failed to dry push to repository: %s" % str(e)))
+            raise RuntimeError(fmt('@{rf}Failed to dry push to repository: %s' % str(e)))
 
 
 def check_clean_working_copy(base_path, vcs_type):
@@ -109,7 +109,7 @@ def check_clean_working_copy(base_path, vcs_type):
     try:
         output = subprocess.check_output(cmd, cwd=base_path)
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(fmt("@{rf}Failed to check working copy state: %s" % str(e)))
+        raise RuntimeError(fmt('@{rf}Failed to check working copy state: %s' % str(e)))
     output = output.decode('utf-8').rstrip()
     if output != '':
         print(output)
@@ -125,7 +125,7 @@ def commit_files(base_path, vcs_type, packages, packages_with_changelogs, messag
         try:
             subprocess.check_call(cmd, cwd=base_path)
         except subprocess.CalledProcessError as e:
-            raise RuntimeError(fmt("@{rf}Failed to commit package.xml files: %s" % str(e)))
+            raise RuntimeError(fmt('@{rf}Failed to commit package.xml files: %s' % str(e)))
     return cmd
 
 
@@ -160,7 +160,7 @@ def tag_repository(base_path, vcs_type, tag_name, has_tag_prefix, dry_run=False)
         try:
             subprocess.check_call(cmd, cwd=base_path)
         except subprocess.CalledProcessError as e:
-            raise RuntimeError(fmt("@{rf}Failed to tag repository: %s" % str(e)))
+            raise RuntimeError(fmt('@{rf}Failed to tag repository: %s' % str(e)))
     return cmd
 
 
@@ -268,7 +268,7 @@ def _main():
                 ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(non_catkin_pkg_names)])
             ), file=sys.stderr)
         if not args.non_interactive and not prompt_continue('Continue anyway', default=False):
-            raise RuntimeError(fmt("@{rf}Aborted release, verify that non-catkin packages are ready to be released or release manually."))
+            raise RuntimeError(fmt('@{rf}Aborted release, verify that non-catkin packages are ready to be released or release manually.'))
     if invalid_pkg_names:
         print(
             fmt(
@@ -276,7 +276,7 @@ def _main():
                 ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(invalid_pkg_names)])
             ), file=sys.stderr)
         if not args.non_interactive and not prompt_continue('Continue anyway', default=False):
-            raise RuntimeError(fmt("@{rf}Aborted release, fix the names of the packages."))
+            raise RuntimeError(fmt('@{rf}Aborted release, fix the names of the packages.'))
 
     local_modifications = []
     for pkg_path, package in packages.items():
@@ -355,7 +355,7 @@ def _main():
     if not is_clean:
         print(fmt('@{yf}Warning: the working copy contains other changes. Consider reverting/committing/stashing them before preparing a release.'), file=sys.stderr)
         if not args.non_interactive and not prompt_continue('Continue anyway', default=False):
-            raise RuntimeError(fmt("@{rf}Aborted release, clean the working copy before trying again."))
+            raise RuntimeError(fmt('@{rf}Aborted release, clean the working copy before trying again.'))
 
     # for svn verify that we know how to tag that repository
     if vcs_type in ['svn']:

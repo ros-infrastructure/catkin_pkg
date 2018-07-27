@@ -59,9 +59,9 @@ try:
 except NameError:
     _unicode = str
 
-__author__ = "William Woodall"
-__email__ = "william@osrfoundation.org"
-__maintainer__ = "William Woodall"
+__author__ = 'William Woodall'
+__email__ = 'william@osrfoundation.org'
+__maintainer__ = 'William Woodall'
 
 log = logging.getLogger('changelog')
 
@@ -167,7 +167,7 @@ def mixed_text_from_docutils(node):
         elif isinstance(child, docutils.nodes.target):
             pass
         elif isinstance(child, docutils.nodes.system_message):
-            log.debug("Skipping system_message: {0}".format(child))
+            log.debug('Skipping system_message: {0}'.format(child))
         elif isinstance(child, docutils.nodes.bullet_list):
             content.texts.append(bullet_list_class_from_docutils(child))
         else:
@@ -425,7 +425,7 @@ class Changelog(object):
             parsed_v = pkg_resources.parse_version(v)
             index = self.__parsed_versions.index(parsed_v)
             if index == -1:
-                raise RuntimeError("Inconsistent internal version storage state")
+                raise RuntimeError('Inconsistent internal version storage state')
             new_versions[index] = v
         self.__versions = new_versions
         self.__dates[version] = date
@@ -529,13 +529,13 @@ class Reference(object):
         """Self as rst (unicode)."""
         if self.text is None:
             return _unicode(self.link)
-        return "`{0} <{1}>`_".format(self.text, self.link)
+        return '`{0} <{1}>`_'.format(self.text, self.link)
 
     def as_txt(self):
         """Self formatted for plain text (unicode)."""
         if self.text is None:
             return _unicode(self.link)
-        return "{0} <{1}>".format(self.text, self.link)
+        return '{0} <{1}>'.format(self.text, self.link)
 
 
 class Transition(object):
