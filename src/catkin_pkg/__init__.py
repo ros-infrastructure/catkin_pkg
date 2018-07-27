@@ -32,4 +32,7 @@
 
 """Library for retrieving information about catkin packages."""
 
-__version__ = '0.4.6'  # same version as in setup.py
+# same version as in:
+# - setup.py
+# - stdeb.cfg
+__version__ = '0.4.6'
