@@ -34,3 +34,17 @@ def in_temporary_directory(f):
             return f(*args, **kwds)
     decorated.__name__ = f.__name__
     return decorated
+
+class temporary_file():
+
+    def __init__(self):
+        pass
+
+    def __enter__(self):
+        self.temp_file = tempfile.NamedTemporaryFile(delete=False)
+        return self.temp_file
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.temp_file and os.path.exists(self.temp_file.name):
+            self.temp_file.close()
+            os.remove(self.temp_file.name)
