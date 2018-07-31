@@ -63,7 +63,7 @@ class PackageVersionTest(unittest.TestCase):
 
     def test_update_changelog_unicode(self):
         """Test that updating the changelog does not throw an exception on unicode characters."""
-        with tempfile.NamedTemporaryFile() as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             missing_changelogs_but_forthcoming = {}
             # Mock the Changelog object from catkin_pkg
             mock_changelog = mock.Mock()
