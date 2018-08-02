@@ -9,9 +9,9 @@ from catkin_pkg.package_version import bump_version
 from catkin_pkg.package_version import update_changelog_sections
 from catkin_pkg.package_version import update_versions
 
-from .util import in_temporary_directory
-
 import mock
+
+from .util import in_temporary_directory
 
 
 class PackageVersionTest(unittest.TestCase):
@@ -66,8 +66,7 @@ class PackageVersionTest(unittest.TestCase):
     @in_temporary_directory
     def test_update_changelog_unicode(self, directory=None):
         """Test that updating the changelog does not throw an exception on unicode characters."""
-        fd, temp_file = tempfile.mkstemp(dir=directory)
-        os.close(fd)
+        temp_file = os.path.join(directory, 'changelog')
         missing_changelogs_but_forthcoming = {}
         # Mock the Changelog object from catkin_pkg
         mock_changelog = mock.Mock()
