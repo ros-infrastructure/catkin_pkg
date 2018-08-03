@@ -16,10 +16,11 @@ class temporary_directory(object):
         return self.temp_path
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if self.temp_path and os.path.exists(self.temp_path):
-            shutil.rmtree(self.temp_path)
+        # in Windows, current directory needs to be changed back to release the file handle.
         if self.original_cwd and os.path.exists(self.original_cwd):
             os.chdir(self.original_cwd)
+        if self.temp_path and os.path.exists(self.temp_path):
+            shutil.rmtree(self.temp_path)
 
 
 def in_temporary_directory(f):
