@@ -34,6 +34,7 @@
 
 import multiprocessing
 import os
+import sys
 
 from .package import _get_package_xml
 from .package import PACKAGE_MANIFEST_FILENAME
@@ -133,7 +134,7 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     if not data:
         return {}
 
-    parallel = len(data) > 9999
+    parallel = False if sys.platform == 'win32' else len(data) > 100
     if parallel:
         try:
             pool = multiprocessing.Pool()
