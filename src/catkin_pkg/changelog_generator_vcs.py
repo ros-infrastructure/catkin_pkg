@@ -292,6 +292,8 @@ class HgClient(VcsClientBase):
         if result_log['returncode']:
             raise RuntimeError('Could not fetch latest tag:\n%s' % result_log['output'])
         tag_name = result_log['output']
+        if tag_name == 'null':
+            raise RuntimeError('Could not find latest tagn')
         return tag_name
 
     def get_log_entries(self, from_tag, to_tag, skip_merges=False):
