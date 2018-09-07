@@ -287,11 +287,13 @@ class HgClient(VcsClientBase):
         return tags
 
     def get_latest_tag_name(self):
-        cmd_log = [self._executable, 'log', '--rev', '.', '--template', '{latesttagdistance}']
+        cmd_log = [self._executable, 'log', '--rev', '.', '--template', '{latesttag}']
         result_log = self._run_command(cmd_log)
         if result_log['returncode']:
             raise RuntimeError('Could not fetch latest tag:\n%s' % result_log['output'])
         tag_name = result_log['output']
+        if tag_name == 'null':
+            raise RuntimeError('Could not find latest tagn')
         return tag_name
 
     def get_log_entries(self, from_tag, to_tag, skip_merges=False):
