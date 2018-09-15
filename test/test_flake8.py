@@ -24,6 +24,8 @@ def test_flake8():
     # Configure flake8 using the .flake8 file in the root of this repository.
     style_guide = get_style_guide()
 
+    style_guide.options.exclude += ['*/doc/_build']
+
     stdout = sys.stdout
     sys.stdout = sys.stderr
     # implicitly calls report_errors()
