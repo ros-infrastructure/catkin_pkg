@@ -605,6 +605,10 @@ def parse_package_string(data, filename=None, warnings=None):
             if not same_exec_depends:
                 pkg.exec_depends.append(deepcopy(dep))
         pkg.doc_depends = _get_dependencies(root, 'doc_depend')
+        for d in run_depends:
+            print('WARNING: The manifest of package "%s" (with format version %d) does not support <run_depend>%s</run_depend>. Please update your package.xml with <exec_depend>' % (pkg.name, pkg.package_format, d.name), file=sys.stderr)
+            pkg.build_export_depends.append(deepcopy(d))
+            pkg.exec_depends.append(deepcopy(d))
     pkg.test_depends = _get_dependencies(root, 'test_depend')
     pkg.conflicts = _get_dependencies(root, 'conflict')
     pkg.replaces = _get_dependencies(root, 'replace')
