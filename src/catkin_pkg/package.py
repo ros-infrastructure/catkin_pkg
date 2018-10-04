@@ -674,6 +674,9 @@ def parse_package_string(data, filename=None, warnings=None):
         })
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
     unknown_tags = set([n.tagName for n in nodes if n.tagName not in known.keys()])
+    if unknown_tags == set(['run_depend']):
+        print('WARNING: The manifest of package "%s" (with format version %d) does not support run_depend. Please update your package.xml with exec_depend' % (pkg.name, pkg.package_format), file=sys.stderr)
+        unknown_tags.remove('run_depend')
     if unknown_tags:
         errors.append('The manifest (with format version %d) must not contain the following tags: %s' % (pkg.package_format, ', '.join(unknown_tags)))
     for node in [n for n in nodes if n.tagName in known.keys()]:
