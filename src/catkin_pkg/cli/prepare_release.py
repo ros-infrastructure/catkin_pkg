@@ -67,13 +67,18 @@ def _flush_stdin():
         pass
 
 
-def get_git_remote_and_branch(base_path):
+def get_git_branch(base_path):
     cmd_branch = [_find_executable('git'), 'rev-parse', '--abbrev-ref', 'HEAD']
     try:
         branch = subprocess.check_output(cmd_branch, cwd=base_path)
     except subprocess.CalledProcessError as e:
         raise RuntimeError(fmt('@{rf}Could not determine git branch: %s' % str(e)))
     branch = branch.decode('utf-8').rstrip()
+    return branch
+
+
+def get_git_remote(base_path):
+    branch = get_git_branch(base_path)
 
     cmd_remote = [_find_executable('git'), 'config', '--get', 'branch.%s.remote' % branch]
     try:
@@ -83,8 +88,7 @@ def get_git_remote_and_branch(base_path):
         msg += "\n\nMay be the branch '%s' is not tracking a remote branch?" % branch
         raise RuntimeError(fmt('@{rf}%s' % msg))
     remote = remote.decode('utf-8').rstrip()
-
-    return [remote, branch]
+    return remote
 
 
 def try_repo_push(base_path, vcs_type):
@@ -92,7 +96,7 @@ def try_repo_push(base_path, vcs_type):
         print('Trying to push to remote repository (dry run)...')
         cmd = [_find_executable(vcs_type), 'push']
         if vcs_type == 'git':
-            cmd.extend(['-n'] + get_git_remote_and_branch(base_path))
+            cmd.extend(['-n'] + [get_git_remote(base_path), get_git_branch(base_path)])
         try:
             subprocess.check_call(cmd, cwd=base_path)
         except (subprocess.CalledProcessError, RuntimeError) as e:
@@ -164,13 +168,13 @@ def tag_repository(base_path, vcs_type, tag_name, has_tag_prefix, dry_run=False)
     return cmd
 
 
-def push_changes(base_path, vcs_type, dry_run=False):
+def push_changes(base_path, vcs_type, tag_name, dry_run=False):
     commands = []
 
     # push changes to the repository
     cmd = [_find_executable(vcs_type), 'push']
     if vcs_type == 'git':
-        cmd.extend(get_git_remote_and_branch(base_path))
+        cmd.extend([get_git_remote(base_path), get_git_branch(base_path)])
     commands.append(cmd)
     if not dry_run:
         try:
@@ -180,7 +184,7 @@ def push_changes(base_path, vcs_type, dry_run=False):
 
     # push tags to the repository
     if vcs_type in ['git']:
-        cmd = [_find_executable(vcs_type), 'push', '--tags']
+        cmd = [_find_executable(vcs_type), 'push', get_git_remote(base_path), tag_name]
         commands.append(cmd)
         if not dry_run:
             try:
@@ -403,7 +407,7 @@ def _main():
         tag_repository(base_path, vcs_type, tag_name, args.tag_prefix != '')
 
         try:
-            commands = push_changes(base_path, vcs_type, dry_run=True)
+            commands = push_changes(base_path, vcs_type, tag_name, dry_run=True)
         except RuntimeError:
             print(fmt('@{yf}Warning: could not determine commands to push the changes and tag to the remote repository. Do you have a remote configured for the current branch?'))
         else:
@@ -420,7 +424,7 @@ def _main():
                     if not prompt_continue('Execute commands to push the local commits and tags to the remote repository', default=True):
                         pushed = False
                 if pushed is None:
-                    push_changes(base_path, vcs_type)
+                    push_changes(base_path, vcs_type, tag_name)
                     pushed = True
 
     if pushed:
