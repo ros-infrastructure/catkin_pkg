@@ -404,7 +404,7 @@ def _main():
 
         try:
             commands = push_changes(base_path, vcs_type, dry_run=True)
-        except RuntimeError as e:
+        except RuntimeError:
             print(fmt('@{yf}Warning: could not determine commands to push the changes and tag to the remote repository. Do you have a remote configured for the current branch?'))
         else:
             if not args.no_push:
