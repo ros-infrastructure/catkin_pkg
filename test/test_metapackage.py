@@ -28,7 +28,8 @@ test_expectations = {
     'no_cmake': [InvalidMetapackage, 'No CMakeLists.txt', None],
     'no_metapackage_tag': [InvalidMetapackage, 'No <metapackage/> tag in <export>', None],
     'NonConformingName': [None, None, None],
-    'valid_metapackage': [None, None, None]
+    'valid_metapackage': [None, None, None],
+    'valid_metapackage_format2': [None, None, None],
 }
 
 test_expected_warnings = [
