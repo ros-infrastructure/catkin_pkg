@@ -1,0 +1,17 @@
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>valid_metapackage_format2</name>
+  <version>0.1.0</version>
+  <description>valid_metapackage</description>
+
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>foo</exec_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+
+</package>

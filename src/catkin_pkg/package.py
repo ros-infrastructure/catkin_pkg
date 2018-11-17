@@ -293,7 +293,8 @@ class Package(object):
                 new_warnings.append('Metapackage "%s" must buildtool_depend on catkin.' % self.name)
             if self.has_invalid_metapackage_dependencies():
                 new_warnings.append('Metapackage "%s" should not have other dependencies besides a '
-                                    'buildtool_depend on catkin and run_depends.' % self.name)
+                                    'buildtool_depend on catkin and %s.' %
+                                    (self.name, 'run_depends' if self.package_format == 1 else 'exec_depends'))
 
         for warning in new_warnings:
             if warnings is None:
