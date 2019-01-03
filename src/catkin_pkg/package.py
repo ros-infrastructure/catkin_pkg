@@ -148,7 +148,11 @@ class Package(object):
         :rtype: str
         :raises: :exc:`InvalidPackage`
         """
-        build_type_exports = [e.content for e in self.exports if e.tagname == 'build_type']
+        # for backward compatibility a build type without an evaluated
+        # condition is still being considered
+        build_type_exports = [
+            e.content for e in self.exports
+            if e.tagname == 'build_type' and e.evaluated_condition is not False]
         if not build_type_exports:
             return 'catkin'
         if len(build_type_exports) == 1:
@@ -196,6 +200,7 @@ class Package(object):
             'replaces',
             'group_depends',
             'member_of_groups',
+            'exports',
         ):
             conditionals = getattr(self, attr)
             for conditional in conditionals:
@@ -353,12 +358,13 @@ class Dependency(object):
 
 
 class Export(object):
-    __slots__ = ['tagname', 'attributes', 'content']
+    __slots__ = ['tagname', 'attributes', 'content', 'evaluated_condition']
 
     def __init__(self, tagname, content=None):
         self.tagname = tagname
         self.attributes = {}
         self.content = content
+        self.evaluated_condition = None
 
     def __str__(self):
         txt = '<%s' % self.tagname
@@ -369,6 +375,21 @@ class Export(object):
         else:
             txt += '/>'
         return txt
+
+    def evaluate_condition(self, context):
+        """
+        Evaluate the condition.
+
+        The result is also stored in the member variable `evaluated_condition`.
+
+        :param context: A dictionary with key value pairs to replace variables
+          starting with $ in the condition.
+
+        :returns: True if the condition evaluates to True, else False
+        :raises: :exc:`ValueError` if the condition fails to parse
+        """
+        self.evaluated_condition = evaluate_condition(self.attributes.get('condition'), context)
+        return self.evaluated_condition
 
 
 # Subclassing ``str`` to keep backward compatibility.
