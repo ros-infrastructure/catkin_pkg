@@ -149,7 +149,7 @@ class Package(object):
         :raises: :exc:`InvalidPackage`
         """
         # for backward compatibility a build type without an evaluated
-        # condition is still being considered
+        # condition is still being considered (i.e. evaluated_condition is None)
         build_type_exports = [
             e.content for e in self.exports
             if e.tagname == 'build_type' and e.evaluated_condition is not False]
