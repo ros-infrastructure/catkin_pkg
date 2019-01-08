@@ -73,8 +73,7 @@ def get_git_branch(base_path):
         branch = subprocess.check_output(cmd_branch, cwd=base_path)
     except subprocess.CalledProcessError as e:
         raise RuntimeError(fmt('@{rf}Could not determine git branch: %s' % str(e)))
-    branch = branch.decode('utf-8').rstrip()
-    return branch
+    return branch.decode('utf-8').rstrip()
 
 
 def get_git_remote(base_path):
@@ -87,8 +86,7 @@ def get_git_remote(base_path):
         msg = 'Could not determine git remote: %s' % str(e)
         msg += "\n\nMay be the branch '%s' is not tracking a remote branch?" % branch
         raise RuntimeError(fmt('@{rf}%s' % msg))
-    remote = remote.decode('utf-8').rstrip()
-    return remote
+    return remote.decode('utf-8').rstrip()
 
 
 def try_repo_push(base_path, vcs_type):
