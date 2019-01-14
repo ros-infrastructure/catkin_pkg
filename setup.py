@@ -12,7 +12,7 @@ install_requires = [
 ]
 
 # argparse is part of the standard library since Python 2.7
-if sys.version_info[0] == 2 and sys.version_info[1] <= 7:
+if sys.version_info[0] == 2 and sys.version_info[1] < 7:
     install_requires.append('argparse')
 
 kwargs = {
