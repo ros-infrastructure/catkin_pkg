@@ -697,7 +697,11 @@ def parse_package_string(data, filename=None, warnings=None):
     nodes = [n for n in root.childNodes if n.nodeType == n.ELEMENT_NODE]
     unknown_tags = set([n.tagName for n in nodes if n.tagName not in known.keys()])
     if unknown_tags:
-        errors.append('The manifest (with format version %d) must not contain the following tags: %s' % (pkg.package_format, ', '.join(unknown_tags)))
+        errors.append('The manifest of package "%s" (with format version %d) must not contain the following tags: %s' % (pkg.name, pkg.package_format, ', '.join(unknown_tags)))
+    if 'run_depend' in unknown_tags and pkg.package_format >= 2:
+        errors.append('Please replace <run_depend> tags with <exec_depend> tags.')
+    elif 'exec_depend' in unknown_tags and pkg.package_format < 2:
+        errors.append('Either update to a newer format or replace <exec_depend> tags with <run_depend> tags.')
     for node in [n for n in nodes if n.tagName in known.keys()]:
         errors += _check_known_attributes(node, known[node.tagName])
         if node.tagName not in ['description', 'export']:
