@@ -32,8 +32,18 @@
 
 """Library to find packages in the filesystem."""
 
-import multiprocessing
 import os
+if os.name == 'nt':
+    # https://docs.python.org/2/library/multiprocessing.html#windows
+    #
+    # On Windows, using multiprocessing requires the scripts to be
+    # "Safe importing of main module" to avoid RuntimeError.
+    # This restriction requires downstream tools to be modified to
+    # work. Instead, let's fallback to threading wrapper to get
+    # around it and still keep the parallelism on Windows.
+    import multiprocessing.dummy as multiprocessing
+else:
+    import multiprocessing
 
 from .package import _get_package_xml
 from .package import PACKAGE_MANIFEST_FILENAME

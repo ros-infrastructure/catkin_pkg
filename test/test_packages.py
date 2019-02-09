@@ -49,7 +49,7 @@ def test_find_packages_allowing_duplicates_with_no_packages():
 @in_temporary_directory
 def test_find_packages_invalid_version():
     version = ':{version}'
-    path = 'src/foo'
+    path = os.path.normpath('src/foo')
     _create_pkg_in_dir(path, version)
     try:
         find_packages(path.split('/')[0])
