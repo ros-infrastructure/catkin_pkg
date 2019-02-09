@@ -33,6 +33,11 @@
 """Library to find packages in the filesystem."""
 
 import os
+
+from .package import _get_package_xml
+from .package import PACKAGE_MANIFEST_FILENAME
+from .package import parse_package_string
+
 if os.name == 'nt':
     # https://docs.python.org/2/library/multiprocessing.html#windows
     #
@@ -44,10 +49,6 @@ if os.name == 'nt':
     import multiprocessing.dummy as multiprocessing
 else:
     import multiprocessing
-
-from .package import _get_package_xml
-from .package import PACKAGE_MANIFEST_FILENAME
-from .package import parse_package_string
 
 
 def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
