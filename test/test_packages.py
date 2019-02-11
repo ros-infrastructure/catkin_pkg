@@ -52,7 +52,7 @@ def test_find_packages_invalid_version():
     path = os.path.normpath('src/foo')
     _create_pkg_in_dir(path, version)
     try:
-        find_packages(path.split('/')[0])
+        find_packages(path.split(os.sep)[0])
         assert False, 'Must raise'
     except InvalidPackage as e:
         exception_message = str(e)
