@@ -535,7 +535,7 @@ def parse_package_string(data, filename=None, warnings=None):
     :raises: :exc:`InvalidPackage`
     """
     try:
-        root = dom.parseString(data)
+        root = dom.parseString(data.encode('utf-8'))
     except Exception as ex:
         raise InvalidPackage('The manifest contains invalid XML:\n%s' % ex, filename)
 
