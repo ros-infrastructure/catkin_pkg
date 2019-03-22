@@ -534,6 +534,8 @@ def parse_package_string(data, filename=None, warnings=None):
     :returns: return parsed :class:`Package`
     :raises: :exc:`InvalidPackage`
     """
+    if sys.version_info[0] == 2 and not isinstance(data, str):
+        data = data.encode('utf-8')
     try:
         root = dom.parseString(data)
     except Exception as ex:
