@@ -4,7 +4,7 @@
   <version>0.1.0</version>
   <description>valid_package description</description>
 
-  <maintainer email="user@todo.todo">user</maintainer>
+  <maintainer email="user@todo.todo">üser</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
 
