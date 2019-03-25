@@ -7,12 +7,14 @@ import xml.dom.minidom as dom
 
 from catkin_pkg.package import (
     _check_known_attributes,
+    _get_package_xml,
     Dependency,
     Export,
     InvalidPackage,
     License,
     Package,
     parse_package,
+    parse_package_string,
     Person,
 )
 
@@ -321,3 +323,18 @@ class PackageTest(unittest.TestCase):
     def test_parse_package_invalid(self):
         filename = os.path.join(test_data_dir, 'invalid_package.xml')
         self.assertRaises(InvalidPackage, parse_package, filename)
+
+    def test_parse_package_string(self):
+        filename = os.path.join(test_data_dir, 'valid_package.xml')
+        xml = _get_package_xml(filename)[0]
+
+        assert isinstance(xml, str)
+        parse_package_string(xml)
+
+        if sys.version_info[0] == 2:
+            xml = xml.decode('utf-8')
+            assert not isinstance(xml, str)
+        else:
+            xml = xml.encode('utf-8')
+            assert isinstance(xml, bytes)
+        parse_package_string(xml)
