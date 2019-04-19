@@ -3,6 +3,7 @@ from __future__ import print_function
 import argparse
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -194,10 +195,16 @@ def push_changes(base_path, vcs_type, tag_name, dry_run=False):
 
 
 def _find_executable(vcs_type):
-    for path in os.getenv('PATH').split(os.path.pathsep):
-        file_path = os.path.join(path, vcs_type)
-        if os.path.isfile(file_path):
+    try:
+        file_path = shutil.which(vcs_type)
+        if file_path is not None:
             return file_path
+    except AttributeError:
+        # fallback for Python < 3.3
+        for path in os.getenv('PATH').split(os.path.pathsep):
+            file_path = os.path.join(path, vcs_type)
+            if os.path.isfile(file_path):
+                return file_path
     raise RuntimeError(fmt('@{rf}Could not find vcs binary: %s' % vcs_type))
 
 

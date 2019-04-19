@@ -167,7 +167,7 @@ def rename_section(data, old_label, new_label):
     def replace_section(match):
         section_char = match.group(2)[0]
         return new_label + '\n' + section_char * len(new_label)
-    pattern = '^(' + re.escape(old_label) + ')\n([' + re.escape(valid_section_characters) + ']+)$'
+    pattern = '^(' + re.escape(old_label) + ')\r?\n([' + re.escape(valid_section_characters) + ']+)\r?$'
     data, count = re.subn(pattern, replace_section, data, flags=re.MULTILINE)
     if count == 0:
         raise RuntimeError('Could not find section')
