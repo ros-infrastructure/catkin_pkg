@@ -83,11 +83,15 @@ class VcsClientBase(object):
         return line
 
     def _find_executable(self, file_name):
-        for path in os.getenv('PATH').split(os.path.pathsep):
-            file_path = os.path.join(path, file_name)
-            if os.path.isfile(file_path):
-                return file_path
-        return None
+        try:
+            return shutil.which(file_name)
+        except AttributeError:
+            # fallback for Python < 3.3
+            for path in os.getenv('PATH').split(os.path.pathsep):
+                file_path = os.path.join(path, file_name)
+                if os.path.isfile(file_path):
+                    return file_path
+            return None
 
     def _run_command(self, cmd, env=None):
         cwd = os.path.abspath(self.path)
@@ -348,7 +352,6 @@ def get_vcs_client(base_path):
     client_types = [c.type for c in vcs_clients]
     if len(client_types) != len(set(client_types)):
         raise RuntimeError('Multiple vcs clients share the same type: %s' % ', '.join(sorted(client_types)))
-
     for vcs_client in vcs_clients:
         if os.path.exists(os.path.join(base_path, '.%s' % vcs_client.type)):
             return vcs_client(base_path)

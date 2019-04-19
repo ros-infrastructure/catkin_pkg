@@ -197,7 +197,7 @@ def get_version_section_match(data, version):
 def get_version_section_pattern(version):
     valid_section_characters = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
     headline = get_version_headline(version, None)
-    pattern = '^(' + re.escape(headline) + '( \([0-9 \-:|+]+\))?)\n([' + re.escape(valid_section_characters) + ']+)\n?$'
+    pattern = '^(' + re.escape(headline) + '( \([0-9 \-:|+]+\))?)\r?\n([' + re.escape(valid_section_characters) + ']+)\r?\n?$'
     return pattern
 
 
