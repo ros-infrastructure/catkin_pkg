@@ -18,7 +18,7 @@ from catkin_pkg.workspace_vcs import get_repository_type, vcs_remotes
 try:
     from shutil import which
 except ImportError:
-    # fallback for python < 3.3
+    # fallback for Python < 3.3
     def which(exe):
         for path in os.getenv('PATH').split(os.path.pathsep):
             file_path = os.path.join(path, exe)
