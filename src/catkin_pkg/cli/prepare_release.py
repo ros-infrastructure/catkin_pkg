@@ -16,6 +16,17 @@ from catkin_pkg.terminal_color import disable_ANSI_colors, fmt
 from catkin_pkg.workspace_vcs import get_repository_type, vcs_remotes
 
 try:
+    from shutil import which
+except ImportError:
+    # fallback for python < 3.3
+    def which(exe):
+        for path in os.getenv('PATH').split(os.path.pathsep):
+            file_path = os.path.join(path, exe)
+            if os.path.isfile(file_path):
+                return file_path
+        return None
+
+try:
     raw_input
 except NameError:
     raw_input = input  # noqa: A001
@@ -191,18 +202,6 @@ def push_changes(base_path, vcs_type, tag_name, dry_run=False):
                 raise RuntimeError(fmt('@{rf}Failed to push tag to the repository: %s\n\nYou need to manually push the new tag to the repository.' % str(e)))
 
     return commands
-
-
-try:
-    from shutil import which
-except ImportError:
-    # fallback for python < 3.3
-    def which(exe):
-        for path in os.getenv('PATH').split(os.path.pathsep):
-            file_path = os.path.join(path, exe)
-            if os.path.isfile(file_path):
-                return file_path
-        return None
 
 
 def _find_executable(vcs_type):
