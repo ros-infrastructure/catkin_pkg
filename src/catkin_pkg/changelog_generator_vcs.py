@@ -40,6 +40,18 @@ import subprocess
 import tempfile
 
 
+try:
+    from shutil import which
+except ImportError:
+    # fallback for Python < 3.3
+    def which(cmd):
+        for path in os.getenv('PATH').split(os.path.pathsep):
+            file_path = os.path.join(path, cmd)
+            if os.path.isfile(file_path):
+                return file_path
+        return None
+
+
 class Tag(object):
 
     def __init__(self, name, timestamp=None):
@@ -63,18 +75,6 @@ class LogEntry(object):
             if apath.startswith(os.path.join(path, '')):
                 return True
         return False
-
-
-try:
-    from shutil import which
-except ImportError:
-    # fallback for python < 3.3
-    def which(cmd):
-        for path in os.getenv('PATH').split(os.path.pathsep):
-            file_path = os.path.join(path, cmd)
-            if os.path.isfile(file_path):
-                return file_path
-        return None
 
 
 class VcsClientBase(object):
