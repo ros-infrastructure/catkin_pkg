@@ -16,6 +16,17 @@ from catkin_pkg.terminal_color import disable_ANSI_colors, fmt
 from catkin_pkg.workspace_vcs import get_repository_type, vcs_remotes
 
 try:
+    from shutil import which
+except ImportError:
+    # fallback for Python < 3.3
+    def which(exe):
+        for path in os.getenv('PATH').split(os.path.pathsep):
+            file_path = os.path.join(path, exe)
+            if os.path.isfile(file_path):
+                return file_path
+        return None
+
+try:
     raw_input
 except NameError:
     raw_input = input  # noqa: A001
@@ -194,11 +205,10 @@ def push_changes(base_path, vcs_type, tag_name, dry_run=False):
 
 
 def _find_executable(vcs_type):
-    for path in os.getenv('PATH').split(os.path.pathsep):
-        file_path = os.path.join(path, vcs_type)
-        if os.path.isfile(file_path):
-            return file_path
-    raise RuntimeError(fmt('@{rf}Could not find vcs binary: %s' % vcs_type))
+    file_path = which(vcs_type)
+    if file_path is None:
+        raise RuntimeError(fmt('@{rf}Could not find vcs binary: %s' % vcs_type))
+    return file_path
 
 
 def main():

@@ -40,6 +40,18 @@ import subprocess
 import tempfile
 
 
+try:
+    from shutil import which
+except ImportError:
+    # fallback for Python < 3.3
+    def which(cmd):
+        for path in os.getenv('PATH').split(os.path.pathsep):
+            file_path = os.path.join(path, cmd)
+            if os.path.isfile(file_path):
+                return file_path
+        return None
+
+
 class Tag(object):
 
     def __init__(self, name, timestamp=None):
@@ -82,13 +94,6 @@ class VcsClientBase(object):
     def replace_repository_references(self, line):
         return line
 
-    def _find_executable(self, file_name):
-        for path in os.getenv('PATH').split(os.path.pathsep):
-            file_path = os.path.join(path, file_name)
-            if os.path.isfile(file_path):
-                return file_path
-        return None
-
     def _run_command(self, cmd, env=None):
         cwd = os.path.abspath(self.path)
         result = {'cmd': ' '.join(cmd), 'cwd': cwd}
@@ -130,7 +135,7 @@ class GitClient(VcsClientBase):
 
     def __init__(self, path):
         super(GitClient, self).__init__(path)
-        self._executable = self._find_executable('git')
+        self._executable = which('git')
         self._repo_hosting = None
         self._github_base_url = 'https://github.com/'
         self._github_path = None
@@ -259,7 +264,7 @@ class HgClient(VcsClientBase):
 
     def __init__(self, path):
         super(HgClient, self).__init__(path)
-        self._executable = self._find_executable('hg')
+        self._executable = which('hg')
 
     # query author
     def _get_author(self, hash_):
