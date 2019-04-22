@@ -209,7 +209,7 @@ def _find_executable(vcs_type):
     if file_path is None:
         raise RuntimeError(fmt('@{rf}Could not find vcs binary: %s' % vcs_type))
     return file_path
-    
+
 
 def main():
     try:
