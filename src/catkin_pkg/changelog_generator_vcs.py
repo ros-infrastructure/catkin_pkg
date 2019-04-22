@@ -353,7 +353,7 @@ def get_vcs_client(base_path):
     client_types = [c.type for c in vcs_clients]
     if len(client_types) != len(set(client_types)):
         raise RuntimeError('Multiple vcs clients share the same type: %s' % ', '.join(sorted(client_types)))
-    
+
     for vcs_client in vcs_clients:
         if os.path.exists(os.path.join(base_path, '.%s' % vcs_client.type)):
             return vcs_client(base_path)
