@@ -176,5 +176,5 @@ def verify_equal_package_versions(packages):
         if version is None:
             version = package.version
         elif package.version != version:
-            raise RuntimeError('Two packages have different version numbers (%s != %s):\n- %s\n- %s' % (package.version, version, package.filename, packages[0].filename))
+            raise RuntimeError('Two packages have different version numbers (%s != %s):\n- %s\n- %s' % (package.version, version, package.filename, list(packages)[0].filename))
     return version
