@@ -172,11 +172,9 @@ def verify_equal_package_versions(packages):
     :raises: :exc:RuntimeError` If the version is not equal in all packages
     """
     version = None
-    filename = None
     for package in packages:
         if version is None:
             version = package.version
-            filename = package.filename
         elif package.version != version:
-            raise RuntimeError('Two packages have different version numbers (%s != %s):\n- %s\n- %s' % (package.version, version, package.filename, filename))
+            raise RuntimeError('Two packages have different version numbers (%s != %s):\n- %s\n- %s' % (package.version, version, package.filename, list(packages)[0].filename))
     return version
