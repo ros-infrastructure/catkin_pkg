@@ -75,6 +75,13 @@ def order_paths(paths_to_order, prefix_paths):
     :param paths_to_order: list of paths
     :param prefix_paths: list of prefixes, must not end with '/'
     """
+    def contains(prefix, path):
+        prefix = os.path.realpath(prefix)
+        path = os.path.realpath(path)
+        return (path == prefix
+                or path.startswith(prefix + os.sep)
+                or (os.altsep and path.startswith(prefix + os.altsep)))
+
     # the ordered paths contains a list for each prefix plus one more which contains paths which do not match one of the prefix_paths
     ordered_paths = [[] for _ in range(len(prefix_paths) + 1)]
 
@@ -82,7 +89,7 @@ def order_paths(paths_to_order, prefix_paths):
         # put each directory into the slot where it matches the prefix, or last otherwise
         index = 0
         for prefix in prefix_paths:
-            if path == prefix or path.startswith(prefix + os.sep) or (os.altsep and path.startswith(prefix + os.altsep)):
+            if contains(prefix, path):
                 break
             index += 1
         ordered_paths[index].append(path)
