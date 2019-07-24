@@ -262,25 +262,25 @@ def _main():
         raise RuntimeError(fmt('@{rf}No packages found'))
     print('Found packages: %s' % ', '.join([fmt('@{bf}@{boldon}%s@{boldoff}@{reset}' % p.name) for p in packages.values()]))
 
-    # complain about packages with non-catkin build_type as they might require additional steps before being released
+    # complain about packages with unsupported build_type as they might require additional steps before being released
     # complain about packages with upper case character since they won't be releasable with bloom
-    non_catkin_pkg_names = []
+    unsupported_pkg_names = []
     invalid_pkg_names = []
     for package in packages.values():
         build_types = [export.content for export in package.exports if export.tagname == 'build_type']
         build_type = build_types[0] if build_types else 'catkin'
-        if build_type != 'catkin':
-            non_catkin_pkg_names.append(package.name)
+        if build_type not in ('catkin', 'ament_cmake'):
+            unsupported_pkg_names.append(package.name)
         if package.name != package.name.lower():
             invalid_pkg_names.append(package.name)
-    if non_catkin_pkg_names:
+    if unsupported_pkg_names:
         print(
             fmt(
-                "@{yf}Warning: the following package are not of build_type catkin and may require manual steps to release': %s" %
-                ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(non_catkin_pkg_names)])
+                "@{yf}Warning: the following package are not of build_type catkin or ament_cmake and may require manual steps to release': %s" %
+                ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(unsupported_pkg_names)])
             ), file=sys.stderr)
         if not args.non_interactive and not prompt_continue('Continue anyway', default=False):
-            raise RuntimeError(fmt('@{rf}Aborted release, verify that non-catkin packages are ready to be released or release manually.'))
+            raise RuntimeError(fmt('@{rf}Aborted release, verify that unsupported packages are ready to be released or release manually.'))
     if invalid_pkg_names:
         print(
             fmt(
