@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import os
 import shutil
-import sys
 import tempfile
 import unittest
 
@@ -43,14 +42,16 @@ class WorkspacesTest(unittest.TestCase):
         self.assertEqual(['baz', 'foo', 'bar'], order_paths(['bar', 'foo', 'baz'], ['baz', 'foo']))
         self.assertEqual(['foo' + os.sep + 'bim', 'bar'], order_paths(['bar', 'foo' + os.sep + 'bim'], ['foo']))
 
-    @unittest.skipUnless(sys.platform.startswith('linux'), 'requires Unix')
     def test_order_paths_with_symlink(self):
         try:
             root_dir = tempfile.mkdtemp()
             foo = os.path.join(root_dir, 'foo')
             foo_inc = os.path.join(root_dir, 'foo/include')
             foo_ln = os.path.join(root_dir, 'foo_symlink')
-            os.symlink(foo, foo_ln)
+            try:
+                os.symlink(foo, foo_ln)
+            except (AttributeError, OSError):
+                self.skipTest('requires symlink availability')
 
             self.assertEqual([foo, 'bar'], order_paths(['bar', foo], [foo_ln]))
             self.assertEqual([foo_ln, 'bar'], order_paths(['bar', foo_ln], [foo]))
