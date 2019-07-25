@@ -46,7 +46,7 @@ class WorkspacesTest(unittest.TestCase):
         root_dir = tempfile.mkdtemp()
         try:
             foo = os.path.join(root_dir, 'foo')
-            foo_inc = os.path.join(root_dir, 'foo/include')
+            foo_inc = os.path.join(foo, 'include')
             foo_ln = os.path.join(root_dir, 'foo_symlink')
             try:
                 os.symlink(foo, foo_ln)
