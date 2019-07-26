@@ -82,13 +82,19 @@ def order_paths(paths_to_order, prefix_paths):
         # put each directory into the slot where it matches the prefix, or last otherwise
         index = 0
         for prefix in prefix_paths:
-            if path == prefix or path.startswith(prefix + os.sep) or (os.altsep and path.startswith(prefix + os.altsep)):
+            if _is_equal_or_in_parents(prefix, path):
                 break
             index += 1
         ordered_paths[index].append(path)
 
     # flatten list of lists
     return [j for i in ordered_paths for j in i]
+
+
+def _is_equal_or_in_parents(dir_, path):
+    dir_ = os.path.normcase(os.path.realpath(dir_))
+    path = os.path.normcase(os.path.realpath(path))
+    return path == dir_ or path.startswith(dir_ + os.sep)
 
 
 def ensure_workspace_marker(base_path):
