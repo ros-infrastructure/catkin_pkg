@@ -138,7 +138,7 @@ class Package(object):
         :returns: True if the given package buildtool depends on catkin
         :rtype: bool
         """
-        return 'catkin' in [d.name for d in self.buildtool_depends]
+        return 'catkin' in (d.name for d in self.buildtool_depends)
 
     def get_build_type(self):
         """
@@ -178,7 +178,7 @@ class Package(object):
         :returns: True if metapackage, else False
         :rtype: bool
         """
-        return 'metapackage' in [e.tagname for e in self.exports]
+        return 'metapackage' in (e.tagname for e in self.exports)
 
     def evaluate_conditions(self, context):
         """

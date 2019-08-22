@@ -58,5 +58,5 @@ class GroupDependency:
         for pkg in packages:
             for g in pkg.member_of_groups:
                 assert g.evaluated_condition is not None
-            if self.name in [g.name for g in pkg.member_of_groups if g.evaluated_condition]:
+            if self.name in (g.name for g in pkg.member_of_groups if g.evaluated_condition):
                 self.members.add(pkg.name)
