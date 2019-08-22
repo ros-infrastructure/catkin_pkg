@@ -45,7 +45,7 @@ class _PackageDecorator(object):
     def __init__(self, package, path):
         self.package = package
         self.path = path
-        self.is_metapackage = 'metapackage' in [e.tagname for e in self.package.exports]
+        self.is_metapackage = 'metapackage' in (e.tagname for e in self.package.exports)
         message_generators = [e.content for e in self.package.exports if e.tagname == 'message_generator']
         self.message_generator = message_generators[0] if message_generators else None
         # full includes direct build depends and recursive run_depends of these build_depends
