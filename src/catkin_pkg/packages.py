@@ -33,7 +33,8 @@
 """Library to find packages in the filesystem."""
 
 import multiprocessing
-import os, sys
+import os
+import sys
 
 from .package import _get_package_xml
 from .package import PACKAGE_MANIFEST_FILENAME
