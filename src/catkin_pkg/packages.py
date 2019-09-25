@@ -33,7 +33,7 @@
 """Library to find packages in the filesystem."""
 
 import multiprocessing
-import os
+import os, sys
 
 from .package import _get_package_xml
 from .package import PACKAGE_MANIFEST_FILENAME
@@ -134,6 +134,11 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
         return {}
 
     parallel = len(data) > 100
+    if sys.platform == "win32":
+        # Windows has path limitations which catkin overflows in nested environments
+        # https://devblogs.microsoft.com/oldnewthing/20100203-00/?p=15083
+        parallel = False
+
     if parallel:
         try:
             pool = multiprocessing.Pool()
