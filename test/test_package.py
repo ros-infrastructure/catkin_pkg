@@ -13,10 +13,10 @@ from catkin_pkg.package import (
     InvalidPackage,
     License,
     Package,
-    ros_xml_schema,
     parse_package,
     parse_package_string,
     Person,
+    check_xml_schema_link,
 )
 
 from mock import Mock
@@ -340,18 +340,18 @@ class PackageTest(unittest.TestCase):
             assert isinstance(xml, bytes)
         parse_package_string(xml)
 
-    def test_ros_xml_schema(self):
+    def test_check_xml_schema_link(self):
         invalid_schema_file = os.path.join(test_data_dir, 'schema', 'invalid_schema.xml')
-        self.assertFalse(ros_xml_schema(invalid_schema_file))
+        self.assertFalse(check_xml_schema_link(invalid_schema_file))
 
         no_schema_file = os.path.join(test_data_dir, 'schema', 'no_schema.xml')
-        self.assertFalse(ros_xml_schema(no_schema_file))
+        self.assertFalse(check_xml_schema_link(no_schema_file))
 
         valid_schema_1_file = os.path.join(test_data_dir, 'schema', 'valid_schema_1.xml')
-        self.assertTrue(ros_xml_schema(valid_schema_1_file))
+        self.assertTrue(check_xml_schema_link(valid_schema_1_file))
 
         valid_schema_2_file = os.path.join(test_data_dir, 'schema', 'valid_schema_2.xml')
-        self.assertTrue(ros_xml_schema(valid_schema_2_file))
+        self.assertTrue(check_xml_schema_link(valid_schema_2_file))
 
         valid_schema_3_file = os.path.join(test_data_dir, 'schema', 'valid_schema_3.xml')
-        self.assertTrue(ros_xml_schema(valid_schema_3_file))
+        self.assertTrue(check_xml_schema_link(valid_schema_3_file))

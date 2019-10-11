@@ -501,7 +501,7 @@ def _get_package_xml(path):
         return f.read(), filename
 
 
-def ros_xml_schema(path):
+def check_xml_schema_link(path):
     """
     Checks whether a link to an ROS package schema exists for the given package manifest.
 
@@ -519,10 +519,10 @@ def ros_xml_schema(path):
 
     for child in childs:
         if child.nodeType == child.PROCESSING_INSTRUCTION_NODE:
-            if "xml-model" == child.target:
+            if 'xml-model' == child.target:
 
                 # extract schema url from "xml-model" processing instruction
-                schema_url = re.search("href=\"([A-Za-z0-9\._/:]*)\"", child.data).group(1)
+                schema_url = re.search('href=\"([A-Za-z0-9\._/:]*)\"', child.data).group(1)
                 if schema_url in PACKAGE_MANIFEST_SCHEMA_URLS:
                     return True
 
