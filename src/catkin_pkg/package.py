@@ -43,6 +43,10 @@ import xml.dom.minidom as dom
 from catkin_pkg.condition import evaluate_condition
 
 PACKAGE_MANIFEST_FILENAME = 'package.xml'
+PACKAGE_MANIFEST_SCHEMA_URLS = ['http://download.ros.org/schema/package_format1.xsd',
+                                'http://download.ros.org/schema/package_format2.xsd',
+                                'http://download.ros.org/schema/package_format3.xsd']
+
 
 
 class Package(object):
@@ -496,6 +500,35 @@ def _get_package_xml(path):
 
     with open(filename, 'r', **kwargs) as f:
         return f.read(), filename
+
+
+def ros_xml_schema(path):
+    """
+    Checks whether a link to an ROS package schema exists for the given package manifest.
+
+    :param path: The path of the package.xml file, it may or may not
+        include the filename
+    :type path: str
+    :returns: True if link to an ROS package schema exists, else False
+    :rtype: bool
+    :raises: :exc:`IOError`
+    """
+    xml, _ = _get_package_xml(path)
+
+    root = dom.parseString(xml)
+    childs = root.childNodes
+
+    for child in childs:
+        if child.nodeType == child.PROCESSING_INSTRUCTION_NODE:
+            if "xml-model" == child.target:
+
+                # extract schema url from "xml-model" processing instruction
+                schema_url = re.search("href=\"([A-Za-z0-9\._/:]*)\"", child.data).group(1)
+                if schema_url in PACKAGE_MANIFEST_SCHEMA_URLS:
+                    return True
+
+    return False
+
 
 
 def parse_package(path, warnings=None):
