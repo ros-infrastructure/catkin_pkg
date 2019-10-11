@@ -342,13 +342,16 @@ class PackageTest(unittest.TestCase):
 
     def test_ros_xml_schema(self):
         invalid_schema_file = os.path.join(test_data_dir, 'schema', 'invalid_schema.xml')
-        assert ros_xml_schema(invalid_schema_file) == False
-        no_schema_file = os.path.join(test_data_dir, 'schema', 'no_schema.xml')
-        assert ros_xml_schema(no_schema_file) == False
-        valid_schema_1_file = os.path.join(test_data_dir, 'schema', 'valid_schema_1.xml')
-        assert ros_xml_schema(valid_schema_1_file) == True
-        valid_schema_2_file = os.path.join(test_data_dir, 'schema', 'valid_schema_2.xml')
-        assert ros_xml_schema(valid_schema_2_file) == True
-        valid_schema_3_file = os.path.join(test_data_dir, 'schema', 'valid_schema_3.xml')
-        assert ros_xml_schema(valid_schema_3_file) == True
+        self.assertFalse(ros_xml_schema(invalid_schema_file))
 
+        no_schema_file = os.path.join(test_data_dir, 'schema', 'no_schema.xml')
+        self.assertFalse(ros_xml_schema(no_schema_file))
+
+        valid_schema_1_file = os.path.join(test_data_dir, 'schema', 'valid_schema_1.xml')
+        self.assertTrue(ros_xml_schema(valid_schema_1_file))
+
+        valid_schema_2_file = os.path.join(test_data_dir, 'schema', 'valid_schema_2.xml')
+        self.assertTrue(ros_xml_schema(valid_schema_2_file))
+
+        valid_schema_3_file = os.path.join(test_data_dir, 'schema', 'valid_schema_3.xml')
+        self.assertTrue(ros_xml_schema(valid_schema_3_file))

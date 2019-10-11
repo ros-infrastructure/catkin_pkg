@@ -48,7 +48,6 @@ PACKAGE_MANIFEST_SCHEMA_URLS = ['http://download.ros.org/schema/package_format1.
                                 'http://download.ros.org/schema/package_format3.xsd']
 
 
-
 class Package(object):
     """Object representation of a package manifest file."""
 
@@ -528,7 +527,6 @@ def ros_xml_schema(path):
                     return True
 
     return False
-
 
 
 def parse_package(path, warnings=None):
