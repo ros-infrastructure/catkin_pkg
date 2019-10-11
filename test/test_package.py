@@ -8,6 +8,7 @@ import xml.dom.minidom as dom
 from catkin_pkg.package import (
     _check_known_attributes,
     _get_package_xml,
+    check_xml_schema_link,
     Dependency,
     Export,
     InvalidPackage,
@@ -16,7 +17,6 @@ from catkin_pkg.package import (
     parse_package,
     parse_package_string,
     Person,
-    check_xml_schema_link,
 )
 
 from mock import Mock
