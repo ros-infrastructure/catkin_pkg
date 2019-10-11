@@ -503,7 +503,7 @@ def _get_package_xml(path):
 
 def check_xml_schema_link(path):
     """
-    Checks whether a link to an ROS package schema exists for the given package manifest.
+    Check whether a link to an ROS package schema exists for the given package manifest.
 
     :param path: The path of the package.xml file, it may or may not
         include the filename
