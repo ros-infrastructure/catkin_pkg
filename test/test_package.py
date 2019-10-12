@@ -8,9 +8,9 @@ import xml.dom.minidom as dom
 from catkin_pkg.package import (
     _check_known_attributes,
     _get_package_xml,
-    check_xml_schema_link,
     Dependency,
     Export,
+    has_ros_schema_reference_string,
     InvalidPackage,
     License,
     Package,
@@ -340,18 +340,25 @@ class PackageTest(unittest.TestCase):
             assert isinstance(xml, bytes)
         parse_package_string(xml)
 
-    def test_check_xml_schema_link(self):
-        invalid_schema_file = os.path.join(test_data_dir, 'schema', 'invalid_schema.xml')
-        self.assertFalse(check_xml_schema_link(invalid_schema_file))
-
-        no_schema_file = os.path.join(test_data_dir, 'schema', 'no_schema.xml')
-        self.assertFalse(check_xml_schema_link(no_schema_file))
-
-        valid_schema_1_file = os.path.join(test_data_dir, 'schema', 'valid_schema_1.xml')
-        self.assertTrue(check_xml_schema_link(valid_schema_1_file))
-
-        valid_schema_2_file = os.path.join(test_data_dir, 'schema', 'valid_schema_2.xml')
-        self.assertTrue(check_xml_schema_link(valid_schema_2_file))
-
-        valid_schema_3_file = os.path.join(test_data_dir, 'schema', 'valid_schema_3.xml')
-        self.assertTrue(check_xml_schema_link(valid_schema_3_file))
+    def test_has_ros_schema_reference_string(self):
+        self.assertFalse(
+            has_ros_schema_reference_string(
+                """\
+<?xml version="1.0"?>
+<?xml-model href="http://some.url/to/a_wrong_schema.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package/>
+"""))
+        self.assertFalse(
+            has_ros_schema_reference_string(
+                """\
+<?xml version="1.0"?>
+<package/>
+"""))
+        for format_version in (1, 2, 3):
+            self.assertTrue(
+                has_ros_schema_reference_string(
+                    """\
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format%d.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package/>
+""" % format_version))
