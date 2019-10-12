@@ -43,9 +43,11 @@ import xml.dom.minidom as dom
 from catkin_pkg.condition import evaluate_condition
 
 PACKAGE_MANIFEST_FILENAME = 'package.xml'
-PACKAGE_MANIFEST_SCHEMA_URLS = ['http://download.ros.org/schema/package_format1.xsd',
-                                'http://download.ros.org/schema/package_format2.xsd',
-                                'http://download.ros.org/schema/package_format3.xsd']
+PACKAGE_MANIFEST_SCHEMA_URLS = [
+    'http://download.ros.org/schema/package_format1.xsd',
+    'http://download.ros.org/schema/package_format2.xsd',
+    'http://download.ros.org/schema/package_format3.xsd',
+]
 
 
 class Package(object):
