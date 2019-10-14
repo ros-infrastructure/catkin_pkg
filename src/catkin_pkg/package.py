@@ -43,6 +43,11 @@ import xml.dom.minidom as dom
 from catkin_pkg.condition import evaluate_condition
 
 PACKAGE_MANIFEST_FILENAME = 'package.xml'
+PACKAGE_MANIFEST_SCHEMA_URLS = [
+    'http://download.ros.org/schema/package_format1.xsd',
+    'http://download.ros.org/schema/package_format2.xsd',
+    'http://download.ros.org/schema/package_format3.xsd',
+]
 
 
 class Package(object):
@@ -496,6 +501,49 @@ def _get_package_xml(path):
 
     with open(filename, 'r', **kwargs) as f:
         return f.read(), filename
+
+
+def has_ros_schema_reference(path):
+    """
+    Check if the XML file contains a processing instruction referencing a ROS package manifest schema.
+
+    :param path: The path of the package.xml file, it may or may not
+        include the filename
+    :type path: str
+    :returns: True if it contains the known reference, else False
+    :rtype: bool
+    :raises: :exc:`IOError`
+    """
+    xml, _ = _get_package_xml(path)
+    return has_ros_schema_reference_string(xml)
+
+
+def has_ros_schema_reference_string(data):
+    """
+    Check if the XML data contains a processing instruction referencing a ROS package manifest schema.
+
+    :param data: package.xml contents
+    :type data: str
+    :returns: True if it contains the known reference, else False
+    :rtype: bool
+    """
+    if sys.version_info[0] == 2 and not isinstance(data, str):
+        data = data.encode('utf-8')
+    try:
+        root = dom.parseString(data)
+    except Exception:
+        # invalid XML
+        return False
+
+    for child in root.childNodes:
+        if child.nodeType == child.PROCESSING_INSTRUCTION_NODE:
+            if child.target == 'xml-model':
+                # extract schema url from "xml-model" processing instruction
+                schema_url = re.search('href=\"([A-Za-z0-9\._/:]*)\"', child.data).group(1)
+                if schema_url in PACKAGE_MANIFEST_SCHEMA_URLS:
+                    return True
+
+    return False
 
 
 def parse_package(path, warnings=None):

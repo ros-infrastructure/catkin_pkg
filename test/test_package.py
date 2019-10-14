@@ -10,6 +10,7 @@ from catkin_pkg.package import (
     _get_package_xml,
     Dependency,
     Export,
+    has_ros_schema_reference_string,
     InvalidPackage,
     License,
     Package,
@@ -338,3 +339,26 @@ class PackageTest(unittest.TestCase):
             xml = xml.encode('utf-8')
             assert isinstance(xml, bytes)
         parse_package_string(xml)
+
+    def test_has_ros_schema_reference_string(self):
+        self.assertFalse(
+            has_ros_schema_reference_string(
+                """\
+<?xml version="1.0"?>
+<?xml-model href="http://some.url/to/a_wrong_schema.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package/>
+"""))
+        self.assertFalse(
+            has_ros_schema_reference_string(
+                """\
+<?xml version="1.0"?>
+<package/>
+"""))
+        for format_version in (1, 2, 3):
+            self.assertTrue(
+                has_ros_schema_reference_string(
+                    """\
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format%d.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package/>
+""" % format_version))
