@@ -346,6 +346,14 @@ class Dependency(object):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        kv = []
+        for slot in self.__slots__:
+            attr = getattr(self, slot, None)
+            if attr:
+                kv.append('{}={!r}'.format(slot, attr))
+        return '{}({})'.format(self.__class__.__name__, ', '.join(kv))
+
     def evaluate_condition(self, context):
         """
         Evaluate the condition.
