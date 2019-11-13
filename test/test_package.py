@@ -123,8 +123,6 @@ class PackageTest(unittest.TestCase):
         assert repr(dep) == "Dependency(name='foo', condition='$foo == 2')"
         self.assertTrue(dep.evaluate_condition({'foo': 2}))
         assert repr(dep) == "Dependency(name='foo', condition='$foo == 2', evaluated_condition=True)"
-
-        dep = Dependency('foo', condition='$foo == 2')
         self.assertFalse(dep.evaluate_condition({'foo': 3}))
         assert repr(dep) == "Dependency(name='foo', condition='$foo == 2', evaluated_condition=False)"
 
