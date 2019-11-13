@@ -350,7 +350,7 @@ class Dependency(object):
         kv = []
         for slot in self.__slots__:
             attr = getattr(self, slot, None)
-            if attr:
+            if attr is not None:
                 kv.append('{}={!r}'.format(slot, attr))
         return '{}({})'.format(self.__class__.__name__, ', '.join(kv))
 
