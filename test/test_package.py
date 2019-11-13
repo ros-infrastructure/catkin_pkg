@@ -118,6 +118,16 @@ class PackageTest(unittest.TestCase):
         dep = Dependency('foo', condition='foo <= bar or bar >= baz')
         self.assertFalse(dep.evaluate_condition({}))
 
+    def test_dependency_repr(self):
+        dep = Dependency('foo', condition='$foo == 2')
+        assert repr(dep) == "Dependency(name='foo', condition='$foo == 2')"
+        self.assertTrue(dep.evaluate_condition({'foo': 2}))
+        assert repr(dep) == "Dependency(name='foo', condition='$foo == 2', evaluated_condition=True)"
+
+        dep = Dependency('foo', condition='$foo == 2')
+        self.assertFalse(dep.evaluate_condition({'foo': 3}))
+        assert repr(dep) == "Dependency(name='foo', condition='$foo == 2', evaluated_condition=False)"
+
     def test_init_kwargs_string(self):
         pack = Package('foo',
                        name='bar',
