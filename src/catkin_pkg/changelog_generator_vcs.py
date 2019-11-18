@@ -155,7 +155,7 @@ class GitClient(VcsClientBase):
         if result_tag['returncode']:
             raise RuntimeError('Could not fetch tags:\n%s' % result_tag['output'])
         # Parse a comma-separated list of refname decorators out of the log
-        decorations = ', '.join(re.findall('^[a-f0-9]+ \(([^)]*)\) .', result_tag['output'], re.MULTILINE)) + ','
+        decorations = ', '.join(re.findall(r'^[a-f0-9]+ \(([^)]*)\) .', result_tag['output'], re.MULTILINE)) + ','
         # Extract only refnames that are tags
         tag_names = re.findall('tag: ([^,]+)[,]', decorations)
 
@@ -240,7 +240,7 @@ class GitClient(VcsClientBase):
                 break
 
     def _replace_github_issue_references(self, line):
-        valid_name = '[\\w\._-]+'
+        valid_name = '[\\w._-]+'
         issue_pattern = '#(\\d+)'
 
         def replace_issue_number(match):

@@ -53,7 +53,7 @@ def bump_version(version, bump='patch'):
     :raises ValueError: if the version string is not in the format x.y.z
     """
     # split the version number
-    match = re.match('^(\d+)\.(\d+)\.(\d+)$', version)
+    match = re.match(r'^(\d+)\.(\d+)\.(\d+)$', version)
     if match is None:
         raise ValueError('Invalid version string, must be int.int.int: "%s"' % version)
     new_version = match.groups()
@@ -78,7 +78,7 @@ def _replace_version(package_str, new_version):
     :raises RuntimeError:
     """
     # try to replace contens
-    new_package_str, number_of_subs = re.subn('<version([^<>]*)>[^<>]*</version>', '<version\g<1>>%s</version>' % new_version, package_str)
+    new_package_str, number_of_subs = re.subn('<version([^<>]*)>[^<>]*</version>', r'<version\g<1>>%s</version>' % new_version, package_str)
     if number_of_subs != 1:
         raise RuntimeError('Illegal number of version tags: %s' % (number_of_subs))
     return new_package_str
