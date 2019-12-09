@@ -8,7 +8,9 @@ python:
   - "3.6"
 # command to install dependencies
 install:
-  - pip install nose coverage argparse python-dateutil docutils pyparsing
+  # newer versions of docutils dropped support for Python 3.4
+  - if [ $TRAVIS_PYTHON_VERSION == "3.4" ]; then pip install docutils==0.15.2; else pip install docutils; fi
+  - pip install nose coverage argparse python-dateutil pyparsing
   - pip install flake8 flake8-blind-except flake8-builtins flake8-class-newline flake8-comprehensions flake8-deprecated flake8-docstrings flake8-import-order flake8-quotes
 # command to run tests
 script:
