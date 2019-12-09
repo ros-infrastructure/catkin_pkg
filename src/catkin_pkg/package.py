@@ -237,12 +237,12 @@ class Package(object):
                     'Package name "%s" does not follow the naming conventions. It should start with '
                     'a lower case letter and only contain lower case letters, digits, underscores, and dashes.' % self.name)
 
-        version_regexp = '^[0-9]+\.[0-9]+\.[0-9]+$'
+        version_regexp = r'^[0-9]+\.[0-9]+\.[0-9]+$'
         if not self.version:
             errors.append('Package version must not be empty')
         elif not re.match(version_regexp, self.version):
             errors.append('Package version "%s" does not follow version conventions' % self.version)
-        elif not re.match('^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$', self.version):
+        elif not re.match(r'^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$', self.version):
             new_warnings.append('Package "%s" does not follow the version conventions. It should not contain leading zeros (unless the number is 0).' % self.name)
         if self.version_compatibility:
             if not re.match(version_regexp, self.version_compatibility):
@@ -433,7 +433,7 @@ class Person(object):
     def validate(self):
         if self.email is None:
             return
-        if not re.match('^[-a-zA-Z0-9_%+]+(\.[-a-zA-Z0-9_%+]+)*@[-a-zA-Z0-9%]+(\.[-a-zA-Z0-9%]+)*\.[a-zA-Z]{2,}$', self.email):
+        if not re.match(r'^[-a-zA-Z0-9_%+]+(\.[-a-zA-Z0-9_%+]+)*@[-a-zA-Z0-9%]+(\.[-a-zA-Z0-9%]+)*\.[a-zA-Z]{2,}$', self.email):
             raise InvalidPackage('Invalid email "%s" for person "%s"' % (self.email, self.name))
 
 
@@ -547,7 +547,7 @@ def has_ros_schema_reference_string(data):
         if child.nodeType == child.PROCESSING_INSTRUCTION_NODE:
             if child.target == 'xml-model':
                 # extract schema url from "xml-model" processing instruction
-                schema_url = re.search('href=\"([A-Za-z0-9\._/:]*)\"', child.data).group(1)
+                schema_url = re.search(r'href="([A-Za-z0-9\._/:]*)"', child.data).group(1)
                 if schema_url in PACKAGE_MANIFEST_SCHEMA_URLS:
                     return True
 

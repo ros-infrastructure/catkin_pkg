@@ -77,4 +77,4 @@ def configure_string(template, environment):
     def substitute(match):
         var = match.group(0)[1:-1]
         return environment[var]
-    return re.sub('\@[a-zA-Z0-9_]+\@', substitute, template)
+    return re.sub('@[a-zA-Z0-9_]+@', substitute, template)

@@ -197,7 +197,7 @@ def get_version_section_match(data, version):
 def get_version_section_pattern(version):
     valid_section_characters = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
     headline = get_version_headline(version, None)
-    pattern = '^(' + re.escape(headline) + '( \([0-9 \-:|+]+\))?)\r?\n([' + re.escape(valid_section_characters) + ']+)\r?\n?$'
+    pattern = '^(' + re.escape(headline) + r'( \([0-9 \-:|+]+\))?)\r?\n([' + re.escape(valid_section_characters) + ']+)\r?\n?$'
     return pattern
 
 
@@ -277,7 +277,7 @@ def generate_version_content(log_entries, vcs_client=None, skip_contributors=Fal
 
 def escape_trailing_underscores(line):
     if line.endswith('_'):
-        line = line[:-1] + '\_'
+        line = line[:-1] + r'\_'
     # match words ending with an underscore which are not followed by another word
     # and insert a backslash before the underscore to escape it
     line = re.sub(r'(\w+)_([^\w])', '\\1\\_\\2', line)
