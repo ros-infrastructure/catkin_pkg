@@ -40,6 +40,7 @@ Reference: http://ros.org/reps/rep-0127.html#metapackage
 from __future__ import print_function
 
 import os
+import re
 
 from catkin_pkg.cmake import configure_file
 from catkin_pkg.cmake import get_metapackage_cmake_template_path
@@ -119,7 +120,13 @@ def has_valid_cmakelists_txt(path, metapackage_name):
     """
     cmakelists_txt = get_cmakelists_txt(path)
     expected = get_expected_cmakelists_txt(metapackage_name)
-    return cmakelists_txt == expected
+    prefix, suffix = expected.split('2.8.3', 1)
+    if not cmakelists_txt.startswith(prefix):
+        return False
+    if not cmakelists_txt.endswith(suffix):
+        return False
+    version = cmakelists_txt[len(prefix):-len(suffix)]
+    return re.match(r'^\d+\.\d+\.\d+$', version)
 
 
 def validate_metapackage(path, package):
@@ -147,12 +154,14 @@ def validate_metapackage(path, package):
         raise InvalidMetapackage('No CMakeLists.txt', path, package)
     # Is the CMakeLists.txt correct, else raise
     if not has_valid_cmakelists_txt(path, package.name):
+        expected = get_expected_cmakelists_txt(package.name)
+        expected = expected.replace('2.8.3', '<version x.y.z>')
         raise InvalidMetapackage("""\
 Invalid CMakeLists.txt
 Expected:
 <<<%s>>>
 Got:
-<<<%s>>>""" % (get_expected_cmakelists_txt(package.name), get_cmakelists_txt(path)), path, package
+<<<%s>>>""" % (expected, get_cmakelists_txt(path)), path, package
         )
     # Does it buildtool depend on catkin, else raise
     if not package.has_buildtool_depend_on_catkin():
