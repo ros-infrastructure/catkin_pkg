@@ -264,7 +264,7 @@ def generate_version_content(log_entries, vcs_client=None, skip_contributors=Fal
         msg = entry.msg
         lines = msg.splitlines()
         lines = [l.strip() for l in lines]
-        lines = [l for l in lines if l]
+        lines = [l for l in lines if l and not l.startswith('Signed-off-by:')]
         lines = [escape_trailing_underscores(l) for l in lines]
         data += '* %s\n' % (replace_repository_references(lines[0], vcs_client=vcs_client) if lines else '')
         for line in lines[1:]:
