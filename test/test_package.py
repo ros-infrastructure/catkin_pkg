@@ -118,6 +118,31 @@ class PackageTest(unittest.TestCase):
         dep = Dependency('foo', condition='foo <= bar or bar >= baz')
         self.assertFalse(dep.evaluate_condition({}))
 
+        # Testing for more than 1 conditions
+        dep = Dependency('foo', condition='foo > bar and bar < baz and foo > bar')
+        self.assertTrue(dep.evaluate_condition({}))
+
+        dep = Dependency('foo', condition='foo <= bar and bar >= baz and foo > bar')
+        self.assertFalse(dep.evaluate_condition({}))
+
+        dep = Dependency('foo', condition='foo > bar or bar < baz or foo <= bar')
+        self.assertTrue(dep.evaluate_condition({}))
+
+        dep = Dependency('foo', condition='foo <= bar or bar >= baz or foo <= bar')
+        self.assertFalse(dep.evaluate_condition({}))
+
+        dep = Dependency('foo', condition='foo <= bar and bar < baz or foo > bar')
+        self.assertTrue(dep.evaluate_condition({}))
+
+        dep = Dependency('foo', condition='foo <= bar or bar < baz and foo < bar')
+        self.assertFalse(dep.evaluate_condition({}))
+
+        dep = Dependency('foo', condition='foo > bar and bar >= baz or foo > bar')
+        self.assertTrue(dep.evaluate_condition({}))
+
+        dep = Dependency('foo', condition='foo <= bar or bar >= baz and foo < bar')
+        self.assertFalse(dep.evaluate_condition({}))
+
     def test_dependency_repr(self):
         dep = Dependency('foo', condition='$foo == 2')
         assert repr(dep) == "Dependency(name='foo', condition='$foo == 2')"

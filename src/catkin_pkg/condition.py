@@ -57,16 +57,18 @@ def _evaluate(parse_results, context):
         # return literal value
         return parse_results
 
+    assert len(parse_results) >= 3 and len(parse_results) % 2 == 1
     # recursion
-    assert len(parse_results) == 3
 
     # handle logical operators
     if parse_results[1] == 'and':
         return _evaluate(parse_results[0], context) and \
-            _evaluate(parse_results[2], context)
+            _evaluate(parse_results[2] if len(parse_results) == 3
+                      else parse_results[2:], context)
     if parse_results[1] == 'or':
         return _evaluate(parse_results[0], context) or \
-            _evaluate(parse_results[2], context)
+            _evaluate(parse_results[2] if len(parse_results) == 3
+                      else parse_results[2:], context)
 
     # handle comparison operators
     operators = {
