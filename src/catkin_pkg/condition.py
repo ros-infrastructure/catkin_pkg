@@ -57,8 +57,8 @@ def _evaluate(parse_results, context):
         # return literal value
         return parse_results
 
-    assert len(parse_results) >= 3 and len(parse_results) % 2 == 1
     # recursion
+    assert len(parse_results) >= 3 and len(parse_results) % 2 == 1
 
     # handle logical operators
     if parse_results[1] == 'and':
