@@ -71,6 +71,7 @@ def _evaluate(parse_results, context):
                       else parse_results[2:], context)
 
     # handle comparison operators
+    assert len(parse_results) == 3
     operators = {
         '==': operator.eq,
         '!=': operator.ne,
