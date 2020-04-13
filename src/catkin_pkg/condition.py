@@ -41,7 +41,7 @@ def _get_condition_expression():
         value = pp.Word(pp.alphanums + '_-')
         comparison_term = identifier | value
         condition = pp.Group(comparison_term + operator + comparison_term)
-        _condition_expression = pp.operatorPrecedence(
+        _condition_expression = pp.infixNotation(
             condition, [
                 ('and', 2, pp.opAssoc.LEFT, ),
                 ('or', 2, pp.opAssoc.LEFT, ),
