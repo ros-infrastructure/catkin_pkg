@@ -127,7 +127,7 @@ def _get_condition_expression():
         condition = pp.Group(comparison_term + operator + comparison_term).setName('condition')
         condition.setParseAction(Condition)
 
-        _condition_expression = pp.operatorPrecedence(
+        _condition_expression = pp.infixNotation(
             condition, [
                 ('and', 2, pp.opAssoc.LEFT, And),
                 ('or', 2, pp.opAssoc.LEFT, Or),
