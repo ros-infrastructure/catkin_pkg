@@ -8,7 +8,7 @@ from setuptools import setup
 install_requires = [
     'docutils',
     'python-dateutil',
-    'pyparsing',
+    'pyparsing>=1.5.7',
 ]
 
 # argparse is part of the standard library since Python 2.7
