@@ -17,6 +17,18 @@ import operator
 import pyparsing as pp
 
 
+def evaluate_condition(condition, context):
+    if condition is None:
+        return True
+    expr = _get_condition_expression()
+    try:
+        parse_results = expr.parseString(condition, parseAll=True)
+    except pp.ParseException as e:
+        raise ValueError(
+            "condition '%s' failed to parse: %s" % (condition, e))
+    return parse_results[0](context)
+
+
 class Condition:
 
     def __init__(self, t):
@@ -133,15 +145,3 @@ def _get_condition_expression():
                 ('or', 2, pp.opAssoc.LEFT, Or),
             ])
     return _condition_expression
-
-
-def evaluate_condition(condition, context):
-    if condition is None:
-        return True
-    expr = _get_condition_expression()
-    try:
-        parse_results = expr.parseString(condition, parseAll=True)
-    except pp.ParseException as e:
-        raise ValueError(
-            "condition '%s' failed to parse: %s" % (condition, e))
-    return parse_results[0](context)
