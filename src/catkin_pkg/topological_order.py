@@ -48,8 +48,11 @@ class _PackageDecorator(object):
         self.is_metapackage = 'metapackage' in (e.tagname for e in self.package.exports)
         message_generators = [e.content for e in self.package.exports if e.tagname == 'message_generator']
         self.message_generator = message_generators[0] if message_generators else None
-        # full includes direct build depends and recursive run_depends of these build_depends
+        # a set containing this package name, direct build depends
+        # and recursive run_depends of these build_depends
         self.depends_for_topological_order = None
+        # a set containing this package name and recursive run_depends
+        self._recursive_run_depends_for_topological_order = None
 
     def __getattr__(self, name):
         if name.startswith('__'):
@@ -60,9 +63,10 @@ class _PackageDecorator(object):
         """
         Set self.depends_for_topological_order to the recursive dependencies required for topological order.
 
-        It contains all direct build- and buildtool dependencies and their recursive
-        runtime dependencies. The set only contains packages which
-        are in the passed packages dictionary.
+        It contains this package name, all direct build- and buildtool
+        dependencies and their recursive runtime dependencies.
+        The set only contains packages which are in the passed packages
+        dictionary.
 
         :param packages: dict of name to ``_PackageDecorator``
         """
@@ -96,20 +100,25 @@ class _PackageDecorator(object):
         :param packages: dict of name to ``_PackageDecorator``
         :param depends_for_topological_order: set to be extended
         """
-        depends_for_topological_order.add(self.package.name)
-        package_names = packages.keys()
-        names = [d.name for d in self.package.run_depends if d.evaluated_condition]
+        if self._recursive_run_depends_for_topological_order is None:
+            self._recursive_run_depends_for_topological_order = set()
+            self._recursive_run_depends_for_topological_order.add(self.package.name)
+            package_names = packages.keys()
+            names = [d.name for d in self.package.run_depends if d.evaluated_condition]
 
-        for group_depend in self.package.group_depends:
-            if group_depend.evaluated_condition:
-                assert group_depend.members is not None, \
-                    'Group members need to be determined before'
-                names += group_depend.members
+            for group_depend in self.package.group_depends:
+                if group_depend.evaluated_condition:
+                    assert group_depend.members is not None, \
+                        'Group members need to be determined before'
+                    names += group_depend.members
 
-        for name in [n for n in names
-                     if (n in package_names and
-                         n not in depends_for_topological_order)]:
-            packages[name]._add_recursive_run_depends(packages, depends_for_topological_order)
+            for name in [n for n in names
+                         if (n in package_names and
+                             n not in self._recursive_run_depends_for_topological_order)]:
+                packages[name]._add_recursive_run_depends(packages,
+                                                          self._recursive_run_depends_for_topological_order)
+
+        depends_for_topological_order.update(self._recursive_run_depends_for_topological_order)
 
 
 def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_workspaces=None):
