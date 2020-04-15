@@ -36,28 +36,28 @@ def _get_condition_expression():
     global _condition_expression
     if not _condition_expression:
         operator = pp.Regex('==|!=|>=|>|<=|<').setName('operator')
-        operator.setParseAction(Operator)
+        operator.setParseAction(_Operator)
 
         identifier = pp.Word('$', pp.alphanums + '_', min=2).setName('identifier')
-        identifier.setParseAction(Identifier)
+        identifier.setParseAction(_Identifier)
 
         value = pp.Word(pp.alphanums + '_-').setName('value')
-        value.setParseAction(Value)
+        value.setParseAction(_Value)
 
         comparison_term = identifier | value
 
         condition = pp.Group(comparison_term + operator + comparison_term).setName('condition')
-        condition.setParseAction(Condition)
+        condition.setParseAction(_Condition)
 
         _condition_expression = pp.infixNotation(
             condition, [
-                ('and', 2, pp.opAssoc.LEFT, And),
-                ('or', 2, pp.opAssoc.LEFT, Or),
+                ('and', 2, pp.opAssoc.LEFT, _And),
+                ('or', 2, pp.opAssoc.LEFT, _Or),
             ])
     return _condition_expression
 
 
-class Operator:
+class _Operator:
     operators = {
         '==': operator.eq,
         '!=': operator.ne,
@@ -80,7 +80,7 @@ class Operator:
     __repr__ = __str__
 
 
-class Identifier:
+class _Identifier:
 
     def __init__(self, t):
         self.value = t[0]
@@ -94,7 +94,7 @@ class Identifier:
     __repr__ = __str__
 
 
-class Value:
+class _Value:
 
     def __init__(self, t):
         self.value = t[0]
@@ -108,7 +108,7 @@ class Value:
     __repr__ = __str__
 
 
-class Condition:
+class _Condition:
 
     def __init__(self, t):
         self.value = t[0]
@@ -122,7 +122,7 @@ class Condition:
     __repr__ = __str__
 
 
-class BinOp:
+class _BinOp:
 
     def __init__(self, t):
         self.args = t[0][0::2]
@@ -137,11 +137,11 @@ class BinOp:
     __repr__ = __str__
 
 
-class And(BinOp):
+class _And(_BinOp):
     reprsymbol = 'and'
     evalop = all
 
 
-class Or(BinOp):
+class _Or(_BinOp):
     reprsymbol = 'or'
     evalop = any
