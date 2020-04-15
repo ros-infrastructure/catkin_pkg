@@ -48,8 +48,10 @@ class _PackageDecorator(object):
         self.is_metapackage = 'metapackage' in (e.tagname for e in self.package.exports)
         message_generators = [e.content for e in self.package.exports if e.tagname == 'message_generator']
         self.message_generator = message_generators[0] if message_generators else None
-        # full includes direct build depends and recursive run_depends of these build_depends
+        # a set containing this package name, direct build depends
+        # and recursive run_depends of these build_depends
         self.depends_for_topological_order = None
+        # a set containing this package name and recursive run_depends
         self._recursive_run_depends_for_topological_order = None
 
     def __getattr__(self, name):
@@ -61,9 +63,10 @@ class _PackageDecorator(object):
         """
         Set self.depends_for_topological_order to the recursive dependencies required for topological order.
 
-        It contains all direct build- and buildtool dependencies and their recursive
-        runtime dependencies. The set only contains packages which
-        are in the passed packages dictionary.
+        It contains this package name, all direct build- and buildtool
+        dependencies and their recursive runtime dependencies.
+        The set only contains packages which are in the passed packages
+        dictionary.
 
         :param packages: dict of name to ``_PackageDecorator``
         """
@@ -114,9 +117,7 @@ class _PackageDecorator(object):
                              n not in self._recursive_run_depends_for_topological_order)]:
                 packages[name]._add_recursive_run_depends(packages,
                                                           self._recursive_run_depends_for_topological_order)
-            self._recursive_run_depends_for_topological_order.remove(self.package.name)
 
-        depends_for_topological_order.add(self.package.name)
         depends_for_topological_order.update(self._recursive_run_depends_for_topological_order)
 
 
