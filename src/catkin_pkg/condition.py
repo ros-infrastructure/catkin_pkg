@@ -29,32 +29,32 @@ def evaluate_condition(condition, context):
     return parse_results[0](context)
 
 
-class Condition:
-
-    def __init__(self, t):
-        self.value = t[0]
-
-    def __call__(self, context):
-        return self.value[1](self.value[0], self.value[2], context)
-
-    def __str__(self):
-        return ' '.join(map(str, self.value))
-
-    __repr__ = __str__
+_condition_expression = None
 
 
-class Identifier:
+def _get_condition_expression():
+    global _condition_expression
+    if not _condition_expression:
+        operator = pp.Regex('==|!=|>=|>|<=|<').setName('operator')
+        operator.setParseAction(Operator)
 
-    def __init__(self, t):
-        self.value = t[0]
+        identifier = pp.Word('$', pp.alphanums + '_', min=2).setName('identifier')
+        identifier.setParseAction(Identifier)
 
-    def __call__(self, context):
-        return str(context.get(self.value[1:], ''))
+        value = pp.Word(pp.alphanums + '_-').setName('value')
+        value.setParseAction(Value)
 
-    def __str__(self):
-        return self.value
+        comparison_term = identifier | value
 
-    __repr__ = __str__
+        condition = pp.Group(comparison_term + operator + comparison_term).setName('condition')
+        condition.setParseAction(Condition)
+
+        _condition_expression = pp.infixNotation(
+            condition, [
+                ('and', 2, pp.opAssoc.LEFT, And),
+                ('or', 2, pp.opAssoc.LEFT, Or),
+            ])
+    return _condition_expression
 
 
 class Operator:
@@ -80,6 +80,20 @@ class Operator:
     __repr__ = __str__
 
 
+class Identifier:
+
+    def __init__(self, t):
+        self.value = t[0]
+
+    def __call__(self, context):
+        return str(context.get(self.value[1:], ''))
+
+    def __str__(self):
+        return self.value
+
+    __repr__ = __str__
+
+
 class Value:
 
     def __init__(self, t):
@@ -90,6 +104,20 @@ class Value:
 
     def __str__(self):
         return self.value
+
+    __repr__ = __str__
+
+
+class Condition:
+
+    def __init__(self, t):
+        self.value = t[0]
+
+    def __call__(self, context):
+        return self.value[1](self.value[0], self.value[2], context)
+
+    def __str__(self):
+        return ' '.join(map(str, self.value))
 
     __repr__ = __str__
 
@@ -117,31 +145,3 @@ class And(BinOp):
 class Or(BinOp):
     reprsymbol = 'or'
     evalop = any
-
-
-_condition_expression = None
-
-
-def _get_condition_expression():
-    global _condition_expression
-    if not _condition_expression:
-        operator = pp.Regex('==|!=|>=|>|<=|<').setName('operator')
-        operator.setParseAction(Operator)
-
-        identifier = pp.Word('$', pp.alphanums + '_', min=2).setName('identifier')
-        identifier.setParseAction(Identifier)
-
-        value = pp.Word(pp.alphanums + '_-').setName('value')
-        value.setParseAction(Value)
-
-        comparison_term = identifier | value
-
-        condition = pp.Group(comparison_term + operator + comparison_term).setName('condition')
-        condition.setParseAction(Condition)
-
-        _condition_expression = pp.infixNotation(
-            condition, [
-                ('and', 2, pp.opAssoc.LEFT, And),
-                ('or', 2, pp.opAssoc.LEFT, Or),
-            ])
-    return _condition_expression
