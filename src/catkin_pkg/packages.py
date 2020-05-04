@@ -58,9 +58,7 @@ def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
     paths = []
     real_exclude_paths = [os.path.realpath(p) for p in exclude_paths] if exclude_paths is not None else []
     for dirpath, dirnames, filenames in os.walk(basepath, followlinks=True):
-        if 'AMENT_IGNORE' in filenames or \
-            'CATKIN_IGNORE' in filenames or \
-            'COLCON_IGNORE' in filenames or \
+        if set(dirnames + filenames) & {'AMENT_IGNORE', 'CATKIN_IGNORE', 'COLCON_IGNORE'} or \
             os.path.realpath(dirpath) in real_exclude_paths or \
                 (exclude_subspaces and '.catkin' in filenames):
             del dirnames[:]
