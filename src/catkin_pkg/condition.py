@@ -16,6 +16,12 @@ import operator
 
 import pyparsing as pp
 
+# operatorPrecedence renamed to infixNotation in 1.5.7
+try:
+    from pyparsing import infixNotation as infixNotation
+except ImportError:
+    from pyparsing import operatorPrecedence as infixNotation
+
 
 def evaluate_condition(condition, context):
     if condition is None:
@@ -49,7 +55,7 @@ def _get_condition_expression():
         condition = pp.Group(comparison_term + operator + comparison_term).setName('condition')
         condition.setParseAction(_Condition)
 
-        _condition_expression = pp.infixNotation(
+        _condition_expression = infixNotation(
             condition, [
                 ('and', 2, pp.opAssoc.LEFT, _And),
                 ('or', 2, pp.opAssoc.LEFT, _Or),
