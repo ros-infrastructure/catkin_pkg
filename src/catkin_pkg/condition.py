@@ -18,7 +18,7 @@ import pyparsing as pp
 
 # operatorPrecedence renamed to infixNotation in 1.5.7
 try:
-    from pyparsing import infixNotation as infixNotation
+    from pyparsing import infixNotation
 except ImportError:
     from pyparsing import operatorPrecedence as infixNotation
 
