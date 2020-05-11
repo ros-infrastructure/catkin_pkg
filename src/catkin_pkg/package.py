@@ -106,7 +106,7 @@ class Package(object):
                         slot.append(deepcopy(d))
             del kwargs['run_depends']
         self.filename = filename
-        self.licenses = [l if isinstance(l, License) else License(l) for l in self.licenses]
+        self.licenses = [license_ if isinstance(license_, License) else License(license_) for license_ in self.licenses]
         # verify that no unknown keywords are passed
         unknown = set(kwargs.keys()).difference(self.__slots__)
         if unknown:
@@ -265,7 +265,7 @@ class Package(object):
 
         if not self.licenses:
             errors.append('The package node must contain at least one "license" tag')
-        if [l for l in self.licenses if not l.strip()]:
+        if [license_ for license_ in self.licenses if not license_.strip()]:
             errors.append('The license tag must neither be empty nor only contain whitespaces')
 
         if self.authors is not None:

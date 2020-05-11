@@ -349,7 +349,7 @@ class BulletList(object):
         b = self.bullet_generator(bullet)
         i = indent
         n = '\n' + i + '  '
-        lines = [i + next(b) + _unicode(l).replace('\n', n) for l in self]
+        lines = [i + next(b) + _unicode(item).replace('\n', n) for item in self]
         return '\n'.join(lines)
 
     def bullet_generator(self, bullet):
