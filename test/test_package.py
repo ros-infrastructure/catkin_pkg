@@ -28,6 +28,9 @@ test_data_dir = os.path.join(os.path.dirname(__file__), 'data', 'package')
 
 class PackageTest(unittest.TestCase):
 
+    if sys.version_info[0] == 2:
+        assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
+
     def get_maintainer(self):
         maint = Mock()
         maint.email = 'foo@bar.com'
@@ -321,7 +324,7 @@ class PackageTest(unittest.TestCase):
         except Exception as e:
             self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e), str(e)))
 
-        self.assertRaisesRegexp(Exception, 'unbound prefix: line 1, column 0', create_node, 'tag', {'ns:key': 'value'})
+        self.assertRaisesRegex(Exception, 'unbound prefix: line 1, column 0', create_node, 'tag', {'ns:key': 'value'})
 
         try:
             create_node('tag', {'ns:key': 'value', 'xmlns:ns': 'urn:ns'})
