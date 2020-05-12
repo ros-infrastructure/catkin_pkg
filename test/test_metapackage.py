@@ -72,6 +72,9 @@ def _validate_metapackage(path, package):
 class TestMetapackageValidation(unittest.TestCase):
     """Tests the metapackage validator."""
 
+    if sys.version_info[0] == 2:
+        assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
+
     def test_validate_metapackage(self):
         pkgs_dict = find_packages(test_data_dir)
         for path, package in pkgs_dict.items():
@@ -81,7 +84,7 @@ class TestMetapackageValidation(unittest.TestCase):
             with assert_warning(warnreg):
                 if exc is not None:
                     if excreg is not None:
-                        with self.assertRaisesRegexp(exc, excreg):
+                        with self.assertRaisesRegex(exc, excreg):
                             _validate_metapackage(path, package)
                     else:
                         with self.assertRaises(exc):
