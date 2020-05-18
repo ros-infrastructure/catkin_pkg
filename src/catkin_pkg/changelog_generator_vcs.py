@@ -139,6 +139,8 @@ class GitClient(VcsClientBase):
         self._repo_hosting = None
         self._github_base_url = 'https://github.com/'
         self._github_path = None
+        self._gitlab_base_url = 'https://gitlab.com/'
+        self._gitlab_path = None
 
     # query author
     def _get_author(self, hash_):
@@ -220,6 +222,8 @@ class GitClient(VcsClientBase):
                 pass
         if self._repo_hosting == 'github':
             line = self._replace_github_issue_references(line)
+        elif self._repo_hosting == 'gitlab':
+            line = self._replace_gitlab_issue_references(line)
         return line
 
     def _determine_repo_hosting(self):
@@ -239,6 +243,17 @@ class GitClient(VcsClientBase):
                 self._github_path = path
                 break
 
+        # detect gitlab hosting
+        prefixes = ['git@gitlab.com:', 'https://gitlab.com/', 'git://gitlab.com/']
+        for prefix in prefixes:
+            if result['output'].startswith(prefix):
+                self._repo_hosting = 'gitlab'
+                path = result['output'][len(prefix):]
+                if path.endswith('.git'):
+                    path = path[:-4]
+                self._gitlab_path = path
+                break
+
     def _replace_github_issue_references(self, line):
         valid_name = '[\\w._-]+'
         issue_pattern = '#(\\d+)'
@@ -255,6 +270,38 @@ class GitClient(VcsClientBase):
             issue_url += '/issues/' + issue_number
             return '`%s#%s <%s>`_' % (path, issue_number, issue_url)
         line = re.sub(('(%s/%s)?' % (valid_name, valid_name)) + issue_pattern, replace_issue_number, line)
+        return line
+
+    def _replace_gitlab_issue_references(self, line):
+        valid_name = '[\\w._-]+'
+        issue_pattern = '#(\\d+)'
+        merge_request_pattern = '!(\\d+)'
+
+        def replace_issue_number(match):
+            issue_url = self._gitlab_base_url
+            if match.group(1):
+                path = match.group(1)
+                issue_url += path
+            else:
+                path = ''
+                issue_url += self._gitlab_path
+            issue_number = match.group(3)
+            issue_url += '/-/issues/' + issue_number
+            return '`%s#%s <%s>`_' % (path, issue_number, issue_url)
+        line = re.sub(('(%s(/%s)+)?' % (valid_name, valid_name)) + issue_pattern, replace_issue_number, line)
+
+        def replace_merge_request_number(match):
+            merge_request_url = self._gitlab_base_url
+            if match.group(1):
+                path = match.group(1)
+                merge_request_url += path
+            else:
+                path = ''
+                merge_request_url += self._gitlab_path
+            merge_request_number = match.group(3)
+            merge_request_url += '/-/merge_requests/' + merge_request_number
+            return '`%s!%s <%s>`_' % (path, merge_request_number, merge_request_url)
+        line = re.sub(('(%s(/%s)+)?' % (valid_name, valid_name)) + merge_request_pattern, replace_merge_request_number, line)
         return line
 
 
