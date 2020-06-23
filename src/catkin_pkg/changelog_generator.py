@@ -225,6 +225,7 @@ def version_from_tag(tag_name):
         return tag_name[1:]
     return tag_name
 
+
 def sorted_tags(tags):
     # first return the forthcoming tag
     for tag in tags:
