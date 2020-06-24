@@ -87,16 +87,16 @@ def get_forthcoming_changes(vcs_client, skip_merges=False):
 def _get_version_tags(vcs_client):
     # get all tags in descending order
     tags = vcs_client.get_tags()
-    version_tags = [t for t in tags if re.match(r'^\d+\.\d+.\d+$', t.name)]
+    version_tags = [t for t in tags if re.match(r'^v?\d+\.\d+.\d+$', t.name)]
     return version_tags
 
 
 def _get_latest_version_tag_name(vcs_client):
     # get latest tag
     tag_name = vcs_client.get_latest_tag_name()
-    if not re.match(r'^\d+\.\d+.\d+$', tag_name):
+    if not re.match(r'^v?\d+\.\d+.\d+$', tag_name):
         raise RuntimeError(
-            "The tag name '{}' doesn't match the version pattern x.y.z".format(tag_name))
+            "The tag name '{}' doesn't match the version pattern v?x.y.z".format(tag_name))
     return tag_name
 
 
@@ -150,7 +150,7 @@ def generate_changelog_file(pkg_name, tag2log_entries, vcs_client=None, skip_con
     for tag in sorted_tags(tag2log_entries.keys()):
         log_entries = tag2log_entries[tag]
         if log_entries is not None:
-            blocks.append(generate_version_block(tag.name, tag.timestamp, log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors))
+            blocks.append(generate_version_block(version_from_tag(tag.name), tag.timestamp, log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors))
 
     return '\n'.join(blocks)
 
@@ -164,17 +164,17 @@ def update_changelog_file(data, tag2log_entries, vcs_client=None, skip_contribut
         content = generate_version_content(log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
 
         # check if version section exists
-        match = get_version_section_match(data, tag.name)
+        match = get_version_section_match(data, version_from_tag(tag.name))
         if match:
             # prepend content to existing section
-            data = prepend_version_content(data, tag.name, content)
+            data = prepend_version_content(data, version_from_tag(tag.name), content)
             assert data is not None
         else:
             # find injection point of earliest following version
             for next_tag in list(tags)[i:]:
-                match = get_version_section_match(data, next_tag.name)
+                match = get_version_section_match(data, version_from_tag(next_tag.name))
                 if match:
-                    block = generate_version_block(tag.name, tag.timestamp, log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
+                    block = generate_version_block(version_from_tag(tag.name), tag.timestamp, log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
                     data = data[:match.start()] + block + '\n' + data[match.start():]
                     break
             if not match:
@@ -218,6 +218,14 @@ def prepend_version_content(data, version, content):
     return data if count == 1 else None
 
 
+def version_from_tag(tag_name):
+    if tag_name is None:
+        return None
+    if tag_name.startswith('v'):
+        return tag_name[1:]
+    return tag_name
+
+
 def sorted_tags(tags):
     # first return the forthcoming tag
     for tag in tags:
@@ -225,7 +233,7 @@ def sorted_tags(tags):
             yield tag
     # then return the tags in descending order
     name_and_tag = [(t.name, t) for t in tags if t.name]
-    name_and_tag.sort(key=lambda x: [int(y) for y in x[0].split('.')])
+    name_and_tag.sort(key=lambda x: [int(y) for y in version_from_tag(x[0]).split('.')])
     name_and_tag.reverse()
     for (_, tag) in name_and_tag:
         yield tag
