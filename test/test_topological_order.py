@@ -7,7 +7,7 @@ from mock import Mock
 
 try:
     from catkin_pkg.topological_order import topological_order_packages, _PackageDecorator, \
-        _sort_decorated_packages
+        _sort_decorated_packages, _set_dependency_depth, _set_fanout
 except ImportError as e:
     raise ImportError('Please adjust your PYTHONPATH before running this test: %s' % str(e))
 
@@ -115,6 +115,84 @@ class TopologicalOrderTest(unittest.TestCase):
         self.assertEqual(set([mockproject1.name, mockproject4.name, mockproject5.name, mockproject6.name]),
                          pd.depends_for_topological_order)
 
+    def test_set_dependency_depth(self):
+        def create_mock(name, build_depends):
+            m = Mock()
+            m.name = name
+            m.build_depends = build_depends
+            m.buildtool_depends = []
+            m.run_depends = []
+            m.group_depends = []
+            m.exports = []
+            m.dependency_depth = 0
+            return m
+
+        mockproject1 = _PackageDecorator(create_mock('n1', []), 'p1')
+        mockproject2 = _PackageDecorator(create_mock('n2', [mockproject1.name]), 'p2')
+        mockproject3 = _PackageDecorator(create_mock('n3', [mockproject2.name]), 'p3')
+        mockproject4 = _PackageDecorator(create_mock('n4', [mockproject2.name]), 'p4')
+        mockproject5 = _PackageDecorator(create_mock('n5', [mockproject4.name]), 'p5')
+        mockproject6 = _PackageDecorator(create_mock('n6', [mockproject5.name]), 'p6')
+
+        packages = {mockproject1.name: mockproject1,
+                    mockproject2.name: mockproject2,
+                    mockproject3.name: mockproject3,
+                    mockproject4.name: mockproject4,
+                    mockproject5.name: mockproject5,
+                    mockproject6.name: mockproject6}
+
+        for k in packages.keys():
+            _set_dependency_depth(packages[k].name, 0, packages)
+
+        # n1 -> n2 -> n3
+        #        \--> n4 -> n5 -> n6
+
+        # n1 - path n2 -> n4 -> n5 ->n6 == 4 (ignores shorter path n2->n3)
+        # n2 - path n4 -> n5 ->n6 == 3
+        # n3 - leaf node == 0
+        # n4 - path n5 ->n6 == 2
+        # n5 - path n6 == 1
+        # n6 - leaf node == 0
+        self.assertEqual([4, 3, 0, 2, 1, 0], [packages[k].dependency_depth for k in packages.keys()])
+
+    def test_set_fanout(self):
+        def create_mock(name, build_depends):
+            m = Mock()
+            m.name = name
+            m.build_depends = build_depends
+            m.buildtool_depends = []
+            m.run_depends = []
+            m.group_depends = []
+            m.exports = []
+            m.dependency_fanout = 0
+            return m
+
+        mockproject1 = _PackageDecorator(create_mock('n1', []), 'p1')
+        mockproject2 = _PackageDecorator(create_mock('n2', [mockproject1.name]), 'p2')
+        mockproject3 = _PackageDecorator(create_mock('n3', [mockproject2.name]), 'p3')
+        mockproject4 = _PackageDecorator(create_mock('n4', [mockproject2.name, mockproject3.name]), 'p4')
+        mockproject5 = _PackageDecorator(create_mock('n5', [mockproject4.name, mockproject3.name]), 'p5')
+        mockproject6 = _PackageDecorator(create_mock('n6', [mockproject5.name, mockproject2.name]), 'p6')
+
+        packages = {mockproject1.name: mockproject1,
+                    mockproject2.name: mockproject2,
+                    mockproject3.name: mockproject3,
+                    mockproject4.name: mockproject4,
+                    mockproject5.name: mockproject5,
+                    mockproject6.name: mockproject6}
+
+        for k in packages.keys():
+            _set_fanout(packages[k].name, packages)
+
+        # count instances of mockprojectN.name in _PackageDecorator() constructors above
+        # n1 fans out to p2
+        # n2 to p3, p4, p6
+        # n3 to p4, p5
+        # n4 to p5
+        # n5 to p6
+        # n6 to nothing
+        self.assertEqual([1, 3, 2, 1, 1, 0], [packages[k].dependency_fanout for k in packages.keys()])
+
     def test_sort_decorated_packages(self):
         projects = {}
         sprojects = _sort_decorated_packages(projects)
@@ -123,8 +201,11 @@ class TopologicalOrderTest(unittest.TestCase):
         def create_mock(path):
             m = Mock()
             m.path = path
+            m.build_depends = []
             m.depends_for_topological_order = set()
             m.message_generator = False
+            m.dependency_depth = 0
+            m.dependency_fanout = 0
             return m
 
         mock1 = create_mock('mock1')
@@ -143,6 +224,7 @@ class TopologicalOrderTest(unittest.TestCase):
         def create_mock(path):
             m = Mock()
             m.path = path
+            m.build_depends = []
             m.depends_for_topological_order = set()
             m.message_generator = False
             return m
@@ -165,6 +247,7 @@ class TopologicalOrderTest(unittest.TestCase):
         def create_mock(path, depend):
             m = Mock()
             m.path = path
+            m.build_depends = []
             m.depends_for_topological_order = set([depend])
             m.message_generator = False
             return m
