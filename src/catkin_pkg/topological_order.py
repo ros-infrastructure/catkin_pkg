@@ -53,6 +53,8 @@ class _PackageDecorator(object):
         self.depends_for_topological_order = None
         # a set containing this package name and recursive run_depends
         self._recursive_run_depends_for_topological_order = None
+        self.dependency_depth = 0
+        self.dependency_fanout = 0
 
     def __getattr__(self, name):
         if name.startswith('__'):
@@ -120,6 +122,33 @@ class _PackageDecorator(object):
 
         depends_for_topological_order.update(self._recursive_run_depends_for_topological_order)
 
+    def set_dependency_depth(self, dependency_depth):
+        """
+        Dependency depth counts the worst-case length of the chain of packages which lead to
+        leaf nodes in the dependency tree.  This is the primary sort criteria for package
+        build order. The idea is to build packages which start a long chain of dependencies
+        as soon as their dependencies are satisfied. This will (hopefully) on average satisfy
+        the dependencies of packages further down the chain sooner in the build process, leaving
+        fewer cases where a package late in the build process is the only job available
+        to run because it is holding up a number of additional dependencies.
+
+        :param depth: Dependency depth to set for this package ``int``
+        :returns: Nothing
+        """
+        if self.dependency_depth < dependency_depth: # Want to keep worst-case dep chain length
+            self.dependency_depth = dependency_depth
+
+    def inc_dependency_fanout(self):
+        """
+        Increment the dependency_fanout field for this package.
+
+        Fanout is a count of the number of packages which directly depend on this one.
+        Used as a secondary sort criteria / heuristic for determining which packages should
+        be built first. The concept is if two or more packages have the same depenency depth
+        then pick the one which should unblock the most dependend packages, keeping the
+        ready to build queue as full as possible.
+        """
+        self.dependency_fanout += 1
 
 def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_workspaces=None):
     """
@@ -211,6 +240,62 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None, und
     # remove underlay packages from result
     return [(path, package) for path, package in tuples if path is None or package.name not in underlay_decorators_by_name]
 
+def _set_dependency_depth(name, depth, packages):
+    """
+    Traverse the dependency tree of a package, setting the dependency_depth of
+    the dependencies based on their depth in the dependency tree
+
+    :param name: A string holding the name of the package ``str``
+    :param depth: Integer depth from the root of the dependency tree
+    :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
+    :returns: nothing
+    """
+    packages[name].set_dependency_depth(depth)
+    depth += 1
+    for depend in packages[name].package['build_depends']:
+        depend_str = str(depend)
+        if depend_str in packages:
+            packages[depend_str].set_dependency_depth(depth)
+            _set_dependency_depth(depend_str, depth, packages)
+
+def _set_fanout(name, packages):
+    """
+    Iterate the list of packages which are depenencies, incrementing
+    the fanout of each of those dependencies by 1.
+    :param name: A string holding the name of the package ``str``
+    :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
+    :returns: nothing
+    """
+    for depend in packages[name].package['build_depends']:
+        depend_str = str(depend)
+        if depend_str in packages:
+            packages[depend_str].inc_dependency_fanout()
+
+def _get_next_name(names, packages):
+    """
+    Iterate through a list of package names, picking the package which should be added
+    next to the topolgical sort.
+
+    The primary search criteria is dependency depth, the secondary one is the number of
+    packages which directly depend on a given package.  See the comments in ``_PackageDecorator``
+    for further discussion.
+
+    :param names: A list of string holding the names of packages with 0 outstanding dependencies ``list``
+    :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
+    :returns: A string holding the next package to add to the topological sort
+    """
+    best_depth = -1
+    best_fanout = 0
+    best_name = ''
+    for this_name in names:
+        this_depth = packages[this_name].dependency_depth
+        this_fanout = packages[this_name].dependency_fanout
+        if (this_depth > best_depth) or ((this_depth == best_depth) and (this_fanout > best_fanout)):
+            best_depth = this_depth
+            best_fanout = this_fanout
+            best_name = this_name
+
+    return best_name
 
 def _reduce_cycle_set(packages_orig):
     """
@@ -266,6 +351,10 @@ def _sort_decorated_packages(packages_orig):
                 # queue for recursion
                 dependency_names_to_follow.add(name)
 
+    for name, foo in packages.items():
+        _set_dependency_depth(name, 0, packages)
+        _set_fanout(name, packages)
+
     ordered_packages = []
     while len(packages) > 0:
         # find all packages without build dependencies
@@ -294,7 +383,7 @@ def _sort_decorated_packages(packages_orig):
 
         # add first candidates to ordered list
         # do not add all candidates since removing the depends from the first might affect the next candidates
-        name = names[0]
+        name = _get_next_name(names, packages)
         ordered_packages.append([packages[name].path, packages[name].package])
         # remove package from further processing
         del packages[name]
