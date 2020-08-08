@@ -120,9 +120,6 @@ class TopologicalOrderTest(unittest.TestCase):
             m = Mock()
             m.name = name
             m.build_depends = build_depends
-            m.buildtool_depends = []
-            m.run_depends = []
-            m.group_depends = []
             m.exports = []
             m.dependency_depth = 0
             return m
@@ -160,9 +157,6 @@ class TopologicalOrderTest(unittest.TestCase):
             m = Mock()
             m.name = name
             m.build_depends = build_depends
-            m.buildtool_depends = []
-            m.run_depends = []
-            m.group_depends = []
             m.exports = []
             m.dependency_fanout = 0
             return m
