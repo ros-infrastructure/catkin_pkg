@@ -153,7 +153,7 @@ class TopologicalOrderTest(unittest.TestCase):
         # n4 - path n5 ->n6 == 2
         # n5 - path n6 == 1
         # n6 - leaf node == 0
-        self.assertEqual([4, 3, 0, 2, 1, 0], [packages[k].dependency_depth for k in packages.keys()])
+        self.assertEqual([4, 3, 0, 2, 1, 0], [packages[k].dependency_depth for k in sorted(packages.keys())])
 
     def test_set_fanout(self):
         def create_mock(name, build_depends):
@@ -191,7 +191,7 @@ class TopologicalOrderTest(unittest.TestCase):
         # n4 to p5
         # n5 to p6
         # n6 to nothing
-        self.assertEqual([1, 3, 2, 1, 1, 0], [packages[k].dependency_fanout for k in packages.keys()])
+        self.assertEqual([1, 3, 2, 1, 1, 0], [packages[k].dependency_fanout for k in sorted(packages.keys())])
 
     def test_sort_decorated_packages(self):
         projects = {}
@@ -227,6 +227,8 @@ class TopologicalOrderTest(unittest.TestCase):
             m.build_depends = []
             m.depends_for_topological_order = set()
             m.message_generator = False
+            m.dependency_depth = 0
+            m.dependency_fanout = 0
             return m
 
         mock1 = create_mock('mock1')
@@ -250,6 +252,8 @@ class TopologicalOrderTest(unittest.TestCase):
             m.build_depends = []
             m.depends_for_topological_order = set([depend])
             m.message_generator = False
+            m.dependency_depth = 0
+            m.dependency_fanout = 0
             return m
 
         # creating a cycle for cycle detection
