@@ -121,6 +121,22 @@ class PackageTest(unittest.TestCase):
         dep = Dependency('foo', condition='foo <= bar or bar >= baz')
         self.assertFalse(dep.evaluate_condition({}))
 
+        dep = Dependency('foo', condition='$foo == ""')
+        self.assertTrue(dep.evaluate_condition({}))
+        self.assertFalse(dep.evaluate_condition({'foo': 'foo'}))
+
+        dep = Dependency('foo', condition='$foo == "foo \' bar"')
+        self.assertTrue(dep.evaluate_condition({'foo': "foo ' bar"}))
+        self.assertFalse(dep.evaluate_condition({}))
+
+        dep = Dependency('foo', condition="$foo == ''")
+        self.assertTrue(dep.evaluate_condition({}))
+        self.assertFalse(dep.evaluate_condition({'foo': 'foo'}))
+
+        dep = Dependency('foo', condition="$foo == 'foo \" bar'")
+        self.assertTrue(dep.evaluate_condition({'foo': 'foo " bar'}))
+        self.assertFalse(dep.evaluate_condition({}))
+
         # Testing for more than 1 conditions
         dep = Dependency('foo', condition='foo > bar and bar < baz and foo > bar')
         self.assertTrue(dep.evaluate_condition({}))
