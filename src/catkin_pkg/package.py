@@ -338,7 +338,7 @@ class Dependency(object):
     def __eq__(self, other):
         if not isinstance(other, Dependency):
             return False
-        return all(getattr(self, attr) == getattr(other, attr) for attr in self.__slots__)
+        return all(getattr(self, attr) == getattr(other, attr) for attr in self.__slots__ if attr != 'evaluated_condition')
 
     def __hash__(self):
         return hash(tuple(getattr(self, slot) for slot in self.__slots__))
@@ -672,9 +672,9 @@ def parse_package_string(data, filename=None, warnings=None):
         depends = _get_dependencies(root, 'depend')
         for dep in depends:
             # check for collisions with specific dependencies
-            same_build_depends = ['build_depend' for d in pkg.build_depends if d.name == dep.name]
-            same_build_export_depends = ['build_export_depend' for d in pkg.build_export_depends if d.name == dep.name]
-            same_exec_depends = ['exec_depend' for d in pkg.exec_depends if d.name == dep.name]
+            same_build_depends = ['build_depend' for d in pkg.build_depends if d == dep]
+            same_build_export_depends = ['build_export_depend' for d in pkg.build_export_depends if d == dep]
+            same_exec_depends = ['exec_depend' for d in pkg.exec_depends if d == dep]
             if same_build_depends or same_build_export_depends or same_exec_depends:
                 errors.append("The generic dependency on '%s' is redundant with: %s" % (dep.name, ', '.join(same_build_depends + same_build_export_depends + same_exec_depends)))
             # only append non-duplicates
@@ -695,8 +695,8 @@ def parse_package_string(data, filename=None, warnings=None):
 
     if pkg.package_format == 1:
         for test_depend in pkg.test_depends:
-            same_build_depends = ['build_depend' for d in pkg.build_depends if d.name == test_depend.name]
-            same_run_depends = ['run_depend' for d in pkg.run_depends if d.name == test_depend.name]
+            same_build_depends = ['build_depend' for d in pkg.build_depends if d == test_depend]
+            same_run_depends = ['run_depend' for d in pkg.run_depends if d == test_depend]
             if same_build_depends or same_run_depends:
                 errors.append('The test dependency on "%s" is redundant with: %s' % (test_depend.name, ', '.join(same_build_depends + same_run_depends)))
 
