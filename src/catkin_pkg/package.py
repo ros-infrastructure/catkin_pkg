@@ -279,7 +279,69 @@ class Package(object):
             http://git.openembedded.org/openembedded-core/tree/meta/conf/licenses.conf
             """
             return {
+                'Apache License Version 2.0': 'Apache-2.0',
+                'Apachi 2': 'Apache-2.0',
+                'Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)': 'Apache-2.0',
+                'Apache v2': 'Apache-2.0',
+                'Apache v2.0': 'Apache-2.0',
+                'Apache2.0': 'Apache-2.0',
+                'APACHE2.0': 'Apache-2.0',
                 'Apache2': 'Apache-2.0',
+                'Apache License, Version 2.0': 'Apache-2.0',
+                'Apache 2': 'Apache-2.0',
+                'Apache 2.0': 'Apache-2.0',
+                'Apache License 2.0': 'Apache-2.0',
+                'LGPL v2': 'LGPL-2.0-only',
+                'LGPL v2.1 or later': 'LGPL-2.1-or-later',
+                'LGPL v2.1': 'LGPL-2.1-only',
+                'LGPL-2.1': 'LGPL-2.1-only',
+                'LGPLv2.1': 'LGPL-2.1-only',
+                'GNU Lesser Public License 2.1': 'LGPL-2.1-only',
+                'LGPL3': 'LGPL-3.0-only',
+                'LGPLv3': 'LGPL-3.0-only',
+                'GPL-2.0': 'GPL-2.0-only',
+                'GPLv2': 'GPL-2.0-only',
+                'GNU General Public License v2.0': 'GPL-2.0-only',
+                'GNU GPL v3.0': 'GPL-3.0-only',
+                'GPL v3': 'GPL-3.0-only',
+                'GPLv3': 'GPL-3.0-only',
+                'ECL2.0': 'EPL-2.0',
+                'Eclipse Public License 2.0': 'EPL-2.0',
+                'Mozilla Public License Version 1.1': 'MPL-1.1',
+                'Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International Public License': 'CC-BY-NC-ND-4.0',
+                'CreativeCommons-Attribution-NonCommercial-NoDerivatives-4.0': 'CC-BY-NC-ND-4.0',
+                'CreativeCommons-Attribution-NonCommercial-ShareAlike-4.0-International': 'CC-BY-NC-SA-4.0',
+                'CC BY-NC-SA 4.0': 'CC-BY-NC-SA-4.0',
+                'CreativeCommons-by-nc-4.0': 'CC-BY-NC-4.0',
+                'CreativeCommons-by-nc-sa-2.0': 'CC-BY-NC-SA-2.0',
+                'Creative Commons BY-NC-ND 3.0': 'CC-BY-NC-ND-3.0',
+                'BSD 3-clause Clear License': 'BSD-2-Clause',
+                'BSD 3-clause. See license attached': 'BSD-2-Clause',
+                'BSD 2-Clause License': 'BSD-2-Clause',
+                'BSD2': 'BSD-2-Clause',
+                'BSD-3': 'BSD-3-Clause',
+                'BSD 3-Clause': 'BSD-3-Clause',
+                'Boost Software License 1.0': 'BSL-1.0',
+                'Boost': 'BSL-1.0',
+                'Boost Software License, Version 1.0': 'BSL-1.0',
+                'Boost Software License': 'BSL-1.0',
+                'BSL1.0': 'BSL-1.0',
+                'MIT License': 'MIT',
+                'zlib License': 'Zlib',
+                'zlib': 'Zlib'
+            }.get(lic, None)
+
+        def map_license_to_more_common_format(lic):
+            """
+            Map license value to more common format.
+
+            These aren't SPDX Identifiers, but lets unify them at least.
+            """
+            return {
+                'proprietary': 'Proprietary',
+                'Public Domain': 'PD',
+                'Public domain': 'PD',
+                'TODO': 'TODO-CATKIN-PACKAGE-LICENSE'
             }.get(lic, None)
 
         def validate_licenses(licenses, warnings):
@@ -287,7 +349,12 @@ class Package(object):
                 if is_valid_spdx_identifier(lic):
                     continue
 
-                if lic == 'TODO-CATKIN-PACKAGE-LICENSE':
+                common = map_license_to_more_common_format(lic)
+                if common:
+                    lic = common
+                    warnings.append('The license value "%s" is not valid SPDX identifier, and it is usually used as "%s"' % (lic, common))
+
+                if license == 'TODO-CATKIN-PACKAGE-LICENSE':
                     warnings.append('The license value "%s" is only temporary from the template, replace it with correct value' % (lic))
                     continue
 
