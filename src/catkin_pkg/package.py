@@ -338,6 +338,7 @@ class Package(object):
             These aren't SPDX Identifiers, but lets unify them at least.
             """
             return {
+                "Check-author's-website": 'Check-authors-website',
                 'proprietary': 'Proprietary',
                 'Public Domain': 'PD',
                 'Public domain': 'PD',
