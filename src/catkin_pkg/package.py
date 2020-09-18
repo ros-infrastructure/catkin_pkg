@@ -287,7 +287,7 @@ class Package(object):
                 if is_valid_spdx_identifier(lic):
                     continue
 
-                if lic == 'TODO':
+                if lic == 'TODO-CATKIN-PACKAGE-LICENSE':
                     warnings.append('The license value "%s" is only temporary from the template, replace it with correct value' % (lic))
                     continue
 
