@@ -29,7 +29,7 @@ class CreatePkgTest(unittest.TestCase):
         template = PackageTemplate._create_package_template(
             'foopackage',
             description='foo_desc',
-            licenses=['a', 'b'],
+            licenses=['BSD-3-Clause'],
             maintainer_names=['John Doe', 'Jim Daniels'],
             author_names=['Harry Smith'],
             version='1.2.3',
