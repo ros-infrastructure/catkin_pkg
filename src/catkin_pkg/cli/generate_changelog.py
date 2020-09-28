@@ -40,10 +40,11 @@ def prompt_continue(msg, default):
 
 def main(sysargs=None):
     parser = argparse.ArgumentParser(description='Generate a REP-0132 %s' % CHANGELOG_FILENAME)
+    group_merge = parser.add_mutually_exclusive_group()
     parser.add_argument(
         '-a', '--all', action='store_true', default=False,
         help='Generate changelog for all versions instead of only the forthcoming one (only supported when no changelog file exists yet)')
-    parser.add_argument(
+    group_merge.add_argument(
         '--only-merges', action='store_true', default=False,
         help='Only add merge commits to the changelog')
     parser.add_argument(
@@ -52,7 +53,7 @@ def main(sysargs=None):
     parser.add_argument(
         '--skip-contributors', action='store_true', default=False,
         help='Skip adding the list of contributors to the changelog')
-    parser.add_argument(
+    group_merge.add_argument(
         '--skip-merges', action='store_true', default=False,
         help='Skip adding merge commits to the changelog')
     parser.add_argument(
