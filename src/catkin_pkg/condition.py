@@ -50,7 +50,15 @@ def _get_condition_expression():
         value = pp.Word(pp.alphanums + '_-').setName('value')
         value.setParseAction(_Value)
 
-        comparison_term = identifier | value
+        double_quoted_value = pp.QuotedString('"').setName(
+            'double_quoted_value')
+        double_quoted_value.setParseAction(_Value)
+        single_quoted_value = pp.QuotedString("'").setName(
+            'single_quoted_value')
+        single_quoted_value.setParseAction(_Value)
+
+        comparison_term = identifier | value | double_quoted_value | \
+            single_quoted_value
 
         condition = pp.Group(comparison_term + operator + comparison_term).setName('condition')
         condition.setParseAction(_Condition)
