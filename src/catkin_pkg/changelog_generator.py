@@ -48,7 +48,7 @@ from catkin_pkg.changelog_generator_vcs import Tag
 FORTHCOMING_LABEL = 'Forthcoming'
 
 
-def get_all_changes(vcs_client, skip_merges=False):
+def get_all_changes(vcs_client, skip_merges=False, only_merges=False):
     tags = _get_version_tags(vcs_client)
 
     # query all log entries per tag range
@@ -56,16 +56,16 @@ def get_all_changes(vcs_client, skip_merges=False):
     previous_tag = Tag(None)
     for tag in sorted_tags(tags):
         log_entries = vcs_client.get_log_entries(
-            from_tag=previous_tag.name, to_tag=tag.name, skip_merges=skip_merges)
+            from_tag=previous_tag.name, to_tag=tag.name, skip_merges=skip_merges, only_merges=only_merges)
         tag2log_entries[previous_tag] = log_entries
         previous_tag = tag
     log_entries = vcs_client.get_log_entries(
-        from_tag=previous_tag.name, to_tag=None, skip_merges=skip_merges)
+        from_tag=previous_tag.name, to_tag=None, skip_merges=skip_merges, only_merges=only_merges)
     tag2log_entries[previous_tag] = log_entries
     return tag2log_entries
 
 
-def get_forthcoming_changes(vcs_client, skip_merges=False):
+def get_forthcoming_changes(vcs_client, skip_merges=False, only_merges=False):
     tags = _get_version_tags(vcs_client)
     latest_tag_name = _get_latest_version_tag_name(vcs_client)
 
@@ -79,7 +79,7 @@ def get_forthcoming_changes(vcs_client, skip_merges=False):
         # ignore non-forthcoming log entries but keep version to identify injection point of forthcoming
         tag2log_entries[tag] = None
     log_entries = vcs_client.get_log_entries(
-        from_tag=from_tag.name, to_tag=to_tag.name, skip_merges=skip_merges)
+        from_tag=from_tag.name, to_tag=to_tag.name, skip_merges=skip_merges, only_merges=only_merges)
     tag2log_entries[from_tag] = log_entries
     return tag2log_entries
 

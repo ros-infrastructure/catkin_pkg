@@ -40,16 +40,20 @@ def prompt_continue(msg, default):
 
 def main(sysargs=None):
     parser = argparse.ArgumentParser(description='Generate a REP-0132 %s' % CHANGELOG_FILENAME)
+    group_merge = parser.add_mutually_exclusive_group()
     parser.add_argument(
         '-a', '--all', action='store_true', default=False,
         help='Generate changelog for all versions instead of only the forthcoming one (only supported when no changelog file exists yet)')
+    group_merge.add_argument(
+        '--only-merges', action='store_true', default=False,
+        help='Only add merge commits to the changelog')
     parser.add_argument(
         '--print-root', action='store_true', default=False,
         help='Output changelog content to the console as if there would be only one package in the root of the repository')
     parser.add_argument(
         '--skip-contributors', action='store_true', default=False,
         help='Skip adding the list of contributors to the changelog')
-    parser.add_argument(
+    group_merge.add_argument(
         '--skip-merges', action='store_true', default=False,
         help='Skip adding merge commits to the changelog')
     parser.add_argument(
@@ -66,11 +70,11 @@ def main(sysargs=None):
         # printing status messages to stderr to allow piping the changelog to a file
         if args.all:
             print('Querying all tags and commit information...', file=sys.stderr)
-            tag2log_entries = get_all_changes(vcs_client, skip_merges=args.skip_merges)
+            tag2log_entries = get_all_changes(vcs_client, skip_merges=args.skip_merges, only_merges=args.only_merges)
             print('Generating changelog output with all versions...', file=sys.stderr)
         else:
             print('Querying commit information since latest tag...', file=sys.stderr)
-            tag2log_entries = get_forthcoming_changes(vcs_client, skip_merges=args.skip_merges)
+            tag2log_entries = get_forthcoming_changes(vcs_client, skip_merges=args.skip_merges, only_merges=args.only_merges)
             print('Generating changelog files with forthcoming version...', file=sys.stderr)
         print('', file=sys.stderr)
         data = generate_changelog_file('repository-level', tag2log_entries, vcs_client=vcs_client)
@@ -106,12 +110,12 @@ def main(sysargs=None):
 
     if args.all:
         print('Querying all tags and commit information...')
-        tag2log_entries = get_all_changes(vcs_client, skip_merges=args.skip_merges)
+        tag2log_entries = get_all_changes(vcs_client, skip_merges=args.skip_merges, only_merges=args.only_merges)
         print('Generating changelog files with all versions...')
         generate_changelogs(base_path, packages, tag2log_entries, logger=logging, vcs_client=vcs_client, skip_contributors=args.skip_contributors)
     else:
         print('Querying commit information since latest tag...')
-        tag2log_entries = get_forthcoming_changes(vcs_client, skip_merges=args.skip_merges)
+        tag2log_entries = get_forthcoming_changes(vcs_client, skip_merges=args.skip_merges, only_merges=args.only_merges)
         # separate packages with/without a changelog file
         packages_without = {pkg_path: package for pkg_path, package in packages.items() if package.name in missing_changelogs}
         if packages_without:
