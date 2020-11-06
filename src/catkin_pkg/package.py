@@ -345,6 +345,25 @@ class Package(object):
                 'TODO': 'TODO-CATKIN-PACKAGE-LICENSE'
             }.get(lic, None)
 
+        def validate_licenses_multiple_values(lic):
+            """
+            Check if the license tag contains multiple license values.
+
+            Show warning about using multiple license tags when the
+            value is one of the listed.
+            """
+            return lic in [
+                'LGPLv2.1, modified BSD',
+                'Lesser GPL and Apache License',
+                'BSD,GPL because of list.h; other files released under BSD,GPL',
+                'GPL because of list.h; other files released under BSD',
+                'BSD, some icons are licensed under the GNU Lesser General Public License (LGPL) or Creative Commons Attribution-Noncommercial 3.0 License',
+                'BSD,LGPL,LGPL (amcl)',
+                'BSD, GPL',
+                'BSD, Apache 2.0',
+                'BSD, LGPL',
+                'BSD,LGPL,Apache 2.0']
+
         def validate_licenses(licenses, warnings):
             for lic in licenses:
                 if is_valid_spdx_identifier(lic):
@@ -362,6 +381,9 @@ class Package(object):
                 spdx = map_license_to_spdx(lic)
                 if not spdx:
                     warnings.append('The license value "%s" cannot be mapped to valid SPDX identifier' % (lic))
+                    if validate_licenses_multiple_values(lic):
+                        warnings.append('The license value "%s" contains multiple licenses, you should use multiple <license> flags instead, '
+                                        'see https://www.ros.org/reps/rep-0149.html#license-multiple-but-at-least-one')
                 elif spdx != lic:
                     # double check that what we mapped it to, is one of valid SPDX identifiers
                     if not is_valid_spdx_identifier(spdx):
