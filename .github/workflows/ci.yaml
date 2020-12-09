@@ -35,7 +35,7 @@ jobs:
             python: 3.5
           - os: macos-latest
             python: 3.6
-      name: rosdep tests
+      name: catkin_pkg tests
       runs-on: ${{matrix.os}}
 
       steps:
