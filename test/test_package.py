@@ -4,6 +4,7 @@ import sys
 import unittest
 
 import xml.dom.minidom as dom
+from xml.parsers.expat import ExpatError
 
 from catkin_pkg.package import (
     _check_known_attributes,
@@ -337,14 +338,14 @@ class PackageTest(unittest.TestCase):
 
         try:
             create_node('tag', {'key': 'value'})
-        except Exception as e:
+        except ExpatError as e:
             self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e), str(e)))
 
         self.assertRaisesRegex(Exception, 'unbound prefix: line 1, column 0', create_node, 'tag', {'ns:key': 'value'})
 
         try:
             create_node('tag', {'ns:key': 'value', 'xmlns:ns': 'urn:ns'})
-        except Exception as e:
+        except ExpatError as e:
             self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e), str(e)))
 
         def check(attrs, known, res=[]):
@@ -391,6 +392,38 @@ class PackageTest(unittest.TestCase):
             xml = xml.encode('utf-8')
             assert isinstance(xml, bytes)
         parse_package_string(xml)
+
+        xml_string = """
+<package>
+  <name>valid_package</name>
+  <version>0.1.0</version>
+  <description>valid_package description</description>
+  <maintainer email="user@todo.todo>Forgotten end quote</maintainer>
+  <license>BSD</license>
+</package>
+"""
+        self.assertRaises(InvalidPackage, parse_package_string, xml_string)
+
+        xml_string = """
+<package>
+  <name>valid_package</name>
+  <version>0.1.0</version>
+  <description>Invalid < character in description</description>
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>BSD</license>
+</package>
+"""
+        self.assertRaises(InvalidPackage, parse_package_string, xml_string)
+        xml_string = """
+<package>
+  <name>valid_package</name>
+  <version>0.1.0</version>
+  <description>valid_package description</description>
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>BSD</license>
+</package><extra>Unwanted junk</extra>
+"""
+        self.assertRaises(InvalidPackage, parse_package_string, xml_string)
 
     def test_has_ros_schema_reference_string(self):
         self.assertFalse(

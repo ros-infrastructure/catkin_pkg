@@ -62,11 +62,7 @@ def assert_warning(warnreg):
 
 
 def _validate_metapackage(path, package):
-    try:
-        validate_metapackage(path, package)
-    except Exception:
-        # print('on package ' + package.name, file=sys.stderr)
-        raise
+    validate_metapackage(path, package)
 
 
 class TestMetapackageValidation(unittest.TestCase):
