@@ -39,6 +39,7 @@ import os
 import re
 import sys
 import xml.dom.minidom as dom
+from xml.parsers.expat import ExpatError
 
 from catkin_pkg.condition import evaluate_condition
 
@@ -539,7 +540,7 @@ def has_ros_schema_reference_string(data):
         data = data.encode('utf-8')
     try:
         root = dom.parseString(data)
-    except Exception:
+    except ExpatError:
         # invalid XML
         return False
 
@@ -594,7 +595,7 @@ def parse_package_string(data, filename=None, warnings=None):
         data = data.encode('utf-8')
     try:
         root = dom.parseString(data)
-    except Exception as ex:
+    except ExpatError as ex:
         raise InvalidPackage('The manifest contains invalid XML:\n%s' % ex, filename)
 
     pkg = Package(filename)
