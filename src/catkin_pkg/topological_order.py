@@ -59,7 +59,7 @@ class _PackageDecorator(object):
             raise AttributeError(name)
         return getattr(self.package, name)
 
-    def calculate_depends_for_topological_order(self, packages):
+    def calculate_depends_for_topological_order(self, packages, include_exec_depends=False):
         """
         Set self.depends_for_topological_order to the recursive dependencies required for topological order.
 
@@ -69,9 +69,12 @@ class _PackageDecorator(object):
         dictionary.
 
         :param packages: dict of name to ``_PackageDecorator``
+        :param include_exec_depends: A bool that if true, causes exec depends to be included in the dependency graph.``
         """
         self.depends_for_topological_order = set()
         all_depends = self.package.build_depends + self.package.buildtool_depends + self.package.test_depends
+        if include_exec_depends:
+            all_depends += self.package.exec_depends
         names = [d.name for d in all_depends if d.evaluated_condition]
 
         # collect all group dependencies
@@ -121,7 +124,12 @@ class _PackageDecorator(object):
         depends_for_topological_order.update(self._recursive_run_depends_for_topological_order)
 
 
-def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_workspaces=None):
+def topological_order(
+        root_dir,
+        whitelisted=None,
+        blacklisted=None,
+        underlay_workspaces=None,
+        include_exec_depends=False):
     """
     Crawls the filesystem to find packages and uses their dependencies to return a topologically order list.
 
@@ -132,6 +140,7 @@ def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_wor
     :param whitelisted: A list of whitelisted package names, ``list``
     :param blacklisted: A list of blacklisted package names, ``list``
     :param underlay_workspaces: A list of underlay workspaces of packages which might provide dependencies in case of partial workspaces, ``list``
+    :param include_exec_depends: A bool that if true, causes exec depends to be included in the dependency graph.
     :returns: A list of tuples containing the relative path and a ``Package`` object, ``list``
     """
     packages = find_packages(root_dir)
@@ -147,10 +156,21 @@ def topological_order(root_dir, whitelisted=None, blacklisted=None, underlay_wor
                 for path, package in find_packages(space).items():
                     underlay_packages[package.name] = (path, package)
 
-    return topological_order_packages(packages, whitelisted=whitelisted, blacklisted=blacklisted, underlay_packages=dict(underlay_packages.values()))
+    return topological_order_packages(
+        packages,
+        whitelisted=whitelisted,
+        blacklisted=blacklisted,
+        underlay_packages=dict(underlay_packages.values()),
+        include_exec_depends=include_exec_depends,
+    )
 
 
-def topological_order_packages(packages, whitelisted=None, blacklisted=None, underlay_packages=None):
+def topological_order_packages(
+        packages,
+        whitelisted=None,
+        blacklisted=None,
+        underlay_packages=None,
+        include_exec_depends=False):
     """
     Topologically orders packages.
 
@@ -170,6 +190,7 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None, und
     :param whitelisted: A list of whitelisted package names, ``list``
     :param blacklisted: A list of blacklisted package names, ``list``
     :param underlay_packages: A dict mapping relative paths to ``Package`` objects ``dict``
+    :param include_exec_depends: A bool that if true, causes exec depends to be included in the dependency graph.
     :returns: A list of tuples containing the relative path and a ``Package`` object, ``list``
     """
     decorators_by_name = {}
@@ -205,7 +226,7 @@ def topological_order_packages(packages, whitelisted=None, blacklisted=None, und
 
     # calculate transitive dependencies
     for decorator in decorators_by_name.values():
-        decorator.calculate_depends_for_topological_order(decorators_by_name)
+        decorator.calculate_depends_for_topological_order(decorators_by_name, include_exec_depends)
 
     tuples = _sort_decorated_packages(decorators_by_name)
     # remove underlay packages from result
