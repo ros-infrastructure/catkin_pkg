@@ -231,9 +231,9 @@ def processes_changelog_children(changelog, children):
         elif isinstance(child, docutils.nodes.title) or isinstance(child, docutils.nodes.subtitle):
             version, date = None, None
             # See if the title has a text element in it
-            if len(child.children) > 0 and isinstance(child.children[0], docutils.nodes.Text):
+            if len(child.children) > 0 and any(isinstance(c, docutils.nodes.Text) for c in child.traverse()):
                 # Extract version and date from (sub-)title
-                title_text = child.children[0].rawsource
+                title_text = child.astext()
                 try:
                     version, date = version_and_date_from_title(title_text)
                 except InvalidSectionTitle:
