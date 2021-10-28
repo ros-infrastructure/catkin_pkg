@@ -64,7 +64,7 @@ def assert_warning(warnreg):
 def _validate_metapackage(path, package):
     try:
         validate_metapackage(path, package)
-    except Exception:
+    except Exception:  # noqa: B902
         # print('on package ' + package.name, file=sys.stderr)
         raise
 

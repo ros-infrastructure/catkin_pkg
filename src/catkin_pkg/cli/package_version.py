@@ -35,5 +35,5 @@ def main():
             new_version = bump_version(version, args.bump)
             update_versions(packages.keys(), new_version)
             print('%s -> %s' % (version, new_version))
-    except Exception as e:
+    except Exception as e:  # noqa: B902
         sys.exit(str(e))

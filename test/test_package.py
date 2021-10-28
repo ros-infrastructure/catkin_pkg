@@ -337,14 +337,14 @@ class PackageTest(unittest.TestCase):
 
         try:
             create_node('tag', {'key': 'value'})
-        except Exception as e:
+        except Exception as e:  # noqa: B902
             self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e), str(e)))
 
         self.assertRaisesRegex(Exception, 'unbound prefix: line 1, column 0', create_node, 'tag', {'ns:key': 'value'})
 
         try:
             create_node('tag', {'ns:key': 'value', 'xmlns:ns': 'urn:ns'})
-        except Exception as e:
+        except Exception as e:  # noqa: B902
             self.fail('create_node() raised %s "%s" unexpectedly!' % (type(e), str(e)))
 
         def check(attrs, known, res=[]):

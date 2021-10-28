@@ -539,7 +539,7 @@ def has_ros_schema_reference_string(data):
         data = data.encode('utf-8')
     try:
         root = dom.parseString(data)
-    except Exception:
+    except Exception:  # noqa: B902
         # invalid XML
         return False
 
@@ -594,7 +594,7 @@ def parse_package_string(data, filename=None, warnings=None):
         data = data.encode('utf-8')
     try:
         root = dom.parseString(data)
-    except Exception as ex:
+    except Exception as ex:  # noqa: B902
         raise InvalidPackage('The manifest contains invalid XML:\n%s' % ex, filename)
 
     pkg = Package(filename)
