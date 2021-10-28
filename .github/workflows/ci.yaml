@@ -13,16 +13,14 @@ jobs:
           os: [ubuntu-latest, macos-latest]
           python: [3.7, 3.8, 3.9]
           include:
-          - os: ubuntu-16.04
-            python: 2.7
           - os: ubuntu-18.04
             python: 2.7
           - os: macos-latest
             python: 2.7
-          - os: ubuntu-16.04
-            python: 3.5
           - os: ubuntu-18.04
             python: 3.6
+          - os: ubuntu-20.04
+            python: 3.8
       name: catkin_pkg tests
       runs-on: ${{matrix.os}}
 
