@@ -8,7 +8,7 @@ on:
 jobs:
     build:
       strategy:
-        fast-fail: false
+        fail-fast: false
         matrix:
           os: [ubuntu-latest, macos-latest]
           python: [3.7, 3.8, 3.9]
