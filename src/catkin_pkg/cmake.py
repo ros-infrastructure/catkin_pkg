@@ -47,7 +47,7 @@ def get_metapackage_cmake_template_path():
     return os.path.join(os.path.dirname(__file__), rel_path)
 
 
-def configure_file(template_file, environment):  # noqa: D402
+def configure_file(template_file, environment):
     """
     Evaluate a .in template file used in CMake with configure_file().
 
@@ -57,7 +57,7 @@ def configure_file(template_file, environment):  # noqa: D402
     :returns: string with evaluates template
     :raises: KeyError for placeholders in the template which are not
       in the environment
-    """
+    """  # noqa: D402
     with open(template_file, 'r') as f:
         template = f.read()
         return configure_string(template, environment)
