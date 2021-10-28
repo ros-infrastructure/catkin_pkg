@@ -57,7 +57,7 @@ def configure_file(template_file, environment):
     :returns: string with evaluates template
     :raises: KeyError for placeholders in the template which are not
       in the environment
-    """  # noqa: B402
+    """  # noqa: D402
     with open(template_file, 'r') as f:
         template = f.read()
         return configure_string(template, environment)
