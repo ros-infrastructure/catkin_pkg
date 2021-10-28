@@ -18,8 +18,6 @@ jobs:
             python: 2.7
           - os: ubuntu-18.04
             python: 3.6
-          - os: ubuntu-20.04
-            python: 3.8
       name: catkin_pkg tests
       runs-on: ${{matrix.os}}
 
