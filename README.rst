@@ -16,6 +16,5 @@ Code & tickets
 Continuous Integration
 ----------------------
 
-+--------------------------------------------------------------------------+--------------------------------------------------------------------+
-| `Build Status <https://travis-ci.org/ros-infrastructure/catkin_pkg>`_.   | .. image:: https://travis-ci.org/ros-infrastructure/catkin_pkg.png |
-+--------------------------------------------------------------------------+--------------------------------------------------------------------+
+.. image:: https://github.com/ros-infrastructure/catkin_pkg/actions/workflows/ci.yaml/badge.svg?branch=master&event=push
+   :target: https://github.com/ros-infrastructure/catkin_pkg/actions/workflows/ci.yaml?query=branch%3Amaster+event%3Apush
