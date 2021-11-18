@@ -99,9 +99,9 @@ def generate_distutils_setup(package_xml_path=os.path.curdir, **kwargs):
         data['url'] = package.urls[0].url
 
     if len(package.description) <= 200:
-        data['description'] = package.description
+        data['description'] = package.description.replace('\n', ' ')
     else:
-        data['description'] = package.description[:197] + '...'
+        data['description'] = package.description[:197].replace('\n', ' ') + '...'
         data['long_description'] = package.description
 
     data['license'] = ', '.join(package.licenses)
