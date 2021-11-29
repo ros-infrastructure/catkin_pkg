@@ -253,6 +253,9 @@ class Package(object):
 
         if not self.description:
             errors.append('Package description must not be empty')
+        else:
+            if '\n' in self.description:
+                new_warnings.append('Package "%s" has newlines in the description')
 
         if not self.maintainers:
             errors.append("Package '{0}' must declare at least one maintainer".format(self.name))
