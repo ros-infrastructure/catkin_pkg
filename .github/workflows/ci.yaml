@@ -14,8 +14,6 @@ jobs:
           include:
           - os: ubuntu-18.04
             python: 2.7
-          - os: macos-latest
-            python: 2.7
           - os: ubuntu-18.04
             python: 3.6
       name: catkin_pkg tests
