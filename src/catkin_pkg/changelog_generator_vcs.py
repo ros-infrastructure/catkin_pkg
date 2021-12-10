@@ -271,7 +271,7 @@ class GitClient(VcsClientBase):
                 path = ''
                 issue_url += self._github_path
             issue_number = match.group(2)
-            issue_url += '/issues/' + issue_number
+            issue_url += '/pull/' + issue_number
             return '`%s#%s <%s>`_' % (path, issue_number, issue_url)
         line = re.sub(('(%s/%s)?' % (valid_name, valid_name)) + issue_pattern, replace_issue_number, line)
         return line
@@ -290,7 +290,7 @@ class GitClient(VcsClientBase):
                 path = ''
                 issue_url += self._gitlab_path
             issue_number = match.group(3)
-            issue_url += '/-/issues/' + issue_number
+            issue_url += '/-/pull/' + issue_number
             return '`%s#%s <%s>`_' % (path, issue_number, issue_url)
         line = re.sub(('(%s(/%s)+)?' % (valid_name, valid_name)) + issue_pattern, replace_issue_number, line)
 
