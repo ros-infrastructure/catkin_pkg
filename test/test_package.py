@@ -20,7 +20,10 @@ from catkin_pkg.package import (
     Person,
 )
 
-from mock import Mock
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
 
 sys.stderr = sys.stdout
 

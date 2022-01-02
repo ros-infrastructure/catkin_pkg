@@ -8,7 +8,10 @@ from catkin_pkg.package_templates import _create_include_macro, _create_targetli
     create_cmakelists, create_package_files, create_package_xml, PackageTemplate
 from catkin_pkg.python_setup import generate_distutils_setup
 
-from mock import MagicMock, Mock
+try:
+    from unittest.mock import MagicMock, Mock
+except ImportError:
+    from mock import MagicMock, Mock
 
 
 def u(line):
