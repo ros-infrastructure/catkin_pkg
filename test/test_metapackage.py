@@ -61,14 +61,6 @@ def assert_warning(warnreg):
         sys.stderr = orig_stderr
 
 
-def _validate_metapackage(path, package):
-    try:
-        validate_metapackage(path, package)
-    except Exception:
-        # print('on package ' + package.name, file=sys.stderr)
-        raise
-
-
 class TestMetapackageValidation(unittest.TestCase):
     """Tests the metapackage validator."""
 
@@ -85,12 +77,12 @@ class TestMetapackageValidation(unittest.TestCase):
                 if exc is not None:
                     if excreg is not None:
                         with self.assertRaisesRegex(exc, excreg):
-                            _validate_metapackage(path, package)
+                            validate_metapackage(path, package)
                     else:
                         with self.assertRaises(exc):
-                            _validate_metapackage(path, package)
+                            validate_metapackage(path, package)
                 else:
-                    _validate_metapackage(path, package)
+                    validate_metapackage(path, package)
 
     def test_collect_warnings(self):
         """Tests warnings collection."""
