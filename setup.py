@@ -1,19 +1,9 @@
 #!/usr/bin/env python
 
 import os
-import sys
 
 from setuptools import setup
 
-install_requires = [
-    'docutils',
-    'python-dateutil',
-    'pyparsing',
-]
-
-# argparse is part of the standard library since Python 2.7
-if sys.version_info[0] == 2 and sys.version_info[1] < 7:
-    install_requires.append('argparse')
 
 kwargs = {
     'name': 'catkin_pkg',
@@ -45,7 +35,11 @@ kwargs = {
     'description': 'catkin package library',
     'long_description': 'Library for retrieving information about catkin packages.',
     'license': 'BSD',
-    'install_requires': install_requires,
+    'install_requires': [
+        'docutils',
+        'python-dateutil',
+        'pyparsing',
+    ],
     'extras_require': {
         'test': [
             'flake8',
