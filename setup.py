@@ -46,6 +46,20 @@ kwargs = {
     'long_description': 'Library for retrieving information about catkin packages.',
     'license': 'BSD',
     'install_requires': install_requires,
+    'extras_require': {
+        'test': [
+            'flake8',
+            'flake8-blind-except',
+            'flake8-builtins',
+            'flake8-class-newline',
+            'flake8-comprehensions',
+            'flake8-deprecated',
+            'flake8-docstrings',
+            'flake8-import-order',
+            'flake8-quotes',
+            "mock; python_version < '3.3'",
+            'nose',
+        ]},
 }
 if 'SKIP_PYTHON_MODULES' in os.environ:
     kwargs['packages'] = []
