@@ -30,4 +30,4 @@ jobs:
           python -m pip install -U -e .[test]
       - name: Run tests
         run: |
-          python -m nose -s --tests test
+          python -m pytest -s test
