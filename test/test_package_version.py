@@ -9,7 +9,10 @@ from catkin_pkg.package_version import bump_version
 from catkin_pkg.package_version import update_changelog_sections
 from catkin_pkg.package_version import update_versions
 
-import mock
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
 
 from .util import in_temporary_directory
 
@@ -69,7 +72,7 @@ class PackageVersionTest(unittest.TestCase):
         temp_file = os.path.join(directory, 'changelog')
         missing_changelogs_but_forthcoming = {}
         # Mock the Changelog object from catkin_pkg
-        mock_changelog = mock.Mock()
+        mock_changelog = Mock()
         # Create a changelog entry with a unicode char.
         mock_changelog.rst = ('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n'
                               'Changelog for package fake_pkg\n'
