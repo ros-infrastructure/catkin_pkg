@@ -10,19 +10,19 @@ jobs:
       strategy:
         matrix:
           os: [ubuntu-latest, macos-latest]
-          python: [3.7, 3.8, 3.9]
+          python: ['3.7', '3.8', '3.9', '3.10']
           include:
           - os: ubuntu-18.04
-            python: 2.7
+            python: '2.7'
           - os: ubuntu-18.04
-            python: 3.6
+            python: '3.6'
       name: catkin_pkg tests
       runs-on: ${{matrix.os}}
 
       steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{matrix.python}}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{matrix.python}}
       - name: Install dependencies
