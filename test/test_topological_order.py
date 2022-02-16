@@ -3,7 +3,10 @@ from __future__ import print_function
 import sys
 import unittest
 
-from mock import Mock
+try:
+    from mock import Mock
+except ImportError:
+    from unittest.mock import Mock
 
 try:
     from catkin_pkg.topological_order import topological_order_packages, _PackageDecorator, \

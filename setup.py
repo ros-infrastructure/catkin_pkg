@@ -1,20 +1,9 @@
 #!/usr/bin/env python
 
 import os
-import sys
 
 from setuptools import setup
 
-install_requires = [
-    'docutils',
-    'python-dateutil',
-    'pyparsing',
-    'setuptools',
-]
-
-# argparse is part of the standard library since Python 2.7
-if sys.version_info[0] == 2 and sys.version_info[1] < 7:
-    install_requires.append('argparse')
 
 kwargs = {
     'name': 'catkin_pkg',
@@ -46,7 +35,26 @@ kwargs = {
     'description': 'catkin package library',
     'long_description': 'Library for retrieving information about catkin packages.',
     'license': 'BSD',
-    'install_requires': install_requires,
+    'install_requires': [
+        'docutils',
+        'python-dateutil',
+        'pyparsing',
+        'setuptools',
+    ],
+    'extras_require': {
+        'test': [
+            'flake8',
+            'flake8-blind-except',
+            'flake8-builtins',
+            'flake8-class-newline',
+            'flake8-comprehensions',
+            'flake8-deprecated',
+            'flake8-docstrings',
+            'flake8-import-order',
+            'flake8-quotes',
+            "mock; python_version < '3.3'",
+            'pytest',
+        ]},
 }
 if 'SKIP_PYTHON_MODULES' in os.environ:
     kwargs['packages'] = []
