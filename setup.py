@@ -52,7 +52,7 @@ kwargs = {
             'flake8-import-order',
             'flake8-quotes',
             "mock; python_version < '3.3'",
-            'nose',
+            'pytest',
         ]},
 }
 if 'SKIP_PYTHON_MODULES' in os.environ:

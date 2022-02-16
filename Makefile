@@ -27,4 +27,4 @@ testsetup:
 	echo "running ${NAME} tests"
 
 test: testsetup
-	cd test && nosetests && nosetests3
+	cd test && pytest && pytest-3
