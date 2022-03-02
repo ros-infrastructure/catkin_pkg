@@ -57,8 +57,9 @@ def generate_distutils_setup(package_xml_path=os.path.curdir, **kwargs):
     the "url" field.
 
     The "description" is taken from the eponymous tag if it does not
-    exceed 200 characters. If it does "description" contains the
-    truncated text while "description_long" contains the complete.
+    exceed 200 characters and has no newlines. If it does "description"
+    contains the truncated text while "long_description" contains the
+    complete.
 
     All licenses are merged into the "license" field.
 
@@ -98,10 +99,12 @@ def generate_distutils_setup(package_xml_path=os.path.curdir, **kwargs):
     elif package.urls:
         data['url'] = package.urls[0].url
 
-    if len(package.description) <= 200:
-        data['description'] = package.description
-    else:
-        data['description'] = package.description[:197] + '...'
+    description = package.description.splitlines()[0]
+    if len(description) > 200:
+        description = description[:197] + '...'
+
+    data['description'] = description
+    if description != package.description:
         data['long_description'] = package.description
 
     data['license'] = ', '.join(package.licenses)
