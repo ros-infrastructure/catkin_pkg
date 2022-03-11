@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<package>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>xhtml_descrption</name>
   <version>0.1.0</version>
   <description>
@@ -16,7 +17,7 @@
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
 
-  <run_depend>foo</run_depend>
-  <run_depend>bar</run_depend>
-  <run_depend>baz</run_depend>
+  <exec_depend>foo</exec_depend>
+  <exec_depend>bar</exec_depend>
+  <exec_depend>baz</exec_depend>
 </package>
