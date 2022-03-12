@@ -137,7 +137,7 @@ class Package(object):
             data[attr] = getattr(self, attr)
         return str(data)
 
-    def plaintext_description(self):
+    def get_plaintext_description(self):
         return self.description
 
     def has_buildtool_depend_on_catkin(self):
