@@ -628,7 +628,7 @@ def parse_package_string(data, filename=None, warnings=None):
 
     # description
     pkg.description = _get_node_value(_get_node(root, 'description', filename), allow_xml=True, apply_str=False)
-    pkg.plaintext_description = _get_node_text(_get_node(root, 'description', filename))
+    pkg.plaintext_description = re.sub(' +(\n+) +', r'\1', _get_node_text(_get_node(root, 'description', filename)), flags=re.MULTILINE)
 
     # at least one maintainer, all must have email
     maintainers = _get_nodes(root, 'maintainer')
