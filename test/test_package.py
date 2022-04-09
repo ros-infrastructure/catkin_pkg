@@ -383,14 +383,14 @@ class PackageTest(unittest.TestCase):
 
     def test_parse_package_xhtml_description(self):
         filename = os.path.join(test_data_dir, 'xhtml_description.xml')
+        expected_plaintext_description = None
+        with open(os.path.join(test_data_dir, 'xhtml_description.txt'), 'r') as f:
+            # Strip the trailing newline from the data file.
+            expected_plaintext_description = f.read().rstrip('\n')
         package = parse_package(filename)
         assert package.description
-        assert package.plaintext_description == """\
-A package with an XHTML description.
 
-This package contains several xhtml tags which are, according to REP-149, meant to be properly handled but "XML tags and multiple whitespaces" may be stripped in some situations. Another sentence in this quasi-paragraph will continue to appear on the same plaintext line because there was no <br/> tag to indicate a newline should appear in the output text.
-This text should appear on a subsequent line.\
-"""
+        assert package.plaintext_description == expected_plaintext_description
 
     def test_parse_package_string(self):
         filename = os.path.join(test_data_dir, 'valid_package.xml')
