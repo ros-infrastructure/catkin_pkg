@@ -385,7 +385,7 @@ class PackageTest(unittest.TestCase):
         filename = os.path.join(test_data_dir, 'xhtml_description.xml')
         package = parse_package(filename)
         assert package.description
-        assert package.get_plaintext_description() == """\
+        assert package.plaintext_description == """\
 A package with an XHTML description.
 
 This package contains several xhtml tags which are, according to REP-149, meant to be properly handled but "XML tags and multiple whitespaces" may be stripped in some situations. Another sentence in this quasi-paragraph will continue to appear on the same plaintext line because there was no <br/> tag to indicate a newline should appear in the output text.

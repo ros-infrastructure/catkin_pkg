@@ -138,9 +138,6 @@ class Package(object):
             data[attr] = getattr(self, attr)
         return str(data)
 
-    def get_plaintext_description(self):
-        return self.plaintext_description
-
     def has_buildtool_depend_on_catkin(self):
         """
         Return True if this Package buildtool depends on catkin, otherwise False.
