@@ -813,7 +813,7 @@ def _get_node_text(node, strip=True):
     value = ''
     for child in node.childNodes:
         if child.nodeType == child.TEXT_NODE:
-            value += re.sub('\s+', ' ', child.data)
+            value += re.sub(r'\s+', ' ', child.data)
         elif child.nodeType == child.ELEMENT_NODE:
             if child.tagName == 'br':
                 value += '\n'
