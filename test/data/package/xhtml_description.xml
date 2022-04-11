@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>xhtml_descrption</name>
+  <version>0.1.0</version>
+  <description>
+    A package with an XHTML description.
+    <br/><br/>
+    This package contains <em>several</em> xhtml tags which
+    are, according to
+    <a href="https://www.ros.org/reps/rep-0149.html#description">REP-149</a>,
+    meant to be properly handled but &quot;XML tags and multiple
+    whitespaces&quot; may be stripped in some situations.
+    Another sentence in this quasi-paragraph will continue to appear
+    on the same plaintext line because there was no &lt;br/&gt; tag to indicate
+    a newline should appear in the output text.
+    <br/>
+    This text should appear on a subsequent line.
+  </description>
+
+  <maintainer email="user@todo.todo">üser</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>foo</exec_depend>
+  <exec_depend>bar</exec_depend>
+  <exec_depend>baz</exec_depend>
+</package>
