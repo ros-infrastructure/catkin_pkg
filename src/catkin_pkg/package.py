@@ -60,6 +60,7 @@ class Package(object):
         'version',
         'version_compatibility',
         'description',
+        'plaintext_description',
         'maintainers',
         'licenses',
         'urls',
@@ -624,6 +625,7 @@ def parse_package_string(data, filename=None, warnings=None):
 
     # description
     pkg.description = _get_node_value(_get_node(root, 'description', filename), allow_xml=True, apply_str=False)
+    pkg.plaintext_description = re.sub(' +(\n+) +', r'\1', _get_node_text(_get_node(root, 'description', filename)), flags=re.MULTILINE)
 
     # at least one maintainer, all must have email
     maintainers = _get_nodes(root, 'maintainer')
@@ -801,6 +803,23 @@ def _get_node_value(node, allow_xml=False, apply_str=True):
         value = (''.join([n.data for n in node.childNodes if n.nodeType == n.TEXT_NODE])).strip(' \n\r\t')
     if apply_str:
         value = str(value)
+    return value
+
+
+def _get_node_text(node, strip=True):
+    value = ''
+    for child in node.childNodes:
+        if child.nodeType == child.TEXT_NODE:
+            value += re.sub(r'\s+', ' ', child.data)
+        elif child.nodeType == child.ELEMENT_NODE:
+            if child.tagName == 'br':
+                value += '\n'
+            else:
+                value += _get_node_text(child, strip=False)
+        else:
+            assert 'unreachable'
+    if strip:
+        value = value.strip()
     return value
 
 
