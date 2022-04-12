@@ -94,7 +94,7 @@ def _replace_setup_py_version(setup_py_str, new_version):
     :rtype: str
     :raises RuntimeError:
     """
-    # try to replace contens
+    # try to replace contents
     new_setup_py_str, number_of_subs = re.subn(
         r'version=([\'"])\d+\.\d+\.\d+([\'"]),',
         r'version=\g<1>%s\g<2>,' % new_version,
