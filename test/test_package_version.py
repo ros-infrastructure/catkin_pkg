@@ -61,7 +61,7 @@ class PackageVersionTest(unittest.TestCase):
         self.assertRaises(
             RuntimeError,
             _replace_setup_py_version,
-            '0.1',
+            "version='0.1'",
             '1.0.0')
         self.assertRaises(
             RuntimeError,
