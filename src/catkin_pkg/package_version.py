@@ -84,6 +84,29 @@ def _replace_version(package_str, new_version):
     return new_package_str
 
 
+def _replace_setup_py_version(setup_py_str, new_version):
+    """
+    Replace the version tag in contents if there is only one instance and it is
+    using a literal as the version.
+
+    :param str package_str: contents of setup.py
+    :param str new_version: new version number
+    :returns: new setup.py string
+    :rtype: str
+    :raises RuntimeError:
+    """
+    # try to replace contens
+    new_setup_py_str, number_of_subs = re.subn(
+        r'version=([\'"])\d+\.\d+\.\d+([\'"]),',
+        r'version=\g<1>%s\g<2>,' % new_version,
+        setup_py_str)
+    if number_of_subs == 0:
+        raise RuntimeError("Failed to find a normal version statement, e.g.: version='1.2.3',")
+    if number_of_subs != 1:
+        raise RuntimeError('Illegal number of version statements: %s' % (number_of_subs))
+    return new_setup_py_str
+
+
 def _check_for_version_comment(package_str, new_version):
     """
     Check if a comment is present behind the version tag and return it.
@@ -103,7 +126,8 @@ def _check_for_version_comment(package_str, new_version):
 
 def update_versions(paths, new_version):
     """
-    Bulk replace of version: searches for package.xml files directly in given folders and replaces version tag within.
+    Bulk replace of version: searches for package.xml and setup.py files directly in given folders
+    and replaces version tag within.
 
     :param list paths: folder names
     :param str new_version: version string "int.int.int"
@@ -111,6 +135,7 @@ def update_versions(paths, new_version):
     """
     files = {}
     for path in paths:
+        # Update any package.xml files.
         package_path = os.path.join(path, 'package.xml')
         with open(package_path, 'r') as f:
             package_str = f.read()
@@ -122,6 +147,17 @@ def update_versions(paths, new_version):
         except RuntimeError as rue:
             raise RuntimeError('Could not bump version number in file %s: %s' % (package_path, str(rue)))
         files[package_path] = new_package_str
+        # Update any setup.py files.
+        setup_py_path = os.path.join(path, 'setup.py')
+        if os.path.exists(setup_py_path):
+            with open(setup_py_path, 'r') as f:
+                setup_py_str = f.read()
+            try:
+                new_setup_py_str = _replace_setup_py_version(setup_py_str, new_version)
+            except RuntimeError as exc:
+                raise RuntimeError('Could not bump version number in file %s: %s' % (setup_py_path, str(exc)))
+            files[setup_py_path] = new_setup_py_str
+
     # if all replacements successful, write back modified package.xml
     for package_path, new_package_str in files.items():
         with open(package_path, 'w') as f:
@@ -140,7 +176,7 @@ def get_forthcoming_label(rst):
             if len(section.children) > 0 and isinstance(section.children[0], docutils.nodes.title):
                 title = section.children[0]
         if title and len(title.children) > 0 and isinstance(title.children[0], docutils.nodes.Text):
-            title_text = title.children[0].rawsource
+            title_text = title.children[0].astext()
             if FORTHCOMING_LABEL.lower() in title_text.lower():
                 if forthcoming_label:
                     raise RuntimeError('Found multiple forthcoming sections')
