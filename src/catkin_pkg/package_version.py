@@ -86,8 +86,7 @@ def _replace_version(package_str, new_version):
 
 def _replace_setup_py_version(setup_py_str, new_version):
     """
-    Replace the version tag in contents if there is only one instance and it is
-    using a literal as the version.
+    Replace the version tag in contents if there is only one instance and it is using a literal as the version.
 
     :param str package_str: contents of setup.py
     :param str new_version: new version number
@@ -126,8 +125,7 @@ def _check_for_version_comment(package_str, new_version):
 
 def update_versions(paths, new_version):
     """
-    Bulk replace of version: searches for package.xml and setup.py files directly in given folders
-    and replaces version tag within.
+    Bulk replace of version: searches for package.xml and setup.py files directly in given folders and replaces version tag within.
 
     :param list paths: folder names
     :param str new_version: version string "int.int.int"
