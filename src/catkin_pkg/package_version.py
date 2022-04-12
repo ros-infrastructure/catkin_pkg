@@ -123,16 +123,27 @@ def _check_for_version_comment(package_str, new_version):
     return comment
 
 
-def update_versions(paths, new_version):
+def extract_build_type_from_package_object(package_obj):
+    """
+    Extract the build type from a given package xml object.
+
+    :returns: the build type of the package
+    :rtype: str
+    """
+    build_types = [export.content for export in package_obj.exports if export.tagname == 'build_type']
+    return build_types[0] if build_types else 'catkin'
+
+
+def update_versions(packages, new_version):
     """
     Bulk replace of version: searches for package.xml and setup.py files directly in given folders and replaces version tag within.
 
-    :param list paths: folder names
+    :param dict packages: dict from folder names to package xml objects in those folders
     :param str new_version: version string "int.int.int"
     :raises RuntimeError: if any one package.xml cannot be updated
     """
     files = {}
-    for path in paths:
+    for path, package_obj in packages.items():
         # Update any package.xml files.
         package_path = os.path.join(path, 'package.xml')
         with open(package_path, 'r') as f:
@@ -148,13 +159,16 @@ def update_versions(paths, new_version):
         # Update any setup.py files.
         setup_py_path = os.path.join(path, 'setup.py')
         if os.path.exists(setup_py_path):
-            with open(setup_py_path, 'r') as f:
-                setup_py_str = f.read()
-            try:
-                new_setup_py_str = _replace_setup_py_version(setup_py_str, new_version)
-            except RuntimeError as exc:
-                raise RuntimeError('Could not bump version number in file %s: %s' % (setup_py_path, str(exc)))
-            files[setup_py_path] = new_setup_py_str
+            # Only update setup.py for ament_python packages.
+            build_type = extract_build_type_from_package_object(package_obj)
+            if build_type == 'ament_python':
+                with open(setup_py_path, 'r') as f:
+                    setup_py_str = f.read()
+                try:
+                    new_setup_py_str = _replace_setup_py_version(setup_py_str, new_version)
+                except RuntimeError as exc:
+                    raise RuntimeError('Could not bump version number in file %s: %s' % (setup_py_path, str(exc)))
+                files[setup_py_path] = new_setup_py_str
 
     # if all replacements successful, write back modified package.xml
     for package_path, new_package_str in files.items():

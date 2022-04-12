@@ -84,7 +84,7 @@ class PackageVersionTest(unittest.TestCase):
             with open(os.path.join(sub_dir, 'package.xml'), 'w') as fhand:
                 fhand.write('<package><version>1.5.4</version></package>')
 
-            update_versions([root_dir, sub_dir], '7.6.5')
+            update_versions({root_dir: Mock(), sub_dir: Mock()}, '7.6.5')
 
             with open(os.path.join(root_dir, 'package.xml'), 'r') as fhand:
                 contents = fhand.read()
