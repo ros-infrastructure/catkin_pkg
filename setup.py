@@ -39,6 +39,7 @@ kwargs = {
         'docutils',
         'python-dateutil',
         'pyparsing',
+        'setuptools',
     ],
     'extras_require': {
         'test': [
