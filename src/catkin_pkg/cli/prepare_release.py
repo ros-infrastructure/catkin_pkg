@@ -10,7 +10,6 @@ from catkin_pkg import metapackage
 from catkin_pkg.changelog import CHANGELOG_FILENAME, get_changelog_from_path
 from catkin_pkg.package import InvalidPackage, PACKAGE_MANIFEST_FILENAME
 from catkin_pkg.package_version import bump_version
-from catkin_pkg.package_version import extract_build_type_from_package_object
 from catkin_pkg.package_version import get_forthcoming_label, update_changelog_sections, update_versions
 from catkin_pkg.packages import find_packages, verify_equal_package_versions
 from catkin_pkg.terminal_color import disable_ANSI_colors, fmt
@@ -270,7 +269,7 @@ def _main():
     invalid_pkg_names = []
     valid_build_types = ['catkin', 'ament_cmake', 'ament_python']
     for package in packages.values():
-        build_type = extract_build_type_from_package_object(package)
+        build_type = package.get_build_type()
         if build_type not in valid_build_types:
             unsupported_pkg_names.append(package.name)
         if package.name != package.name.lower():
