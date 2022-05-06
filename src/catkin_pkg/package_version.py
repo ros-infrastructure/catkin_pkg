@@ -123,17 +123,6 @@ def _check_for_version_comment(package_str, new_version):
     return comment
 
 
-def extract_build_type_from_package_object(package_obj):
-    """
-    Extract the build type from a given package xml object.
-
-    :returns: the build type of the package
-    :rtype: str
-    """
-    build_types = [export.content for export in package_obj.exports if export.tagname == 'build_type']
-    return build_types[0] if build_types else 'catkin'
-
-
 def update_versions(packages, new_version):
     """
     Bulk replace of version: searches for package.xml and setup.py files directly in given folders and replaces version tag within.
@@ -160,7 +149,7 @@ def update_versions(packages, new_version):
         setup_py_path = os.path.join(path, 'setup.py')
         if os.path.exists(setup_py_path):
             # Only update setup.py for ament_python packages.
-            build_type = extract_build_type_from_package_object(package_obj)
+            build_type = package_obj.get_build_type()
             if build_type == 'ament_python':
                 with open(setup_py_path, 'r') as f:
                     setup_py_str = f.read()
