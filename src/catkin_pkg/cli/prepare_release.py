@@ -133,6 +133,7 @@ def check_clean_working_copy(base_path, vcs_type):
 def commit_files(base_path, vcs_type, packages, packages_with_changelogs, message, dry_run=False):
     cmd = [_find_executable(vcs_type), 'commit', '-m', message]
     cmd += [os.path.join(p, PACKAGE_MANIFEST_FILENAME) for p in packages.keys()]
+    cmd += [s for s in [os.path.join(p, 'setup.py') for p in packages.keys()] if os.path.exists(s)]
     cmd += [path for path, _, _ in packages_with_changelogs.values()]
     if not dry_run:
         try:
@@ -266,17 +267,18 @@ def _main():
     # complain about packages with upper case character since they won't be releasable with bloom
     unsupported_pkg_names = []
     invalid_pkg_names = []
+    valid_build_types = ['catkin', 'ament_cmake', 'ament_python']
     for package in packages.values():
-        build_types = [export.content for export in package.exports if export.tagname == 'build_type']
-        build_type = build_types[0] if build_types else 'catkin'
-        if build_type not in ('catkin', 'ament_cmake'):
+        build_type = package.get_build_type()
+        if build_type not in valid_build_types:
             unsupported_pkg_names.append(package.name)
         if package.name != package.name.lower():
             invalid_pkg_names.append(package.name)
     if unsupported_pkg_names:
         print(
             fmt(
-                "@{yf}Warning: the following package are not of build_type catkin or ament_cmake and may require manual steps to release': %s" %
+                "@{yf}Warning: the following package are not of build_type %s and may require manual steps to release': %s" %
+                str(valid_build_types),
                 ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(unsupported_pkg_names)])
             ), file=sys.stderr)
         if not args.non_interactive and not prompt_continue('Continue anyway', default=False):
@@ -304,6 +306,10 @@ def _main():
                 raise RuntimeError(fmt(
                     "@{rf}Invalid metapackage at path '@{boldon}%s@{boldoff}':\n  %s\n\nSee requirements for metapackages: %s" %
                     (os.path.abspath(pkg_path), str(e), metapackage.DEFINITION_URL)))
+        # verify that the setup.py files don't have modifications pending
+        setup_py_path = os.path.join(pkg_path, 'setup.py')
+        if os.path.exists(setup_py_path) and has_changes(base_path, setup_py_path, vcs_type):
+            local_modifications.append(setup_py_path)
 
     # fetch current version and verify that all packages have same version number
     old_version = verify_equal_package_versions(packages.values())
@@ -380,7 +386,7 @@ def _main():
         (new_version, ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(missing_changelogs_but_forthcoming.keys())]))))
 
     # bump version number
-    update_versions(packages.keys(), new_version)
+    update_versions(packages, new_version)
     print(fmt("@{gf}Bump version@{reset} of all packages from '@{bf}%s@{reset}' to '@{bf}@{boldon}%s@{boldoff}@{reset}'" % (old_version, new_version)))
 
     pushed = None

@@ -4,6 +4,7 @@ import shutil
 import tempfile
 import unittest
 
+from catkin_pkg.package_version import _replace_setup_py_version
 from catkin_pkg.package_version import _replace_version
 from catkin_pkg.package_version import bump_version
 from catkin_pkg.package_version import update_changelog_sections
@@ -45,6 +46,34 @@ class PackageVersionTest(unittest.TestCase):
         self.assertRaises(RuntimeError, _replace_version, '<package></package>', '0.1.1')
         self.assertRaises(RuntimeError, _replace_version, '<package><version>0.1.1</version><version>0.1.1</version></package>', '0.1.1')
 
+    def test_replace_setup_py_version(self):
+        self.assertEqual(
+            'version="1.0.0",',
+            _replace_setup_py_version('version="0.0.1",', '1.0.0'))
+        self.assertEqual(
+            "version='1.0.0',",
+            _replace_setup_py_version("version='0.0.1',", '1.0.0'))
+        self.assertRaises(
+            RuntimeError,
+            _replace_setup_py_version,
+            '',
+            '1.0.0')
+        self.assertRaises(
+            RuntimeError,
+            _replace_setup_py_version,
+            "version='0.1'",
+            '1.0.0')
+        self.assertRaises(
+            RuntimeError,
+            _replace_setup_py_version,
+            'version=something,',
+            '1.0.0')
+        self.assertRaises(
+            RuntimeError,
+            _replace_setup_py_version,
+            'version="0.0.1",version="0.0.1",',
+            '1.0.0')
+
     def test_update_versions(self):
         try:
             root_dir = tempfile.mkdtemp()
@@ -55,7 +84,7 @@ class PackageVersionTest(unittest.TestCase):
             with open(os.path.join(sub_dir, 'package.xml'), 'w') as fhand:
                 fhand.write('<package><version>1.5.4</version></package>')
 
-            update_versions([root_dir, sub_dir], '7.6.5')
+            update_versions({root_dir: Mock(), sub_dir: Mock()}, '7.6.5')
 
             with open(os.path.join(root_dir, 'package.xml'), 'r') as fhand:
                 contents = fhand.read()
