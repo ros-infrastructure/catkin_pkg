@@ -40,11 +40,14 @@ from .package import PACKAGE_MANIFEST_FILENAME
 from .package import parse_package_string
 
 
-def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
+DEFAULT_IGNORE_MARKERS = {'AMENT_IGNORE', 'CATKIN_IGNORE', 'COLCON_IGNORE'}
+
+
+def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False, ignore_markers=DEFAULT_IGNORE_MARKERS):
     """
     Crawls the filesystem to find package manifest files.
 
-    When a subfolder contains either of the following files it is ignored:
+    When a subfolder contains either of the files mentioned in ``ignore_markers`` it is ignored. By default, these are:
     - ``AMENT_IGNORE``
     - ``CATKIN_IGNORE``
     - ``COLCON_IGNORE``
@@ -53,12 +56,13 @@ def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
     :param exclude_paths: A list of paths which should not be searched, ``list``
     :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be
         searched, ``bool``
+    :param ignore_markers: Names of files that indicate that a folder should be ignored, ``set``
     :returns: A list of relative paths containing package manifest files ``list``
     """
     paths = []
     real_exclude_paths = [os.path.realpath(p) for p in exclude_paths] if exclude_paths is not None else []
     for dirpath, dirnames, filenames in os.walk(basepath, followlinks=True):
-        if set(dirnames + filenames) & {'AMENT_IGNORE', 'CATKIN_IGNORE', 'COLCON_IGNORE'} or \
+        if set(dirnames + filenames) & ignore_markers or \
             os.path.realpath(dirpath) in real_exclude_paths or \
                 (exclude_subspaces and '.catkin' in filenames):
             del dirnames[:]
@@ -72,7 +76,7 @@ def find_package_paths(basepath, exclude_paths=None, exclude_subspaces=False):
     return paths
 
 
-def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warnings=None):
+def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warnings=None, ignore_markers=DEFAULT_IGNORE_MARKERS):
     """
     Crawls the filesystem to find package manifest files and parses them.
 
@@ -80,11 +84,14 @@ def find_packages(basepath, exclude_paths=None, exclude_subspaces=False, warning
     :param exclude_paths: A list of paths which should not be searched, ``list``
     :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be
         searched, ``bool``
-    :param warnings: Print warnings if None or return them in the given list
+    :param warnings: Print warnings if None or return them in the given list, ``bool``
+    :param ignore_markers: Names of files that indicate that a folder should be ignored, ``set``
     :returns: A dict mapping relative paths to ``Package`` objects ``dict``
     :raises: :exc:RuntimeError` If multiple packages have the same name
     """
-    packages = find_packages_allowing_duplicates(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces, warnings=warnings)
+    packages = find_packages_allowing_duplicates(basepath, exclude_paths=exclude_paths,
+                                                 exclude_subspaces=exclude_subspaces, warnings=warnings,
+                                                 ignore_markers=ignore_markers)
     package_paths_by_name = {}
     for path, package in packages.items():
         if package.name not in package_paths_by_name:
@@ -109,7 +116,7 @@ class _PackageParser(object):
         return (path, parsed_package), warnings
 
 
-def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subspaces=False, warnings=None):
+def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subspaces=False, warnings=None, ignore_markers=DEFAULT_IGNORE_MARKERS):
     """
     Crawls the filesystem to find package manifest files and parses them.
 
@@ -118,9 +125,10 @@ def find_packages_allowing_duplicates(basepath, exclude_paths=None, exclude_subs
     :param exclude_subspaces: The flag is subfolders containing a .catkin file should not be
         searched, ``bool``
     :param warnings: Print warnings if None or return them in the given list
+    :param ignore_markers: Names of files that indicate that a folder should be ignored, ``set``
     :returns: A dict mapping relative paths to ``Package`` objects ``dict``
     """
-    package_paths = find_package_paths(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces)
+    package_paths = find_package_paths(basepath, exclude_paths=exclude_paths, exclude_subspaces=exclude_subspaces, ignore_markers=ignore_markers)
 
     xmls = {}
     for path in package_paths:

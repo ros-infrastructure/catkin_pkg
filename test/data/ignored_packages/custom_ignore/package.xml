@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package>
+  <name>custom_ignored</name>
+  <version>1.2.0</version>
+  <description>Package with a CUSTOM_IGNORE file.</description>
+
+  <maintainer email="user@todo.todo">üser</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+</package>
