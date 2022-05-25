@@ -166,6 +166,18 @@ class Package(object):
             return build_type_exports[0]
         raise InvalidPackage('Only one <build_type> element is permitted.', self.filename)
 
+    def get_unconditional_build_types(self):
+        """
+        Return values of export/build_type elements without conditional filtering, or ['catkin'] if unspecified.
+
+        :returns: package build types
+        :rtype: List[str]
+        """
+        build_type_exports = [e.content for e in self.exports if e.tagname == 'build_type']
+        if not build_type_exports:
+            return ['catkin']
+        return build_type_exports
+
     def has_invalid_metapackage_dependencies(self):
         """
         Return True if this package has invalid dependencies for a metapackage.
