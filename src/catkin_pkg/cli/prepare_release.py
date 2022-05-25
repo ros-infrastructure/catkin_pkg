@@ -278,8 +278,7 @@ def _main():
         print(
             fmt(
                 "@{yf}Warning: the following package are not of build_type %s and may require manual steps to release': %s" %
-                str(valid_build_types),
-                ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(unsupported_pkg_names)])
+                (str(valid_build_types), ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(unsupported_pkg_names)]))
             ), file=sys.stderr)
         if not args.non_interactive and not prompt_continue('Continue anyway', default=False):
             raise RuntimeError(fmt('@{rf}Aborted release, verify that unsupported packages are ready to be released or release manually.'))
