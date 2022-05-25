@@ -172,13 +172,8 @@ class Package(object):
 
         :returns: package build types
         :rtype: List[str]
-        :raises: :exc:`InvalidPackage`
         """
-        # for backward compatibility a build type without an evaluated
-        # condition is still being considered (i.e. evaluated_condition is None)
-        build_type_exports = [
-            e.content for e in self.exports
-            if e.tagname == 'build_type']
+        build_type_exports = [e.content for e in self.exports if e.tagname == 'build_type']
         if not build_type_exports:
             return ['catkin']
         return build_type_exports
