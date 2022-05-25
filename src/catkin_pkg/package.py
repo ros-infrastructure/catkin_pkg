@@ -166,7 +166,7 @@ class Package(object):
             return build_type_exports[0]
         raise InvalidPackage('Only one <build_type> element is permitted.', self.filename)
 
-    def get_build_types(self):
+    def get_unconditional_build_types(self):
         """
         Return values of export/build_type elements without conditional filtering, or ['catkin'] if unspecified.
 
