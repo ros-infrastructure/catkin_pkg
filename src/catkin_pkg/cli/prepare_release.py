@@ -269,8 +269,8 @@ def _main():
     invalid_pkg_names = []
     valid_build_types = ['catkin', 'ament_cmake', 'ament_python']
     for package in packages.values():
-        build_type = package.get_build_type()
-        if build_type not in valid_build_types:
+        build_types = package.get_build_types()
+        if any(build_type not in valid_build_types for build_type in build_types):
             unsupported_pkg_names.append(package.name)
         if package.name != package.name.lower():
             invalid_pkg_names.append(package.name)
