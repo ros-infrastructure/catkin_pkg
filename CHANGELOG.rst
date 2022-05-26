@@ -1,3 +1,17 @@
+0.5.1 (2022-05-10)
+==================
+- Add API method for getting all build types regardless of conditions. `#337 <https://github.com/ros-infrastructure/catkin_pkg/pull/337>`_
+- Pass all string format arguments as a tuple. `#339 <https://github.com/ros-infrastructure/catkin_pkg/pull/339>`_
+  - Resolves `#338 <https://github.com/ros-infrastructure/catkin_pkg/pull/338>`_
+- Consider all build types when updating package versions. `#340 <https://github.com/ros-infrastructure/catkin_pkg/pull/340>`_
+  - Resolves `#336 <https://github.com/ros-infrastructure/catkin_pkg/pull/336>`_
+
+Contributors
+------------
+
+- Scott K Logan
+- Steven! Ragnarök
+
 0.5.0 (2022-05-10)
 ==================
 
