@@ -149,7 +149,7 @@ def update_versions(packages, new_version):
         setup_py_path = os.path.join(path, 'setup.py')
         if os.path.exists(setup_py_path):
             # Only update setup.py for ament_python packages.
-            build_types = package_obj.get_build_types()
+            build_types = package_obj.get_unconditional_build_types()
             if 'ament_python' in build_types:
                 with open(setup_py_path, 'r') as f:
                     setup_py_str = f.read()
