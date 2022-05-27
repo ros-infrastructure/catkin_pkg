@@ -1,3 +1,14 @@
+0.5.2 (2022-05-27)
+==================
+
+- Use renamed function for getting multiple build types. `#342 <https://github.com/ros-infrastructure/catkin_pkg/pull/342>`_
+  - Resolves `#341 <https://github.com/ros-infrastructure/catkin_pkg/pull/341>`_
+
+Contributors
+------------
+
+- Steven! Ragnarök
+
 0.5.1 (2022-05-10)
 ==================
 - Add API method for getting all build types regardless of conditions. `#337 <https://github.com/ros-infrastructure/catkin_pkg/pull/337>`_
