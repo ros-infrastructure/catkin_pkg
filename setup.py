@@ -27,6 +27,12 @@ kwargs = {
     'author': 'Dirk Thomas',
     'author_email': 'dthomas@osrfoundation.org',
     'maintainer': 'ROS Infrastructure Team',
+    'project_urls': {
+        'Source code':
+        'https://github.com/ros-infrastructure/catkin_pkg',
+        'Issue tracker':
+        'https://github.com/ros-infrastructure/catkin_pkg/issues',
+    },
     'url': 'http://wiki.ros.org/catkin_pkg',
     'keywords': ['catkin', 'ROS'],
     'classifiers': [
