@@ -17,6 +17,30 @@ except ImportError:
 
 from .util import in_temporary_directory
 
+RST_CHANGELOG = ('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n'
+                 'Changelog for package fake_pkg\n'
+                 '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n'
+                 '\n'
+                 'Forthcoming\n'
+                 '-----------\n'
+                 '* This is my changelog entry\n'
+                 '* This is a line that has unicode' u'\xfc''\n'
+                 '\n'
+                 '0.0.9 (2017-01-30)\n'
+                 '------------------\n'
+                 '* This is old version.\n')
+
+MD_CHANGELOG = ('## Changelog for package fake_pkg\n'
+                '\n'
+                'Forthcoming\n'
+                '-----------\n'
+                '* This is my changelog entry\n'
+                '* This is a line that has unicode' u'\xfc''\n'
+                '\n'
+                '0.0.9 (2017-01-30)\n'
+                '------------------\n'
+                '* This is old version.\n')
+
 
 class PackageVersionTest(unittest.TestCase):
 
@@ -103,18 +127,7 @@ class PackageVersionTest(unittest.TestCase):
         # Mock the Changelog object from catkin_pkg
         mock_changelog = Mock()
         # Create a changelog entry with a unicode char.
-        mock_changelog.rst = ('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n'
-                              'Changelog for package fake_pkg\n'
-                              '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n'
-                              '\n'
-                              'Forthcoming\n'
-                              '-----------\n'
-                              '* This is my changelog entry\n'
-                              '* This is a line that has unicode' u'\xfc''\n'
-                              '\n'
-                              '0.0.9 (2017-01-30)\n'
-                              '------------------\n'
-                              '* This is old version.\n')
+        mock_changelog.content = RST_CHANGELOG
 
         # Create tuple with expected entires.
         missing_changelogs_but_forthcoming['fake_pkg'] = (temp_file, mock_changelog, 'Forthcoming')

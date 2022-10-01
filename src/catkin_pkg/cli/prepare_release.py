@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 from catkin_pkg import metapackage
-from catkin_pkg.changelog import CHANGELOG_FILENAME, get_changelog_from_path
+from catkin_pkg.changelog import get_changelog_from_path
 from catkin_pkg.package import InvalidPackage, PACKAGE_MANIFEST_FILENAME
 from catkin_pkg.package_version import bump_version
 from catkin_pkg.package_version import get_forthcoming_label, update_changelog_sections, update_versions
@@ -330,25 +330,22 @@ def _main():
 
     # check for changelog entries
     missing_changelogs = []
-    missing_changelogs_but_forthcoming = {}
+    changelogs_to_update = {}
+    changelogs = {}
     for pkg_path, package in packages.items():
-        changelog_path = os.path.join(pkg_path, CHANGELOG_FILENAME)
-        if not os.path.exists(changelog_path):
+        changelog = get_changelog_from_path(os.path.join(base_path, pkg_path), package.name)
+        if changelog is not None:
+            try:
+                changelog.get_content_of_version(new_version)
+            except KeyError:
+                # check that forthcoming section exists
+                print("Version '%s' not found in changelog of package '%s'" % (new_version, package.name))
+                forthcoming_label = get_forthcoming_label(changelog.content)
+                if forthcoming_label:
+                    changelogs_to_update[package.name] = (changelog.file_path, changelog, forthcoming_label)
+            changelogs[package.name] = changelog
+        else:
             missing_changelogs.append(package.name)
-            continue
-        # verify that the changelog files don't have modifications pending
-        if has_changes(base_path, changelog_path, vcs_type):
-            local_modifications.append(changelog_path)
-        changelog = get_changelog_from_path(changelog_path, package.name)
-        try:
-            changelog.get_content_of_version(new_version)
-        except KeyError:
-            # check that forthcoming section exists
-            forthcoming_label = get_forthcoming_label(changelog.rst)
-            if forthcoming_label:
-                missing_changelogs_but_forthcoming[package.name] = (changelog_path, changelog, forthcoming_label)
-            else:
-                missing_changelogs.append(package.name)
 
     if local_modifications:
         raise RuntimeError(fmt('@{rf}The following files have modifications, please commit/revert them before:' + ''.join([('\n- @{boldon}%s@{boldoff}' % path) for path in local_modifications])))
@@ -379,10 +376,10 @@ def _main():
         tag_svn_cmd = tag_repository(base_path, vcs_type, tag_name, args.tag_prefix != '', dry_run=True)
 
     # tag forthcoming changelog sections
-    update_changelog_sections(missing_changelogs_but_forthcoming, new_version)
+    update_changelog_sections(changelogs_to_update, new_version)
     print(fmt(
         "@{gf}Rename the forthcoming section@{reset} of the following packages to version '@{bf}@{boldon}%s@{boldoff}@{reset}': %s" %
-        (new_version, ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(missing_changelogs_but_forthcoming.keys())]))))
+        (new_version, ', '.join([('@{boldon}%s@{boldoff}' % p) for p in sorted(changelogs_to_update.keys())]))))
 
     # bump version number
     update_versions(packages, new_version)
@@ -392,7 +389,7 @@ def _main():
     if vcs_type in ['svn']:
         # for svn everything affects the remote repository immediately
         commands = []
-        commands.append(commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, dry_run=True))
+        commands.append(commit_files(base_path, vcs_type, packages, changelogs_to_update, tag_name, dry_run=True))
         commands.append(tag_svn_cmd)
         if not args.no_push:
             print(fmt('@{gf}The following commands will be executed to commit the changes and tag the new version:'))
@@ -407,14 +404,14 @@ def _main():
                 if not prompt_continue('Execute commands which will modify the repository', default=True):
                     pushed = False
             if pushed is None:
-                commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name)
+                commit_files(base_path, vcs_type, packages, changelogs_to_update, tag_name)
                 tag_repository(base_path, vcs_type, tag_name, args.tag_prefix != '')
                 pushed = True
 
     else:
         # for other vcs types the changes are first done locally
         print(fmt('@{gf}Committing the package.xml files...'))
-        commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name)
+        commit_files(base_path, vcs_type, packages, changelogs_to_update, tag_name)
 
         print(fmt("@{gf}Creating tag '@{boldon}%s@{boldoff}'..." % (tag_name)))
         tag_repository(base_path, vcs_type, tag_name, args.tag_prefix != '')

@@ -65,7 +65,9 @@ __maintainer__ = 'William Woodall'
 
 log = logging.getLogger('changelog')
 
-CHANGELOG_FILENAME = 'CHANGELOG.rst'
+CHANGELOG_FILE_TYPES = ['rst', 'md']
+CHANGELOG_EXTENSIONS = {file_type: ".%s" % file_type for file_type in CHANGELOG_FILE_TYPES}
+CHANGELOG_FILENAME = 'CHANGELOG'
 
 example_rst = """\
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -115,6 +117,54 @@ The library should now compile under ``Win32``
 
 0.0
 ===
+
+0.0.1 (2012-01-31)
+------------------
+
+1. Initial release
+2. Initial bugs
+"""
+
+example_md = """\
+## Changelog for package foo
+
+0.1.27 (forthcoming)
+--------------------
+* Great new feature
+
+0.1.26 (2012-12-26)
+-------------------
+* Utilizes caching to improve query performance (fix https://github.com/ros/ros_comm/pull/2)
+* Simplified API calls based on (https://github.com/ros/robot_model):
+
+  * Note that these changes are based on REP 192
+  * Also they fix a problem related to initialization
+
+* Fixed synchronization issue on startup
+
+.. not mentioning secret feature on purpose
+
+0.1.25 (2012-11-25)
+-------------------
+
+- Added thread safety
+- Replaced custom XML parser with `TinyXML <http://www.grinninglizard.com/tinyxml/>`_.
+- Fixed regression introduced in 0.1.22
+- New syntax for foo::
+
+    foo('bar')
+
+- Added a safety check for XML parsing
+
+----
+
+The library should now compile under ``Win32``
+
+0.1.0 (2012-10-01)
+------------------
+
+*First* public **stable** release
+
 
 0.0.1 (2012-01-31)
 ------------------
@@ -191,28 +241,37 @@ def get_changelog_from_path(path, package_name=None):
     :returns: ``Changelog`` changelog class or None if file was not readable
     """
     changelog = Changelog(package_name)
-    if os.path.isdir(path):
-        path = os.path.join(path, CHANGELOG_FILENAME)
+    if os.path.isfile(path):
+        changelog.file_path = path
+    else:
+        for changelog_filename in [CHANGELOG_FILENAME+extension for extension in CHANGELOG_EXTENSIONS.values()]:
+            changelog_path = os.path.join(path, changelog_filename)
+            if os.path.isfile(changelog_path):
+                changelog.file_path = changelog_path
     try:
-        with open(path, 'rb') as f:
-            populate_changelog_from_rst(changelog, f.read().decode('utf-8'))
-    except IOError:
+        with open(changelog.file_path, 'rb') as f:
+            populate_changelog_from_file_content(changelog, f.read().decode('utf-8'))
+    except (IOError, TypeError):
         return None
     return changelog
 
 
-def populate_changelog_from_rst(changelog, rst):
+def populate_changelog_from_file_content(changelog, file_content):
     """
     Changelog factory, which converts the raw ReST into a class.
 
     :param changelog: ``Changelog`` changelog to be populated
-    :param rst: ``str`` raw ReST changelog
+    :param file_content: ``str`` raw changelog
     :returns: ``Changelog`` changelog that was populated
     """
-    document = docutils.core.publish_doctree(rst)
+    document = docutils.core.publish_doctree(file_content)
     processes_changelog_children(changelog, document.children)
-    changelog.rst = rst
+    changelog.content = file_content
     return changelog
+
+
+# Backwards compatibility
+populate_changelog_from_rst = populate_changelog_from_file_content
 
 
 def processes_changelog_children(changelog, children):
@@ -362,15 +421,17 @@ class BulletList(object):
 
 
 class Changelog(object):
-    """Represents a REP-0132 changelog."""
+    """Represents a changelog."""
 
     def __init__(self, package_name=None):
+        self.__file_path = None
         self.__package_name = package_name
         self.__versions = []
         self.__parsed_versions = []
         self.__dates = {}
         self.__content = {}
-        self.__rst = ''
+        self.__extension = None
+        self.__data = ''
 
     def __str__(self):
         value = self.__unicode__()
@@ -389,6 +450,20 @@ class Changelog(object):
         return '\n'.join(msg)
 
     @property
+    def file_path(self):
+        return self.__file_path
+
+    @file_path.setter
+    def file_path(self, file_path):
+        self.__file_path = file_path
+        self.__extension = os.path.splitext(file_path)[1]
+        assert self.__extension in CHANGELOG_EXTENSIONS.values(), "Invalid extension: '{0}'".format(self.__extension)
+
+    @property
+    def extension(self):
+        return self.__extension
+
+    @property
     def package_name(self):
         return self.__package_name
 
@@ -397,12 +472,12 @@ class Changelog(object):
         self.__package_name = package_name
 
     @property
-    def rst(self):
-        return self.__rst
+    def data(self):
+        return self.__data
 
-    @rst.setter
-    def rst(self, rst):
-        self.__rst = rst
+    @data.setter
+    def data(self, rst):
+        self.__data = rst
 
     def add_version_section(self, version, date, contents):
         """
@@ -530,6 +605,12 @@ class Reference(object):
         if self.text is None:
             return _unicode(self.link)
         return '`{0} <{1}>`_'.format(self.text, self.link)
+
+    def as_md(self):
+        """Self as markdown (unicode)."""
+        if self.text is None:
+            return _unicode(self.link)
+        return '[{0}]({1})'.format(self.text, self.link)
 
     def as_txt(self):
         """Self formatted for plain text (unicode)."""
