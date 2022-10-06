@@ -98,7 +98,7 @@ class VcsClientBase(object):
         cwd = os.path.abspath(self.path)
         result = {'cmd': ' '.join(cmd), 'cwd': cwd}
         try:
-            proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
+            proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
             output, _ = proc.communicate()
             result['output'] = output.rstrip().decode('utf-8')
             result['returncode'] = proc.returncode
