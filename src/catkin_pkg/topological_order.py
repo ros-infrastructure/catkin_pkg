@@ -222,7 +222,7 @@ def _reduce_cycle_set(packages_orig):
     :param packages: A dict mapping package name to ``_PackageDecorator`` objects ``dict``
     :returns: A list of package names from the input which could not easily be detected as not being part of a cycle.
     """
-    assert(packages_orig)
+    assert (packages_orig)
     packages = copy.copy(packages_orig)
     last_depended = None
     while len(packages) > 0:

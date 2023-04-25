@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 
@@ -39,6 +39,7 @@ kwargs = {
         'Programming Language :: Python',
         'License :: OSI Approved :: BSD License'
     ],
+    'python_requires': '>=3.6',
     'description': 'catkin package library',
     'long_description': 'Library for retrieving information about catkin packages.',
     'license': 'BSD',
@@ -59,7 +60,6 @@ kwargs = {
             'flake8-docstrings',
             'flake8-import-order',
             'flake8-quotes',
-            "mock; python_version < '3.3'",
             'pytest',
         ]},
 }

@@ -2,16 +2,12 @@ import os
 import shutil
 import tempfile
 import unittest
+from unittest.mock import MagicMock, Mock
 
 from catkin_pkg.package import Dependency, Export, PACKAGE_MANIFEST_FILENAME, parse_package, Url
 from catkin_pkg.package_templates import _create_include_macro, _create_targetlib_args, _safe_write_files, \
     create_cmakelists, create_package_files, create_package_xml, PackageTemplate
 from catkin_pkg.python_setup import generate_distutils_setup
-
-try:
-    from unittest.mock import MagicMock, Mock
-except ImportError:
-    from mock import MagicMock, Mock
 
 
 def u(line):
