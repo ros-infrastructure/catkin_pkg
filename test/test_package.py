@@ -2,6 +2,7 @@ import os.path
 # Redirect stderr to stdout to suppress output in tests
 import sys
 import unittest
+from unittest.mock import Mock
 
 import xml.dom.minidom as dom
 from xml.parsers.expat import ExpatError
@@ -19,11 +20,6 @@ from catkin_pkg.package import (
     parse_package_string,
     Person,
 )
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
 
 sys.stderr = sys.stdout
 

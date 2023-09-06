@@ -3,17 +3,13 @@ import os
 import shutil
 import tempfile
 import unittest
+from unittest.mock import Mock
 
 from catkin_pkg.package_version import _replace_setup_py_version
 from catkin_pkg.package_version import _replace_version
 from catkin_pkg.package_version import bump_version
 from catkin_pkg.package_version import update_changelog_sections
 from catkin_pkg.package_version import update_versions
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
 
 from .util import in_temporary_directory
 
