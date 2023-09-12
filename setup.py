@@ -10,7 +10,7 @@ kwargs = {
     # same version as in:
     # - src/catkin_pkg/__init__.py
     # - stdeb.cfg
-    'version': '0.5.2',
+    'version': '1.0.0',
     'packages': ['catkin_pkg', 'catkin_pkg.cli'],
     'package_dir': {'': 'src'},
     'package_data': {'catkin_pkg': ['templates/*.in']},

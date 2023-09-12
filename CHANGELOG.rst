@@ -1,3 +1,16 @@
+1.0.0 (2023-09-12)
+==================
+
+- List 'ROS Infrastructure Team' as the package maintainer. `#328 <https://github.com/ros-infrastructure/catkin_pkg/pull/328>`_
+- Drop support for Python 2. `#354 <https://github.com/ros-infrastructure/catkin_pkg/pull/354>`_
+- Move flake8 config to setup.cfg, address flake8 v6 violations. `#356 <https://github.com/ros-infrastructure/catkin_pkg/pull/356>`_
+
+Contributors
+------------
+
+- Scott K Logan
+- Steven! Ragnarök
+
 0.5.2 (2022-05-27)
 ==================
 
@@ -11,6 +24,7 @@ Contributors
 
 0.5.1 (2022-05-10)
 ==================
+
 - Add API method for getting all build types regardless of conditions. `#337 <https://github.com/ros-infrastructure/catkin_pkg/pull/337>`_
 - Pass all string format arguments as a tuple. `#339 <https://github.com/ros-infrastructure/catkin_pkg/pull/339>`_
   - Resolves `#338 <https://github.com/ros-infrastructure/catkin_pkg/pull/338>`_
