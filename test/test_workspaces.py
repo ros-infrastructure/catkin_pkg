@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 try:
-    from catkin_pkg.workspaces import ensure_workspace_marker, get_spaces, order_paths,\
+    from catkin_pkg.workspaces import ensure_workspace_marker, get_spaces, order_paths, \
         CATKIN_WORKSPACE_MARKER_FILE
 except ImportError as e:
     raise ImportError('Please adjust your PYTHONPATH before running this test: %s' % str(e))
