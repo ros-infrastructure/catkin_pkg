@@ -190,7 +190,7 @@ def update_changelog_sections(changelogs, new_version):
     new_changelog_data = {}
     new_label = '%s (%s)' % (new_version, datetime.date.today().isoformat())
     for pkg_name, (changelog_path, changelog, forthcoming_label) in changelogs.items():
-        data = rename_section(changelog.rst, forthcoming_label, new_label)
+        data = rename_section(changelog.content, forthcoming_label, new_label)
         new_changelog_data[changelog_path] = data
 
     for changelog_path, data in new_changelog_data.items():

@@ -42,7 +42,7 @@ http://ros.org/reps/rep-0132.html
 import os
 import re
 
-from catkin_pkg.changelog import CHANGELOG_FILENAME
+from catkin_pkg.changelog import CHANGELOG_FILENAME, CHANGELOG_EXTENSIONS
 from catkin_pkg.changelog_generator_vcs import Tag
 
 FORTHCOMING_LABEL = 'Forthcoming'
@@ -100,26 +100,27 @@ def _get_latest_version_tag_name(vcs_client):
     return tag_name
 
 
-def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None, skip_contributors=False):
+def generate_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None, skip_contributors=False, file_type='rst'):
     for pkg_path, package in packages.items():
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
+        changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME+CHANGELOG_EXTENSIONS[file_type])
         if os.path.exists(changelog_path):
             continue
         # generate package specific changelog file
         if logger:
-            logger.debug("- creating '%s'" % os.path.join(pkg_path, CHANGELOG_FILENAME))
+            logger.debug("- creating '%s'" % changelog_path)
         pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path)
-        data = generate_changelog_file(package.name, pkg_tag2log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors)
+        data = generate_changelog_file(package.name, pkg_tag2log_entries, vcs_client=vcs_client, skip_contributors=skip_contributors, file_type=file_type)
         with open(changelog_path, 'wb') as f:
             f.write(data.encode('utf-8'))
 
 
-def update_changelogs(base_path, packages, tag2log_entries, logger=None, vcs_client=None, skip_contributors=False):
-    for pkg_path in packages.keys():
-        # update package specific changelog file
+def update_changelogs(changelogs, tag2log_entries, logger=None, vcs_client=None, skip_contributors=False):
+    for pkg_name, changelog in changelogs.items():
+        changelog_path = changelog.file_path
         if logger:
-            logger.debug("- updating '%s'" % os.path.join(pkg_path, CHANGELOG_FILENAME))
-        pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_path)
+            logger.debug("- updating '%s'" % changelog_path)
+        pkg_tag2log_entries = filter_package_changes(tag2log_entries, pkg_name)
         changelog_path = os.path.join(base_path, pkg_path, CHANGELOG_FILENAME)
         with open(changelog_path, 'rb') as f:
             data = f.read().decode('utf-8')
@@ -143,9 +144,9 @@ def filter_package_changes(tag2log_entries, pkg_path):
     return pkg_tag2log_entries
 
 
-def generate_changelog_file(pkg_name, tag2log_entries, vcs_client=None, skip_contributors=False):
+def generate_changelog_file(pkg_name, tag2log_entries, vcs_client=None, skip_contributors=False, file_type='rst'):
     blocks = []
-    blocks.append(generate_package_headline(pkg_name))
+    blocks.append(generate_package_headline(pkg_name, file_type=file_type))
 
     for tag in sorted_tags(tag2log_entries.keys()):
         log_entries = tag2log_entries[tag]
@@ -239,10 +240,16 @@ def sorted_tags(tags):
         yield tag
 
 
-def generate_package_headline(pkg_name):
-    headline = 'Changelog for package %s' % pkg_name
-    section_marker = '^' * len(headline)
-    return '%s\n%s\n%s\n' % (section_marker, headline, section_marker)
+def generate_package_headline(pkg_name, file_type='rst'):
+    if file_type == 'rst':
+        headline = 'Changelog for package %s' % pkg_name
+        section_marker = '^' * len(headline)
+        headline = '%s\n%s\n%s\n' % (section_marker, headline, section_marker)
+    elif file_type == 'md':
+        headline = '## Changelog for package %s\n\n' % pkg_name
+    else:
+        raise RuntimeError('Unknown file format: %s' % file_type)
+    return headline
 
 
 def generate_version_block(version, timestamp, log_entries, vcs_client=None, skip_contributors=False):
