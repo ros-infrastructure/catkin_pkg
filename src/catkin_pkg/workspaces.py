@@ -35,6 +35,7 @@
 from __future__ import print_function
 
 import os
+import warnings
 
 CATKIN_WORKSPACE_MARKER_FILE = '.catkin_workspace'
 
@@ -94,7 +95,9 @@ def order_paths(paths_to_order, prefix_paths):
 def _is_equal_or_in_parents(dir_, path):
     dir_ = os.path.normcase(os.path.realpath(dir_))
     path = os.path.normcase(os.path.realpath(path))
-    return path == dir_ or path.startswith(dir_ + os.sep)
+    res = (path == dir_ or path.startswith(dir_ + os.sep))
+    warnings.warn(f'Checking if {path} is under {dir_}: {res}')
+    return res
 
 
 def ensure_workspace_marker(base_path):
