@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 
@@ -43,6 +44,9 @@ class WorkspacesTest(unittest.TestCase):
         self.assertEqual(['foo' + os.sep + 'bim', 'bar'], order_paths(['bar', 'foo' + os.sep + 'bim'], ['foo']))
 
     def test_order_paths_with_symlink(self):
+        if os.name == 'nt' and sys.version_info < (3, 8):
+            self.skipTest('symlinks are not resolved on Windows prior to Python 3.8')
+
         root_dir = tempfile.mkdtemp()
         try:
             foo = os.path.join(root_dir, 'foo')
