@@ -37,3 +37,7 @@ def main():
             print('%s -> %s' % (version, new_version))
     except Exception as e:  # noqa: B902
         sys.exit(str(e))
+
+
+if __name__ == '__main__':
+    sys.exit(main())

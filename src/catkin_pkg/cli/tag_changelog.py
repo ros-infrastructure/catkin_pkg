@@ -112,3 +112,7 @@ def main(sysargs=None):
     for (changelog_path, data) in new_changelog_data:
         with open(changelog_path, 'wb') as f:
             f.write(data.encode('utf-8'))
+
+
+if __name__ == '__main__':
+    sys.exit(main())

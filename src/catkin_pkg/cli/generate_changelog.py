@@ -135,3 +135,7 @@ def main_catching_runtime_error(*args, **kwargs):
     except RuntimeError as e:
         print('ERROR: ' + str(e), file=sys.stderr)
         sys.exit(1)
+
+
+if __name__ == '__main__':
+    sys.exit(main_catching_runtime_error())
