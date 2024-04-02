@@ -5,4 +5,6 @@ import sys
 from catkin_pkg.cli.package_version import main
 
 if __name__ == '__main__':
+    print('The catkin_package_version script is deprecated. Use python '
+          "-m 'catkin_pkg.cli.package_version' instead.\n", file=sys.stderr)
     sys.exit(main())
