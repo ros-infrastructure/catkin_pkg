@@ -9,8 +9,6 @@ on:  # yamllint disable-line rule:truthy
 jobs:
   pytest:
     uses: ros-infrastructure/ci/.github/workflows/pytest.yaml@main
-    with:
-      matrix-filter: del(.matrix.os[] | select(contains("windows")))
   yamllint:
     runs-on: ubuntu-latest
     steps:
