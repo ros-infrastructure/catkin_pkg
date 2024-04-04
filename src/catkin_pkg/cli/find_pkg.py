@@ -27,3 +27,7 @@ def main(argv=sys.argv[1:]):
     except RuntimeError as e:
         print('ERROR: ' + str(e), file=sys.stderr)
         sys.exit(1)
+
+
+if __name__ == '__main__':
+    sys.exit(main())

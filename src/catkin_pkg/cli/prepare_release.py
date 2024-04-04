@@ -449,3 +449,7 @@ def _main():
             print(fmt('@{yf}%s' % msg))
         else:
             raise RuntimeError(fmt('@{rf}%s' % msg))
+
+
+if __name__ == '__main__':
+    sys.exit(main())
