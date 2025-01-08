@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 
@@ -10,7 +10,7 @@ kwargs = {
     # same version as in:
     # - src/catkin_pkg/__init__.py
     # - stdeb.cfg
-    'version': '0.5.2',
+    'version': '1.0.0',
     'packages': ['catkin_pkg', 'catkin_pkg.cli'],
     'package_dir': {'': 'src'},
     'package_data': {'catkin_pkg': ['templates/*.in']},
@@ -39,6 +39,7 @@ kwargs = {
         'Programming Language :: Python',
         'License :: OSI Approved :: BSD License'
     ],
+    'python_requires': '>=3.6',
     'description': 'catkin package library',
     'long_description': 'Library for retrieving information about catkin packages.',
     'license': 'BSD',
@@ -59,7 +60,6 @@ kwargs = {
             'flake8-docstrings',
             'flake8-import-order',
             'flake8-quotes',
-            "mock; python_version < '3.3'",
             'pytest',
         ]},
 }

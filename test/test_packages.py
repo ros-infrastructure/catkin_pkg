@@ -25,7 +25,7 @@ def _create_pkg_in_dir(path, version='0.1.0'):
 
   <maintainer email="foo@bar.com">Foo Bar</maintainer>
 </package>
-""".format(path.split('/')[-1], version)
+""".format(os.path.basename(path), version)
 
     with open(os.path.join(path, 'package.xml'), 'w+') as f:
         f.write(template)
@@ -52,10 +52,10 @@ def test_find_packages_allowing_duplicates_with_no_packages():
 @in_temporary_directory
 def test_find_packages_invalid_version():
     version = ':{version}'
-    path = 'src/foo'
+    path = os.path.join('src', 'foo')
     _create_pkg_in_dir(path, version)
     try:
-        find_packages(path.split('/')[0])
+        find_packages(os.path.dirname(path))
         assert False, 'Must raise'
     except InvalidPackage as e:
         exception_message = str(e)

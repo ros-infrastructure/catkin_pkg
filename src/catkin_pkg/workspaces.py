@@ -92,8 +92,11 @@ def order_paths(paths_to_order, prefix_paths):
 
 
 def _is_equal_or_in_parents(dir_, path):
-    dir_ = os.path.normcase(os.path.realpath(dir_))
-    path = os.path.normcase(os.path.realpath(path))
+    # On Windows, when a symlink points to a path which uses 8.3/short filenames, it doesn't
+    # appear that `os.path.realpath` will resolve both redirections in the same invocation.
+    # We need to work around this non-idempotence by invoking the function twice.
+    dir_ = os.path.normcase(os.path.realpath(os.path.realpath(dir_)))
+    path = os.path.normcase(os.path.realpath(os.path.realpath(path)))
     return path == dir_ or path.startswith(dir_ + os.sep)
 
 

@@ -1,33 +1,16 @@
-name: catkin_pkg-ci
+---
+name: Run tests
 
-on:
+on:  # yamllint disable-line rule:truthy
   push:
-    branches: [master]
+    branches: ['master']
   pull_request:
 
 jobs:
-    build:
-      strategy:
-        matrix:
-          os: [ubuntu-latest, macos-latest]
-          python: ['3.7', '3.8', '3.9', '3.10']
-          include:
-          - os: ubuntu-18.04
-            python: '2.7'
-          - os: ubuntu-18.04
-            python: '3.6'
-      name: catkin_pkg tests
-      runs-on: ${{matrix.os}}
-
-      steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{matrix.python}}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{matrix.python}}
-      - name: Install dependencies
-        run: |
-          python -m pip install -U -e .[test]
-      - name: Run tests
-        run: |
-          python -m pytest -s test
+  pytest:
+    uses: ros-infrastructure/ci/.github/workflows/pytest.yaml@main
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: yamllint -f github .

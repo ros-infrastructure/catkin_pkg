@@ -17,13 +17,14 @@ from __future__ import print_function
 import os
 import sys
 
-from flake8.api.legacy import get_style_guide
 import pytest
 
 
 @pytest.mark.flake8
 @pytest.mark.linter
 def test_flake8():
+    from flake8.api.legacy import get_style_guide
+
     # Configure flake8 using the .flake8 file in the root of this repository.
     style_guide = get_style_guide()
 

@@ -231,7 +231,7 @@ def _main():
     parser.add_argument('-y', '--non-interactive', action='store_true', default=False, help="Run without user interaction, confirming all questions with 'yes'")
     args = parser.parse_args()
 
-    if args.version and not re.match('^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$', args.version):
+    if args.version and not re.match(r'^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$', args.version):
         parser.error('The passed version must follow the conventions (positive integers x.y.z with no leading zeros)')
 
     if args.tag_prefix and ' ' in args.tag_prefix:
@@ -449,3 +449,7 @@ def _main():
             print(fmt('@{yf}%s' % msg))
         else:
             raise RuntimeError(fmt('@{rf}%s' % msg))
+
+
+if __name__ == '__main__':
+    sys.exit(main())

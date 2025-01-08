@@ -31,30 +31,30 @@ class TestSectionTitleParsing(unittest.TestCase):
 
 def check_0_1_26(content):
     assert len(content) == 1
-    assert type(content[0]) == BulletList
+    assert type(content[0]) is BulletList
     assert len(content[0].bullets) == 3
 
 
 def check_0_1_25(content):
     assert len(content) == 3
-    assert type(content[0]) == BulletList
+    assert type(content[0]) is BulletList
     assert len(content[0].bullets) == 5
     mtext = content[0].bullets[3]
-    assert type(mtext) == MixedText
+    assert type(mtext) is MixedText
     assert len(mtext.texts) == 2
-    assert type(content[1]) == Transition
-    assert type(content[2]) == MixedText
+    assert type(content[1]) is Transition
+    assert type(content[2]) is MixedText
 
 
 def check_0_1_0(content):
     assert len(content) == 1
-    assert type(content[0]) == MixedText
+    assert type(content[0]) is MixedText
     assert len(content[0].texts) == 4
 
 
 def check_0_0_1(content):
     assert len(content) == 1
-    assert type(content[0]) == BulletList
+    assert type(content[0]) is BulletList
     assert content[0].bullet_type == 'enumerated'
 
 

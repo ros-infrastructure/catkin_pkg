@@ -1,8 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 
 from catkin_pkg.cli.create_pkg import main
 
 if __name__ == '__main__':
+    print('The catkin_create_pkg script is deprecated. Use python '
+          "-m 'catkin_pkg.cli.create_pkg' instead.\n", file=sys.stderr)
     sys.exit(main())
