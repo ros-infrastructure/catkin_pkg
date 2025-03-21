@@ -42,6 +42,9 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
     parser.add_argument('-m', '--maintainer',
                         action='append',
                         help='A single maintainer, may be used multiple times')
+    parser.add_argument('-n', '--no_comments',
+                        action='store_true',
+                        help="Don't put comments in package.xml or CMakeLists.txt")
     rosdistro_name = os.environ['ROS_DISTRO'] if 'ROS_DISTRO' in os.environ else None
     parser.add_argument('--rosdistro', required=rosdistro_name is None, default=rosdistro_name, help='The ROS distro (default: environment variable ROS_DISTRO if defined)')
 
@@ -64,7 +67,8 @@ def main(argv=sys.argv[1:], parent_path=os.getcwd()):
                              package_template=package_template,
                              rosdistro=args.rosdistro,
                              newfiles={},
-                             meta=args.meta)
+                             meta=args.meta,
+                             no_comments=args.no_comments)
         print('Successfully created files in %s. Please adjust the values in package.xml.' % target_path)
     except ValueError as vae:
         parser.error(str(vae))
