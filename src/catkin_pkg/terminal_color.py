@@ -42,13 +42,11 @@ _ansi = {}
 
 def ansi(key):
     """Return the escape sequence for a given ansi color key."""
-    global _ansi
     return _ansi[key]
 
 
 def enable_ANSI_colors():
     """Populate the global module dictionary `ansi` with ANSI escape sequences."""
-    global _ansi
     color_order = [
         'black', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'white'
     ]
@@ -88,7 +86,6 @@ def enable_ANSI_colors():
 
 def disable_ANSI_colors():
     """Set all the ANSI escape sequences to empty strings, effectively disabling console colors."""
-    global _ansi
     for key in _ansi:
         _ansi[key] = ''
 
@@ -117,7 +114,6 @@ def sanitize(msg):
 
 def fmt(msg):
     """Replace color annotations with ansi escape sequences."""
-    global _ansi
     msg = msg.replace('@!', '@{boldon}')
     msg = msg.replace('@/', '@{italicson}')
     msg = msg.replace('@_', '@{ulon}')
