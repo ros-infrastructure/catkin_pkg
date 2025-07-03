@@ -50,7 +50,8 @@ import sys
 import dateutil.parser
 import docutils
 import docutils.core
-import pkg_resources
+
+from packaging.version import parse as parse_version
 
 _py3 = sys.version_info[0] >= 3
 
@@ -417,12 +418,12 @@ class Changelog(object):
         """
         if version in self.__versions:
             raise DuplicateVersionsException(version)
-        self.__parsed_versions.append(pkg_resources.parse_version(version))
+        self.__parsed_versions.append(parse_version(version))
         self.__parsed_versions = sorted(self.__parsed_versions)
         # Cannot go parsed -> str, so sorting must be done by comparison
         new_versions = [None] * len(self.__parsed_versions)
         for v in self.__versions + [version]:
-            parsed_v = pkg_resources.parse_version(v)
+            parsed_v = parse_version(v)
             index = self.__parsed_versions.index(parsed_v)
             if index == -1:
                 raise RuntimeError('Inconsistent internal version storage state')

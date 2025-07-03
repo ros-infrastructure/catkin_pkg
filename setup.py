@@ -45,6 +45,7 @@ kwargs = {
     'license': 'BSD',
     'install_requires': [
         'docutils',
+        'packaging',
         'python-dateutil',
         'pyparsing',
         'setuptools',
