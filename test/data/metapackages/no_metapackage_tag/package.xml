@@ -5,7 +5,7 @@
   <description>no_metapackage_tag</description>
 
   <maintainer email="user@todo.todo">user</maintainer>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>foo</run_depend>

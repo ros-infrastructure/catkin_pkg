@@ -5,7 +5,7 @@
   <description>no_buildtool_depend_catkin</description>
 
   <maintainer email="user@todo.todo">user</maintainer>
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <run_depend>foo</run_depend>
   <run_depend>bar</run_depend>
