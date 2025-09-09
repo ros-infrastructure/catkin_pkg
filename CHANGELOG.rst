@@ -1,3 +1,28 @@
+1.1.0 (2025-09-09)
+==================
+
+- Declare dependency on setuptools in stdeb. `#360 <https://github.com/ros-infrastructure/catkin_pkg/pull/360>`_
+- Update Ubuntu and Debian platforms supported by catkin_pkg. `#359 <https://github.com/ros-infrastructure/catkin_pkg/pull/359>`_
+- Move flake8 import into test. `#361 <https://github.com/ros-infrastructure/catkin_pkg/pull/361>`_
+- Switch to a raw string for the prepare_release cli. `#362 <https://github.com/ros-infrastructure/catkin_pkg/pull/362>`_
+- Switch to ros-infrastructure centralized CI. `#363 <https://github.com/ros-infrastructure/catkin_pkg/pull/363>`_
+- Support PEP 338 invocation of catkin_pkg modules. `#367 <https://github.com/ros-infrastructure/catkin_pkg/pull/367>`_
+- Use platform-agnostic path manipulation in test_packages.py. `#366 <https://github.com/ros-infrastructure/catkin_pkg/pull/366>`_
+- Deprecate the bare catkin_* scripts. `#368 <https://github.com/ros-infrastructure/catkin_pkg/pull/368>`_
+- Fix symlink resolution on Windows w/short filenames. `#365 <https://github.com/ros-infrastructure/catkin_pkg/pull/365>`_
+- Enable tests on Windows. `#364 <https://github.com/ros-infrastructure/catkin_pkg/pull/364>`_
+- Fix AttributeError with docutils >= 0.18. `#352 <https://github.com/ros-infrastructure/catkin_pkg/pull/352>`_
+- Remove spurious global declaration. `#375 <https://github.com/ros-infrastructure/catkin_pkg/pull/375>`_
+- Replace pkg_resources usage with packaging. `#374 <https://github.com/ros-infrastructure/catkin_pkg/pull/374>`_
+
+Contributors
+------------
+
+- Chris Lalancette
+- Johannes Rothe
+- Scott K Logan
+- Steven! Ragnarök
+
 1.0.0 (2023-09-12)
 ==================
 
