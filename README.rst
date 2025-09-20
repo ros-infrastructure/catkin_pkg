@@ -3,6 +3,8 @@ catkin_pkg
 
 Standalone Python library for the `Catkin package system <http://ros.org/wiki/catkin>`_.
 
+> [!NOTE]  
+> Despite its name, the library is used also in ROS 2 context for managing `Ament packages <https://docs.ros.org/en/rolling/Concepts/Advanced/About-Build-System.html#term-ament-package>`. 
 
 Code & tickets
 --------------
