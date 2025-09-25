@@ -47,14 +47,14 @@ class PackageTest(unittest.TestCase):
         pack = Package(name='foo',
                        version='0.0.0',
                        maintainers=[maint],
-                       licenses=['BSD'])
+                       licenses=['BSD-3-Clause'])
         self.assertEqual(None, pack.filename)
         self.assertEqual('0.0.0', pack.version)
         self.assertEqual(None, pack.version_compatibility)
         self.assertEqual([], pack.urls)
         self.assertEqual([], pack.authors)
         self.assertEqual([maint], pack.maintainers)
-        self.assertEqual(['BSD'], pack.licenses)
+        self.assertEqual(['BSD-3-Clause'], pack.licenses)
         self.assertEqual([None], [license_.file for license_ in pack.licenses])
         self.assertEqual([], pack.build_depends)
         self.assertEqual([], pack.buildtool_depends)
@@ -68,7 +68,7 @@ class PackageTest(unittest.TestCase):
         pack = Package('foo',
                        name='bar',
                        version='0.0.0',
-                       licenses=['BSD'],
+                       licenses=['BSD-3-Clause'],
                        maintainers=[self.get_maintainer()])
         self.assertEqual('foo', pack.filename)
 
@@ -177,7 +177,7 @@ class PackageTest(unittest.TestCase):
                        version='0.0.1',
                        version_compatibility='0.0.0',
                        description='pdesc',
-                       licenses=['BSD'],
+                       licenses=['BSD-3-Clause'],
                        maintainers=[self.get_maintainer()])
         self.assertEqual('foo', pack.filename)
         self.assertEqual('bar', pack.name)
@@ -188,7 +188,7 @@ class PackageTest(unittest.TestCase):
 
     def test_init_kwargs_object(self):
         mmain = [self.get_maintainer(), self.get_maintainer()]
-        mlis = ['MIT', License('BSD', 'LICENSE')]
+        mlis = ['MIT', License('BSD-3-Clause', 'LICENSE')]
         mauth = [self.get_maintainer(), self.get_maintainer()]
         murl = [Mock(), Mock()]
         mbuilddep = [Mock(), Mock()]
@@ -242,7 +242,7 @@ class PackageTest(unittest.TestCase):
                        package_format='1',
                        version='0.0.1',
                        description='pdesc',
-                       licenses=['BSD'],
+                       licenses=['BSD-3-Clause'],
                        maintainers=[maint])
         pack.validate()
 
@@ -370,7 +370,7 @@ class PackageTest(unittest.TestCase):
         assert package.name == 'valid_package'
         assert package.description == 'valid_package description'
         assert package.version == '0.1.0'
-        assert package.licenses == ['BSD']
+        assert package.licenses == ['BSD-3-Clause']
         assert [x.name for x in package.run_depends] == ['foo', 'bar', 'baz']
 
     def test_parse_package_invalid(self):
