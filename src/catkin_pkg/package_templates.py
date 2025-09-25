@@ -34,6 +34,7 @@ from __future__ import print_function
 
 import getpass
 import os
+import re
 import string
 import sys
 
@@ -144,7 +145,7 @@ class PackageTemplate(Package):
         return package_temp
 
 
-def read_template_file(filename, rosdistro):
+def read_template_file(filename, rosdistro, no_comments=False):
     template_dir = os.path.join(os.path.dirname(__file__), 'templates')
     templates = []
     templates.append(os.path.join(template_dir, rosdistro, '%s.in' % filename))
@@ -153,6 +154,16 @@ def read_template_file(filename, rosdistro):
         if os.path.isfile(template):
             with open(template, 'r') as fhand:
                 template_contents = fhand.read()
+
+            if no_comments:
+                lines = template_contents.split('\n')
+                lines2 = []
+                for line in lines:
+                    if line.startswith('##') or '<!--' in line:
+                        continue
+                    lines2.append(line)
+                template_contents = '\n'.join(lines2)
+                # template_contents = re.sub(r'\n\n+', '\n\n', template_contents).strip()
             return template_contents
     raise IOError(
         'Could not read template for ROS distro '
@@ -194,7 +205,7 @@ def _safe_write_files(newfiles, target_dir):
 
 
 def create_package_files(target_path, package_template, rosdistro,
-                         newfiles=None, meta=False):
+                         newfiles=None, meta=False, no_comments=False):
     """
     Create several files from templates to start a new package.
 
@@ -209,10 +220,10 @@ def create_package_files(target_path, package_template, rosdistro,
     manifest_path = os.path.join(target_path, PACKAGE_MANIFEST_FILENAME)
     if manifest_path not in newfiles:
         newfiles[manifest_path] = \
-            create_package_xml(package_template, rosdistro, meta=meta)
+            create_package_xml(package_template, rosdistro, meta=meta, no_comments=no_comments)
     cmake_path = os.path.join(target_path, 'CMakeLists.txt')
     if cmake_path not in newfiles:
-        newfiles[cmake_path] = create_cmakelists(package_template, rosdistro, meta=meta)
+        newfiles[cmake_path] = create_cmakelists(package_template, rosdistro, meta=meta, no_comments=no_comments)
     _safe_write_files(newfiles, target_path)
     if 'roscpp' in package_template.catkin_deps:
         fname = os.path.join(target_path, 'include', package_template.name)
@@ -232,7 +243,7 @@ class CatkinTemplate(string.Template):
     escape = '@'
 
 
-def create_cmakelists(package_template, rosdistro, meta=False):
+def create_cmakelists(package_template, rosdistro, meta=False, no_comments=False):
     """Create CMake file contents from the template.
 
     :param package_template: contains the required information
@@ -246,7 +257,7 @@ def create_cmakelists(package_template, rosdistro, meta=False):
         }
         return configure_file(template_path, temp_dict)
     else:
-        cmakelists_txt_template = read_template_file('CMakeLists.txt', rosdistro)
+        cmakelists_txt_template = read_template_file('CMakeLists.txt', rosdistro, no_comments=no_comments)
         ctemp = CatkinTemplate(cmakelists_txt_template)
         if package_template.catkin_deps == []:
             components = ''
@@ -285,7 +296,9 @@ def create_cmakelists(package_template, rosdistro, meta=False):
                      'target_libraries': _create_targetlib_args(package_template),
                      'message_dependencies': message_depends
                      }
-        return ctemp.substitute(temp_dict)
+        cmake_text = ctemp.substitute(temp_dict)
+        cmake_text = re.sub(r'\n\n+', '\n\n', cmake_text).strip()
+        return cmake_text
 
 
 def _create_targetlib_args(package_template):
@@ -341,7 +354,7 @@ def _create_depend_tag(dep_type,
     return result
 
 
-def create_package_xml(package_template, rosdistro, meta=False):
+def create_package_xml(package_template, rosdistro, meta=False, no_comments=False):
     """
     Create package xml file content.
 
@@ -349,7 +362,7 @@ def create_package_xml(package_template, rosdistro, meta=False):
     :returns: file contents as string
     """
     package_xml_template = \
-        read_template_file(PACKAGE_MANIFEST_FILENAME, rosdistro)
+        read_template_file(PACKAGE_MANIFEST_FILENAME, rosdistro, no_comments=no_comments)
     ctemp = CatkinTemplate(package_xml_template)
     temp_dict = {}
     for key in package_template.__slots__:
@@ -442,4 +455,6 @@ def create_package_xml(package_template, rosdistro, meta=False):
 
     temp_dict['components'] = package_template.catkin_deps
 
-    return ctemp.substitute(temp_dict)
+    package_text = ctemp.substitute(temp_dict)
+    package_text = re.sub(r'\n\n+', '\n\n', package_text).strip()
+    return package_text
