@@ -48,7 +48,6 @@ kwargs = {
         'packaging',
         'python-dateutil',
         'pyparsing',
-        'setuptools',
     ],
     'extras_require': {
         'test': [
