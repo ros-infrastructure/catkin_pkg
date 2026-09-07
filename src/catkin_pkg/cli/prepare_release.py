@@ -130,8 +130,10 @@ def check_clean_working_copy(base_path, vcs_type):
     return True
 
 
-def commit_files(base_path, vcs_type, packages, packages_with_changelogs, message, dry_run=False):
+def commit_files(base_path, vcs_type, packages, packages_with_changelogs, message, signoff, dry_run=False):
     cmd = [_find_executable(vcs_type), 'commit', '-m', message]
+    if signoff and vcs_type in ['git']:
+        cmd += ['--signoff']
     cmd += [os.path.join(p, PACKAGE_MANIFEST_FILENAME) for p in packages.keys()]
     cmd += [s for s in [os.path.join(p, 'setup.py') for p in packages.keys()] if os.path.exists(s)]
     cmd += [path for path, _, _ in packages_with_changelogs.values()]
@@ -227,6 +229,7 @@ def _main():
     parser.add_argument('--version', help='Specify a specific version to use')
     parser.add_argument('--no-color', action='store_true', default=False, help='Disables colored output')
     parser.add_argument('--no-push', action='store_true', default=False, help='Disables pushing to remote repository')
+    parser.add_argument('-s', '--signoff', action='store_true', default=False, help='Signs off the commit (git only)')
     parser.add_argument('-t', '--tag-prefix', default='', help='Add this prefix to the created release tag')
     parser.add_argument('-y', '--non-interactive', action='store_true', default=False, help="Run without user interaction, confirming all questions with 'yes'")
     args = parser.parse_args()
@@ -392,7 +395,7 @@ def _main():
     if vcs_type in ['svn']:
         # for svn everything affects the remote repository immediately
         commands = []
-        commands.append(commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, dry_run=True))
+        commands.append(commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, args.signoff, dry_run=True))
         commands.append(tag_svn_cmd)
         if not args.no_push:
             print(fmt('@{gf}The following commands will be executed to commit the changes and tag the new version:'))
@@ -407,14 +410,14 @@ def _main():
                 if not prompt_continue('Execute commands which will modify the repository', default=True):
                     pushed = False
             if pushed is None:
-                commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name)
+                commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, args.signoff)
                 tag_repository(base_path, vcs_type, tag_name, args.tag_prefix != '')
                 pushed = True
 
     else:
         # for other vcs types the changes are first done locally
         print(fmt('@{gf}Committing the package.xml files...'))
-        commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name)
+        commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, args.signoff)
 
         print(fmt("@{gf}Creating tag '@{boldon}%s@{boldoff}'..." % (tag_name)))
         tag_repository(base_path, vcs_type, tag_name, args.tag_prefix != '')
