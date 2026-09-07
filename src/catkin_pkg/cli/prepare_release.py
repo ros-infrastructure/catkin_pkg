@@ -132,8 +132,11 @@ def check_clean_working_copy(base_path, vcs_type):
 
 def commit_files(base_path, vcs_type, packages, packages_with_changelogs, message, signoff, dry_run=False):
     cmd = [_find_executable(vcs_type), 'commit', '-m', message]
-    if signoff and vcs_type in ['git']:
-        cmd += ['--signoff']
+    if signoff:
+        if vcs_type in ['git']:
+            cmd += ['--signoff']
+        else:
+            print(fmt('@{yf}Warning: -s,--signoff is not valid and will not be used for repository type: @{boldon}%s@{boldoff}' % vcs_type))
     cmd += [os.path.join(p, PACKAGE_MANIFEST_FILENAME) for p in packages.keys()]
     cmd += [s for s in [os.path.join(p, 'setup.py') for p in packages.keys()] if os.path.exists(s)]
     cmd += [path for path, _, _ in packages_with_changelogs.values()]
