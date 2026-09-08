@@ -130,7 +130,7 @@ def check_clean_working_copy(base_path, vcs_type):
     return True
 
 
-def commit_files(base_path, vcs_type, packages, packages_with_changelogs, message, signoff, dry_run=False):
+def commit_files(base_path, vcs_type, packages, packages_with_changelogs, message, dry_run=False, signoff=False):
     cmd = [_find_executable(vcs_type), 'commit', '-m', message]
     if signoff:
         if vcs_type in ['git']:
@@ -398,7 +398,7 @@ def _main():
     if vcs_type in ['svn']:
         # for svn everything affects the remote repository immediately
         commands = []
-        commands.append(commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, args.signoff, dry_run=True))
+        commands.append(commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, dry_run=True, signoff=args.signoff))
         commands.append(tag_svn_cmd)
         if not args.no_push:
             print(fmt('@{gf}The following commands will be executed to commit the changes and tag the new version:'))
@@ -413,14 +413,14 @@ def _main():
                 if not prompt_continue('Execute commands which will modify the repository', default=True):
                     pushed = False
             if pushed is None:
-                commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, args.signoff)
+                commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, signoff=args.signoff)
                 tag_repository(base_path, vcs_type, tag_name, args.tag_prefix != '')
                 pushed = True
 
     else:
         # for other vcs types the changes are first done locally
         print(fmt('@{gf}Committing the package.xml files...'))
-        commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, args.signoff)
+        commit_files(base_path, vcs_type, packages, missing_changelogs_but_forthcoming, tag_name, signoff=args.signoff)
 
         print(fmt("@{gf}Creating tag '@{boldon}%s@{boldoff}'..." % (tag_name)))
         tag_repository(base_path, vcs_type, tag_name, args.tag_prefix != '')
