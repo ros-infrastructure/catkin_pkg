@@ -38,7 +38,7 @@ import subprocess
 
 def get_repository_type(path):
     for vcs_type in ['bzr', 'git', 'hg', 'svn']:
-        if os.path.isdir(os.path.join(path, '.%s' % vcs_type)):
+        if os.path.exists(os.path.join(path, '.%s' % vcs_type)):
             return vcs_type
     return None
 
