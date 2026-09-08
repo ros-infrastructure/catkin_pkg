@@ -243,7 +243,7 @@ class Package(object):
         if not self.name:
             errors.append('Package name must not be empty')
         # accepting upper case letters and hyphens only for backward compatibility
-        if not re.match('^[a-zA-Z0-9][a-zA-Z0-9_-]*$', self.name):
+        if not re.match('^[a-zA-Z][a-zA-Z0-9_-]*$', self.name):
             errors.append('Package name "%s" does not follow naming conventions' % self.name)
         else:
             if not re.match('^[a-z][a-z0-9_-]*$', self.name):
