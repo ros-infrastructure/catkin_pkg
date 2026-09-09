@@ -1,3 +1,17 @@
+1.1.1 (2026-09-09)
+==================
+
+- Add '-s,--signoff' to prepare_release. `#384 <https://github.com/ros-infrastructure/catkin_pkg/pull/384>`_
+- Fixed VCS detection in git worktrees. `#382 <https://github.com/ros-infrastructure/catkin_pkg/pull/382>`_
+- Drop runtime dependency on setuptools. `#381 <https://github.com/ros-infrastructure/catkin_pkg/pull/381>`_
+
+Contributors
+------------
+
+- Christophe Bedard
+- Martin Pecka
+- Scott K Logan
+
 1.1.0 (2025-09-09)
 ==================
 
