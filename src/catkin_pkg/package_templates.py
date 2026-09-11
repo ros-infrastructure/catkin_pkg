@@ -71,7 +71,7 @@ class PackageTemplate(Package):
         :param catkin_deps:
         """
         # Sort so they are alphebetical
-        licenses = list(licenses or ['TODO'])
+        licenses = list(licenses or ['TODO-CATKIN-PACKAGE-LICENSE'])
         licenses.sort()
         if not maintainer_names:
             maintainer_names = [getpass.getuser()]

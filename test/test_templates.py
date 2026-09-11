@@ -62,7 +62,7 @@ class TemplateTest(unittest.TestCase):
                                description='foo',
                                version='0.0.0',
                                maintainers=[maint],
-                               licenses=['BSD'])
+                               licenses=['BSD-3-Clause'])
 
         result = create_package_xml(pack, 'groovy')
         self.assertTrue('<name>foo</name>' in result, result)
@@ -135,7 +135,7 @@ class TemplateTest(unittest.TestCase):
                                version='0.0.1',
                                version_compatibility='0.0.0',
                                maintainers=[maint],
-                               licenses=['BSD'])
+                               licenses=['BSD-3-Clause'])
         try:
             rootdir = tempfile.mkdtemp()
             file1 = os.path.join(rootdir, 'CMakeLists.txt')
@@ -162,7 +162,7 @@ class TemplateTest(unittest.TestCase):
                                urls=[Url('foo')],
                                description='pdesc',
                                maintainers=[maint],
-                               licenses=['BSD'])
+                               licenses=['BSD-3-Clause'])
         try:
             rootdir = tempfile.mkdtemp()
             file1 = os.path.join(rootdir, 'CMakeLists.txt')
@@ -196,7 +196,7 @@ class TemplateTest(unittest.TestCase):
                               'maintainer': u('John Foo'),
                               'maintainer_email': 'foo@bar.com',
                               'description': 'pdesc',
-                              'license': 'BSD',
+                              'license': 'BSD-3-Clause',
                               'version': '0.0.1',
                               'author': '',
                               'url': 'foo'}, rdict)
@@ -213,7 +213,7 @@ class TemplateTest(unittest.TestCase):
                                description='pdesc',
                                maintainers=[maint, maint],
                                authors=[maint, maint],
-                               licenses=['BSD', 'MIT'],
+                               licenses=['BSD-3-Clause', 'MIT'],
                                urls=[Url('foo', 'bugtracker'), Url('bar')],
                                build_depends=[Dependency('dep1')],
                                buildtool_depends=[Dependency('dep2'),
@@ -279,7 +279,7 @@ class TemplateTest(unittest.TestCase):
             self.assertEqual({'name': 'bar',
                               'maintainer': u('John Foo <foo@bar.com>, John Foo <foo@bar.com>'),
                               'description': 'pdesc',
-                              'license': 'BSD, MIT',
+                              'license': 'BSD-3-Clause, MIT',
                               'version': '0.0.1',
                               'author': u('John Foo <foo@bar.com>, John Foo <foo@bar.com>'),
                               'url': 'bar'}, rdict)
