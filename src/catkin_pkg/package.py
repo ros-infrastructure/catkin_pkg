@@ -251,7 +251,7 @@ class Package(object):
                     'Package name "%s" does not follow the naming conventions. It should start with '
                     'a lower case letter and only contain lower case letters, digits, underscores, and dashes.' % self.name)
 
-        version_regexp = r'^[0-9]+\.[0-9]+\.[0-9]+$'
+        version_regexp = r'^[0-9]+\.[0-9]+\.[0-9]+(\+[a-zA-Z0-9_.-]+)?$'
         if not self.version:
             errors.append('Package version must not be empty')
         elif not re.match(version_regexp, self.version):
